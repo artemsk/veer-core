@@ -27,6 +27,14 @@
 			"Veer\\": "src/Veer/"
 		}
 	},
+	"scripts": {
+		"post-install-cmd": [
+			"php artisan vendor:publish --tag=veer --force"
+		],
+		"post-update-cmd": [
+			"php artisan vendor:publish --tag=veer --force"
+		]
+	},
 	"config": {
 		"preferred-install": "dist"
 	}
