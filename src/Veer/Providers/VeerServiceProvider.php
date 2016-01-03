@@ -11,22 +11,6 @@ class VeerServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-        $this->publishes([
-            __DIR__.'/../../../resources/' => base_path('resources/views'),
-        ], 'veer');
-
-        $this->publishes([
-            __DIR__.'/../../../assets/' => public_path('assets'),
-        ], 'veer');
-
-        $this->publishes([
-            __DIR__.'/../../../config/veer.php' => config_path('veer.php')
-        ], 'veer');
-
-        $this->publishes([
-            __DIR__.'/../../../database/' => database_path('migrations')
-        ], 'veer');
-
 		if ( !($this->app->runningInConsole()) ) {
 			$this->app['veer']->run();	
 		}
