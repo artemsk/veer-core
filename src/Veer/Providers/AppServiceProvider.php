@@ -23,15 +23,15 @@ class AppServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../../../config/veer.php' => config_path('veer.php')
-        ], 'veer');
+        ], 'veer-config');
 
         $this->publishes([
             __DIR__.'/../../../database/' => database_path('migrations')
-        ], 'veer');
+        ], 'veer-db');
 
         $this->publishes([
             __DIR__.'/../../../lang/' => base_path('resources/lang'),
-        ]);
+        ], 'veer');
     }
 
     /**

@@ -1,6 +1,6 @@
 {
 	"name": "artemsk/veer-core",
-	"description": "The Veer Layer Core.",
+	"description": "The Veer Engine Core.",
 	"keywords": ["cms", "veer", "laravel-based"],
 	"license": "MIT",
 	"type": "package",
@@ -26,14 +26,6 @@
 		"psr-4": {
 			"Veer\\": "src/Veer/"
 		}
-	},
-	"scripts": {
-		"post-install-cmd": [
-			"php artisan vendor:publish --tag=veer --force"
-		],
-		"post-update-cmd": [
-			"php artisan vendor:publish --tag=veer --force"
-		]
 	},
 	"config": {
 		"preferred-install": "dist"
