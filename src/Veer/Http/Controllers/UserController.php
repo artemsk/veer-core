@@ -195,7 +195,7 @@ class UserController extends Controller {
 			'password' => \Input::get('password'), 
 			'banned' => 0, 
 			'sites_id' => app('veer')->siteId))) 
-		{	
+		{
 			\Auth::user()->increment('logons_count');
 			
 			\Session::put('roles_id', \Auth::user()->roles_id);

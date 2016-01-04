@@ -41,8 +41,8 @@ Route::resource('search', 'SearchController', array('only' => array('index', 'sh
 /* main entities - page|articles & product */
 
 Route::resource('product', 'ProductController', array('only' => array('index', 'show')));
-get(env('PAGE_ROUTE','page'), array('uses' => 'PageController@index', 'as' => 'page.index'));
-get(env('PAGE_ROUTE','page') .'/{id}', array('uses' => 'PageController@show', 'as' => 'page.show'));
+get(config('veer.page_route', 'page'), array('uses' => 'PageController@index', 'as' => 'page.index'));
+get(config('veer.page_route', 'page') .'/{id}', array('uses' => 'PageController@show', 'as' => 'page.show'));
 
 /* elements */
 

@@ -15,7 +15,7 @@
 						 class="img-responsive products-thumbnail-img @if($item->status == 'hide') image-faded @endif">
                                                  @endif
                             </div>
-				<div class="caption @if($item->hidden == true) image-faded @endif"><small>#{{$item->id}}
+				<div class="caption @if($item->status == 'hide') image-faded @endif"><small>#{{$item->id}}
 					</small>
 					<a href="{{ route('admin.show', array("products", "id" => $item->id)) }}">{{ $item->title }}</a>
 					<p><strong>{{ app('veershop')->getPrice($item, true, array('forced_currency' => 1)) }}</strong><Br/>

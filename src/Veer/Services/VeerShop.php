@@ -60,9 +60,9 @@ class VeerShop {
 	public function priceFormat($price)
 	{		
 		if(round($price) == $price) {
-			$price = number_format($price, 0);
+			$price = number_format((double)$price, 0);
 		} else {
-			$price = number_format($price, 2);
+			$price = number_format((double)$price, 2);
 		}
 		
 		$price = strtr($this->currency_symbol, array("[price]" => $price));

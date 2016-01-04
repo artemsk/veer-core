@@ -9,6 +9,12 @@ return array(
         'template' => "template-blank",
         'template-admin' => "template-admin",
 
+      /*
+       * Page route
+       */
+
+        'page_route' => env('PAGE_ROUTE', 'page'),
+    
       /* 
        * Cache Enable & Prefixes for Html Pages
        * 
@@ -32,17 +38,6 @@ return array(
         'cloudstorage_path' => env('VEER_PATHS_CLOUDSTORAGE', ""),
         'use_cloud_images' => env('VEER_USE_CLOUD_IMAGES', false),
         'use_cloud_files' => env('VEER_USE_CLOUD_FILES', false),
-
-      /*
-       * USER ! Paths to components, events, queues, e-commerce
-       * @deprecated
-       * 
-       */
-
-        'components_path' => "app/Components",
-        'events_path' => "app/Events",
-        'queues_path' => "app/Queues",
-        'ecommerce_path' => "app/Components/Ecommerce",
 
       /*
        * Default settings - loading time alert limit (seconds)

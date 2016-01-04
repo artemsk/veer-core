@@ -223,5 +223,7 @@ class Entity {
                 $this->attachElements($freeForm, $object, 'attributes', null, ",", "Attribute:");
             }
         } 
-    }    
+    }
+
+    protected function prepareData() {}
 }

@@ -52,7 +52,7 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof NotFoundHttpException) return \Redirect::route('404');
 
-        if ($e instanceof \PDOException) return $this->registerDbErrorHandler();
+        if ($e instanceof \PDOException && !config('app.debug')) return $this->registerDbErrorHandler();
 
         if ($e instanceof ModelNotFoundException) {
             return response("Be right back!", 503); //$e = new NotFoundHttpException($e->getMessage(), $e);
