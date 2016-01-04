@@ -14,7 +14,7 @@ class Search extends \Eloquent {
     // Many Searches <-> Many Users
     
     public function users() {
-        return $this->belongsToMany('\Veer\Models\User','searches_connect', 'searches_id', 'users_id');  
+        return $this->belongsToMany('\Veer\Models\User', 'searches_connect', 'searches_id', 'users_id');
     }
     
 }

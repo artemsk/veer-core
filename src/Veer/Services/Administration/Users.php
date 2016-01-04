@@ -50,55 +50,7 @@ class Users {
 	 */
 	public function updateSearches()
 	{
-		if(Input::has('deleteSearch'))
-		{
-			$this->deleteSearch(head(Input::get('deleteSearch')));
-			Event::fire('veer.message.center', \Lang::get('veeradmin.search.delete'));
-
-			return null;
-		}
-
-		if(Input::get('action') == "addSearch" && Input::has('search'))
-		{
-			$q = trim( Input::get('search') );
-			if(!empty($q))
-			{
-				$search = \Veer\Models\Search::firstOrCreate(array("q" => $q));
-				$search->increment('times');
-				$search->save();
-
-				$users =  Input::get('users');
-
-				if(starts_with($users, ':'))
-				{
-					$users = substr($users, 1);
-
-					if( !empty($users) )
-					{
-						$users = explode(",", trim($users) );
-
-						if(count($users) > 0) $search->users()->attach($users);
-					}
-				}
-
-				Event::fire('veer.message.center', \Lang::get('veeradmin.search.new'));
-
-			}
-		}
-	}
-
-
-	/**
-	 * delete Search
-	 * @param int $id
-	 */
-	protected function deleteSearch($id)
-	{
-		$s = \Veer\Models\Search::find($id);
-		if(is_object($s)) {
-			$s->users()->detach();
-			$s->delete();
-		}
+		return (new Elements\Search)->run();
 	}
 
 
