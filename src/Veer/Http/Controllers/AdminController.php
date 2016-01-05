@@ -231,7 +231,9 @@ class AdminController extends Controller
     public function worker()
     {
         if(\Input::has('worker-lock')) return event('lock.for.edit', [[\Auth::id(), 'admin', \Input::get('entity'), \Input::get('id')]]);        
-        if(\Input::has('get-messages')) return \Session::get('veer_message_center'); 
+        if(\Input::has('get-messages')) {
+            return \Session::pull('veer_message_center');
+        }
     }
 
 

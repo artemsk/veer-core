@@ -153,9 +153,12 @@
 	</div>
     
     <div class="overlay"></div>
-	<!-- TODO: replace with view/include ? -->
 	@if(!empty(veer_get('veer_message_center')))
-	<div class="events-veer-message-center">{{ head(veer_get('veer_message_center')) }}</div>
+	<div class="events-veer-message-center">
+        @foreach(veer_get('veer_message_center') as $message)
+        <div>{{ $message }}</div>
+        @endforeach
+    </div>
 	@endif
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 

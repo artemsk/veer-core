@@ -25,10 +25,13 @@ class UserBook {
     public function run()
     {
         if(!empty($this->delete)) {
-            return $this->deleteBook();
+            $this->deleteUserBook($this->delete);
+
+            return event('veer.message.center', trans('veeradmin.book.delete') .
+				" " .$this->restore_link('UserBook', $this->delete));
         }
 
-        if($this->action == 'addUserbook' || $this->action == 'updateUserBook') {
+        if($this->action == 'addUserbook' || $this->action == 'updateUserbook') {
             $this->updateBook();
         }
     }
@@ -43,16 +46,5 @@ class UserBook {
 
         event('veer.message.center', trans('veeradmin.book.update'));
 	}
-
-	/**
-	 * delete Book
-	 * @param int $id
-	 */
-	protected function deleteBook()
-	{
-        \Veer\Models\UserBook::where('id', '=', $this->delete)->delete();
-
-        event('veer.message.center', trans('veeradmin.book.delete') .
-				" " .$this->restore_link('UserBook', $this->delete));		
-	}
+    
 }

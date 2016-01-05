@@ -77,6 +77,6 @@ class Structure {
 	 */
 	public function updateAttributes()
 	{
-        return (new Elements\Attribute)->run();	
+        return Elements\Attribute::request();
 	}
 }

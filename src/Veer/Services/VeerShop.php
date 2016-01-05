@@ -892,6 +892,7 @@ class VeerShop {
 	 * @param type $discount
 	 * @param type $status
 	 * TODO: unused $status variable
+     * TODO: expiration for user discounts is not correctly checked (anywhere)
 	 */
 	public function changeUserDiscountStatus($discount, $status = null)
 	{

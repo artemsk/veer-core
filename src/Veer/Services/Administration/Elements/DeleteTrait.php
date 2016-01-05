@@ -112,6 +112,40 @@ trait DeleteTrait {
 	}
 
     /**
+     * Delete User
+     * 
+     */
+    protected function deleteUser($id)
+    {
+        if($id == \Auth::id()) {
+			return false;
+		}
+
+        $u = \Veer\Models\User::find($id);
+
+		if(is_object($u)) {
+			$u->discounts()->update(["status" => "canceled"]);
+			$u->userlists()->update(["users_id" => false]);
+			$u->books()->update(["users_id" => false]);
+			$u->images()->detach();
+			$u->searches()->detach();
+			$u->administrator()->delete();
+			// don't update: orders, bills, pages, comments, communications
+			// do not need: site, role
+			$u->delete();
+		}
+    }
+
+    /**
+	 * delete Book
+	 * @param int $id
+	 */
+	protected function deleteUserBook($id)
+	{
+        \Veer\Models\UserBook::where('id', '=', $id)->delete();
+	}
+
+    /**
      * Restore link
      * 
      */

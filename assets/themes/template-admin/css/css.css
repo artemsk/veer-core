@@ -255,7 +255,7 @@ footer {
     box-sizing: border-box;
     color: rgba(250, 251, 255, 0.952941);
     display: none;
-    height: 80px;
+    min-height: 80px;
     right: 30px;
     line-height: 20.1599998474121px;
     max-width: 250px;

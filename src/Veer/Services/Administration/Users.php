@@ -73,6 +73,6 @@ class Users {
 	 */
 	public function updateUsers()
 	{
-		return (new Elements\User)->run();
+        return Elements\User::request();
 	}
 }

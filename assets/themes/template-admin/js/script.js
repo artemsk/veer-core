@@ -134,13 +134,13 @@ function overlayHide() {
 function getNotificationMessages() {
     $.ajax({
         type: 'GET',
-        url: '../admin/worker',
+        url: '../admin/worker', // TODO: check without ../
         data: 'get-messages=true',
         success: function(results) { 
             if(results != '') { 
                 //console.log(results);
                 $('.events-veer-message-center').remove();
-                $('<div class="events-veer-message-center">' + results + "</div>").insertAfter('.overlay');
+                $('<div class="events-veer-message-center">' + results.join('<br/>') + "</div>").insertAfter('.overlay');
                 $(".events-veer-message-center").show().addClass('animated').addClass('flipInX');
 
                  setTimeout(function() {

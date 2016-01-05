@@ -176,9 +176,10 @@ trait AttachTrait {
                 // string values
                 $aDb = \Veer\Models\Attribute::firstOrNew([
                     'name' => $name,
-                    'val' => $a,
-                    'type' => '?'
-                ]);                
+                    'val' => $a                    
+                ]);
+                $aDb->type = empty($aDb->type) ? 'descr' : $aDb->type;
+                $aDb->descr = empty($aDb->descr) ? '' : $aDb->descr;
                 $aDb->save();
             }            
             
