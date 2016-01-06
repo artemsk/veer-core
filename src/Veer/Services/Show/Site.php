@@ -5,11 +5,13 @@ class Site {
 	use \Veer\Services\Traits\SortingTraits;
 	
 	protected $site = null;
+    protected $package_path;
     protected $app_path;
 
     public function __construct()
     {
-        $this->app_path = __DIR__ . '/../../';
+        $this->package_path = __DIR__ . '/../../';
+        $this->app_path = app_path('/');
     }
     
 	/**
@@ -151,13 +153,26 @@ class Site {
     {
         $result = [];        
         foreach(!is_array($places) ? [$places] : $places as $place) {
-            $classes = \File::allFiles($this->app_path . ucfirst($place));
-            foreach($classes as $c) {
+            foreach(\File::allFiles($this->package_path . ucfirst($place)) as $c) {
                 $class = array_get(pathinfo($c), 'filename');
                 $result[$place][$class] = $class;
             }
+
+            $classes = \File::isDirectory($this->app_path . ucfirst($place)) ? \File::allFiles($this->app_path . ucfirst($place)) : [];
+            foreach($classes as $c) {
+                $filedata = pathinfo($c);
+                $content = file_get_contents(
+                    $filedata['dirname']. '/' . $filedata['basename'],
+                    false, null, 5, 500
+                );
+                
+                list(, $namespace) = explode('namespace ', substr($content, 0, strpos($content, ';')), 2);                
+                $class = $namespace == 'Veer\\Components' ? $filedata['filename'] : '\\' . $namespace . '\\' . $filedata['filename'];
+                
+                $result[$place][$class] = $class;
+            }
         }
-        
+
         unset($result['events']['Event']); // system
         return $result;
     }
