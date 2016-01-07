@@ -262,8 +262,8 @@ class Product extends Entity {
         $fill['price_sales_off'] = parse_form_date(array_get($fill, 'price_sales_off', 0));
 
         $toShow = parse_form_date(array_get($fill, 'to_show', 0));
-        $toShow->hour((int) array_get($this->data, 'to_show_hour', 0));
-        $toShow->minute((int) array_get($this->data, 'to_show_minute', 0));
+        $toShow->hour((int) array_get($fill, 'to_show_hour', 0));
+        $toShow->minute((int) array_get($fill, 'to_show_minute', 0));
 
         $fill['to_show'] = $toShow;
         return $fill;

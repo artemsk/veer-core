@@ -316,7 +316,11 @@ if (!function_exists('parse_form_date')) {
 	 * @return object
 	 */
 	function parse_form_date($d = null)
-	{ 
+	{
+        if($d instanceof \Carbon\Carbon) {
+            return $d;
+        }
+        
 		if(empty($d)) return now();
 		
 		$parseDate = explode("/", $d);

@@ -277,8 +277,8 @@ class Category extends Entity {
             case 'deleteCurrent':
                 $this->deleteCategory($this->id);
                 break;
-            case 'saveParent' && Input::has('parentId'):
-                $this->attachParent(Input::get('parentId'));
+            case 'saveParent':
+                !Input::has('parentId') ?: $this->attachParent(Input::get('parentId'));
                 break;
             case 'updateParent':
                 if(Input::has('parentId') && Input::has('lastCategoryId') &&
@@ -286,20 +286,20 @@ class Category extends Entity {
                     $this->attachParent(Input::get('parentId'));
                 }
                 break;
-            case 'removeParent' && Input::has('parentId'):
-                $this->detachParent(Input::get('parentId'));
+            case 'removeParent':
+                !Input::has('parentId') ?: $this->detachParent(Input::get('parentId'));
                 break;
             case 'updateCurrent':
                 $this->update(array_intersect_key(Input::all(), array_keys(['title', 'remoteUrl', 'description'])));
                 break;
-            case 'addChild' && Input::has('child'):
-                $this->attachChild(Input::get('child'));
+            case 'addChild':
+                !Input::has('child') ?: $this->attachChild(Input::get('child'));
                 break;
-            case 'removeInChild' && Input::has('currentChildId'):
-                $this->detachChild(Input::get('currentChildId'));
+            case 'removeInChild':
+                !Input::has('currentChildId') ?: $this->detachChild(Input::get('currentChildId'));
                 break;
-            case 'updateInChild' && Input::has('currentChildId'):
-                if(Input::has('parentId') && Input::has('lastCategoryId') &&
+            case 'updateInChild':
+                if(Input::has('currentChildId') && Input::has('parentId') && Input::has('lastCategoryId') &&
                         Input::get('lastCategoryId') != Input::get('parentId')) {
                     $this->updateChildParent(
                         Input::get('currentChildId'), Input::get('parentId'), Input::get('lastCategoryId')
