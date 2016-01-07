@@ -22,7 +22,7 @@
 		<span class="label label-info">
 			max {{ $file->expiration_times }}</span>
 		@endif
-		@if(Carbon\Carbon::parse($file->expiration_day)->timestamp > 0)
+		@if(!empty($file->expiration_day) && Carbon\Carbon::parse($file->expiration_day)->timestamp > 0)
 		<span class="label label-default">expiration {{ Carbon\Carbon::parse($file->expiration_day)->format('d M Y'); }}</span>
 		@endif
 		@if($file->expires > 0)

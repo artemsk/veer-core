@@ -102,7 +102,7 @@ abstract class Entity {
             $prefix = $type == 'pages' ? 'pg' : ($type == 'products' ? 'prd' : 'ct');
             $key = $file_type == 'image' ? 'uploadImage' : 'uploadFile';
 
-            $this->upload($file_type, $key, $this->id, str_plural($this->type), $prefix, [
+            $this->upload($file_type, $key, $this->id, $file_type == 'image' ? str_plural($this->type) : $this->entity, $prefix, [
                 "language" => "veeradmin." . $this->type . "." . str_plural($file_type) . ".new"
             ], false, $data);
         }

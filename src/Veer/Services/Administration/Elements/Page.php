@@ -121,7 +121,7 @@ class Page extends Entity {
      */
     public function sort($data)
     {
-        if(empty($data)) {
+        if(empty($data) || !is_array($data)) {
             return $this;
         }
         
@@ -163,11 +163,13 @@ class Page extends Entity {
     protected function prepareData($fill)
     {
         foreach(['original', 'show_small', 'show_comments', 'show_title', 'show_date', 'in_list'] as $field) {
-            $fill[$field] = isset($fill[$field]) ? 1 : 0; 
+            $fill[$field] = !empty($fill[$field]) ? 1 : 0;
         }
         
         $fill['users_id'] = empty($fill['users_id']) ? \Auth::id() : $fill['users_id'];
-        $fill['url'] = trim($fill['url']); 
+        if(!empty($fill['url'])) { 
+            $fill['url'] = trim($fill['url']);
+        }
         return $fill;
     }  
 }

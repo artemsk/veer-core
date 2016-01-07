@@ -4,24 +4,27 @@ use Illuminate\Support\Facades\Input;
 
 trait HelperTrait {
 
-    protected $uploadDataProvider = [
+    public $uploadDataProvider = [
         'image' => ['images', 'images_path', 'public', '\\Veer\\Models\\Image', 'img', []],
         'file' => ['files', 'downloads_path', 'app', '\\Veer\\Models\\Download', 'fname', 
-                    ['original' => 1, 'expires' => 0, 'expiration_day' => 0, 'expiration_times' => 0, 'downloads' => 0]]
+                    ['original' => 1, 'secret' => '', 'expires' => 0, 'expiration_day' => 0, 'expiration_times' => 0, 'downloads' => 0]]
     ];
 
+    /**
+     * get file data from request or array
+     */
     protected function getUploadedFiles($files, $fileData = null)
     {
-        $correct_files = [];   
-        if(!empty($fileData)) {
+        $correct_files = [];
+        if(Input::hasFile($files)) {
+            $correct_files = is_array(Input::file($files)) ? Input::file($files) : [Input::file($files)];
+        } elseif(!empty($fileData)) {
             $fileData = is_array($fileData) ? $fileData : [$fileData];
             foreach ($fileData as $file) {
                 if($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile && $file->isValid() && $file->isReadable()) {
                     $correct_files[] = $file;
                 }
             }
-        } elseif(Input::hasFile($files)) {
-            $correct_files = is_array(Input::file($files)) ? Input::file($files) : [Input::file($files)];
         }
 
         return $correct_files;
@@ -101,7 +104,7 @@ trait HelperTrait {
         
         $r = explode(".", $removeFile);
         if(isset($r[1]) && !empty($r[1])) {
-            \Veer\Models\Download::where('id', '=', $r[1])->update(['elements_id' => null, 'elements_type' => '']);
+            \Veer\Models\Download::where('id', '=', $r[1])->update(['elements_id' => 0, 'elements_type' => '']);
         }
     }
 

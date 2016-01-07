@@ -42,7 +42,7 @@ trait DeleteTrait {
 	 */
 	protected function deleteProduct($id)
 	{
-		$this->deleteEntity($id, 'product');
+		return $this->deleteEntity($id, 'product');
 	}
     
     /**
@@ -51,7 +51,7 @@ trait DeleteTrait {
 	 */
 	protected function deletePage($id)
 	{
-		$this->deleteEntity($id, 'page');
+		return $this->deleteEntity($id, 'page');
 	}
     
     /**
@@ -86,8 +86,10 @@ trait DeleteTrait {
 			$img->categories()->detach();
 			$img->users()->detach();
             $this->deletingLocalOrCloudFiles('images', $img->img, config("veer.images_path"));
-			$img->delete();			
+			$img->delete();
+            return true;
 		}
+        return false;
 	}
     
     /**
@@ -116,8 +118,10 @@ trait DeleteTrait {
 		if(is_object($t)) {
 			$t->pages()->detach();
 			$t->products()->detach();
-			$t->delete();			
+			$t->delete();
+            return true;
 		}
+        return false;
 	}
 
     /**
@@ -152,7 +156,7 @@ trait DeleteTrait {
 	 */
 	protected function deleteUserBook($id)
 	{
-        \Veer\Models\UserBook::where('id', '=', $id)->delete();
+        return \Veer\Models\UserBook::where('id', '=', $id)->delete();
 	}
 
     /**
