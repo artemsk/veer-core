@@ -9,20 +9,35 @@ trait HelperTrait {
         'file' => ['files', 'downloads_path', 'app', '\\Veer\\Models\\Download', 'fname', 
                     ['original' => 1, 'expires' => 0, 'expiration_day' => 0, 'expiration_times' => 0, 'downloads' => 0]]
     ];
-    
+
+    protected function getUploadedFiles($files, $fileData = null)
+    {
+        $correct_files = [];   
+        if(!empty($fileData)) {
+            $fileData = is_array($fileData) ? $fileData : [$fileData];
+            foreach ($fileData as $file) {
+                if($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile && $file->isValid() && $file->isReadable()) {
+                    $correct_files[] = $file;
+                }
+            }
+        } elseif(Input::hasFile($files)) {
+            $correct_files = is_array(Input::file($files)) ? Input::file($files) : [Input::file($files)];
+        }
+
+        return $correct_files;
+    }
+
     /**
      * Upload Image
-     * Todo: Test
      */
-    public function upload($type, $files, $id, $relationOrObject, $prefix = null, $message = null, $skipRelation = false)
+    public function upload($type, $files, $id, $relationOrObject, $prefix = null, $message = null, $skipRelation = false, $fileData = null)
     {
         list($relation, $assets_path, $folder, $model, $field, $default) = $this->uploadDataProvider[$type];
         $path = $type == 'image' ? base_path() : storage_path();
-        $newId = null;
+        $newId = [];
         
-        foreach(is_array(Input::file($files)) ? Input::file($files) : [Input::file($files)] as $file) {
+        foreach($this->getUploadedFiles($files, $fileData) as $file) {
             $fname = $prefix . $id . "_" . date('YmdHis', time()) . str_random(10) . "." . $file->getClientOriginalExtension();
-
             $this->uploadingLocalOrCloudFiles($relation, $file, $fname, config('veer.' . $assets_path), $path . "/" . $folder . "/");
             
             $new = new $model;
@@ -38,7 +53,7 @@ trait HelperTrait {
                 if($type == "file") { $relationOrObject->downloads()->save($new); }
             }
             
-            $newId = $new->id; // ? 
+            $newId[] = $new->id; // ?
         }
 
         if(!empty($message)) { event('veer.message.center', array_get($message, 'language')); }

@@ -43,15 +43,13 @@ trait AttachTrait {
      */
     protected function checkImagesFiles($action, $attributes, $id, $object, $type, $options)
     {
-        if(Input::hasFile(array_get($attributes, 'uploadImageId', 'uploadImage'))) {
-            $this->upload('image', array_get($attributes, 'uploadImageId', 'uploadImage'), 
-                $id, $type, array_get($options, 'prefix.image'), null);
-        }
-        
-        if(Input::hasFile(array_get($attributes, 'uploadFilesId', 'uploadFiles'))) {
-            $this->upload('file', array_get($attributes, 'uploadFilesId', 'uploadFiles'), 
-                $id, $object, array_get($options, 'prefix.file'), null);
-        }
+        $key = array_get($attributes, 'uploadImageId', 'uploadImage');
+        $this->upload('image', $key, $id, $type, array_get($options, 'prefix.image'),
+                null, false, array_get($attributes, $key));
+ 
+        $file_key = array_get($attributes, 'uploadFilesId', 'uploadFiles');
+        $this->upload('file', $file_key, $id, $object, array_get($options, 'prefix.file'),
+                null, false, array_get($attributes, $file_key));      
         
         $this->copyFiles(array_get($attributes, 'attachFiles'), $object);
         $this->removeFile($action);

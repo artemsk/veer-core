@@ -3,7 +3,7 @@ namespace Veer\Services\Administration\Elements;
 
 use Illuminate\Support\Facades\Input;
 
-class Entity {
+abstract class Entity {
 
     protected $id;
     protected $action;
@@ -92,6 +92,31 @@ class Entity {
             $this->attachments([$key => $value], $this->entity);
         }
         
+        return $this;
+    }
+
+    protected function addImageOrFile($file_type, $data)
+    {
+        if(!empty($data) && !empty($this->id)) {
+            $type = str_plural($this->type);
+            $prefix = $type == 'pages' ? 'pg' : ($type == 'products' ? 'prd' : 'ct');
+            $key = $file_type == 'image' ? 'uploadImage' : 'uploadFile';
+
+            $this->upload($file_type, $key, $this->id, str_plural($this->type), $prefix, [
+                "language" => "veeradmin." . $this->type . "." . str_plural($file_type) . ".new"
+            ], false, $data);
+        }
+    }
+
+    public function image($data)
+    {
+        $this->addImageOrFile('image', $data);
+        return $this;
+    }
+
+    public function file($data)
+    {
+        $this->addImageOrFile('file', $data);
         return $this;
     }
 
@@ -268,4 +293,20 @@ class Entity {
      * @param int $id
      */
     public function toggleStatus($id) {}
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return object
+     */
+    public function getEntity()
+    {
+        return $this->entity;
+    }
 }

@@ -8,7 +8,7 @@ class Download {
     
     protected $action;
     protected $data = [];
-    protected $uploadedIds;
+    protected $uploadedIds = [];
     protected $type = 'download';
 
     public function __construct()
@@ -31,7 +31,7 @@ class Download {
         $this->copyFile();
 
         if(!empty($this->data['uploadFiles']) && Input::hasFile($this->data['uploadFiles'])) {
-            $this->uploadedIds[] = $this->upload('file', 'uploadFiles', null, null, '', null, true);
+            $this->uploadedIds = array_merge($this->uploadedIds, $this->upload('file', 'uploadFiles', null, null, '', null, true));
             event('veer.message.center', trans('veeradmin.file.upload'));
         }
 

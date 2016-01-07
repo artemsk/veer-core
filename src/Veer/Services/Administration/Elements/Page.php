@@ -87,11 +87,11 @@ class Page extends Entity {
         $max = \DB::table((new $this->className)->getTable())->max('manual_order');
         $fill = [
             'title' => trim($data['title']),
-            'url' => $data['url'],
+            'url' => trim($data['url']),
             'hidden' => 1,
             'manual_order' => $max + 10,
             'users_id' => \Auth::id(),
-            'small_txt' => !empty($small[0]) ? substr(trim($small[0]), 2, -2) : '',
+            'small_txt' => !empty($small[0]) ? trim(substr(trim($small[0]), 2, -2)) : '',
             'txt' => trim($txt)
         ];
         
@@ -102,12 +102,12 @@ class Page extends Entity {
             $page->categories()->attach($categories);
         }
 
-        if(Input::hasFile('uploadImage')) {
-            $this->upload('image', 'uploadImage', $page->id, 'pages', 'pg', null);
+        if(!empty($data['uploadImage'])) {
+            $this->upload('image', 'uploadImage', $page->id, 'pages', 'pg', null, false, $data['uploadImage']);
         }
 
-        if(Input::hasFile('uploadFile')) {
-            $this->upload('file', 'uploadFile', $page->id, $page, 'pg', null);
+        if(!empty($data['uploadFile'])) {
+            $this->upload('file', 'uploadFile', $page->id, $page, 'pg', null, false, $data['uploadFile']);
         }
 
         $this->id = $page->id;

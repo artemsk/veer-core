@@ -153,12 +153,12 @@ class Product extends Entity {
             $product->categories()->attach($categories);
         }
         
-        if(Input::hasFile('uploadImage')) {
-            $this->upload('image', 'uploadImage', $product->id, 'products', 'prd', null);
+        if(!empty($data['uploadImage'])) {
+            $this->upload('image', 'uploadImage', $product->id, 'products', 'prd', null, false, $data['uploadImage']);
         }
 
-        if(Input::hasFile('uploadFile')) {
-            $this->upload('file', 'uploadFile', $product->id, $product, 'prd', null);
+        if(!empty($data['uploadFile'])) {
+            $this->upload('file', 'uploadFile', $product->id, $product, 'prd', null, false, $data['uploadFile']);
         }		
 
         $this->id = $product->id;

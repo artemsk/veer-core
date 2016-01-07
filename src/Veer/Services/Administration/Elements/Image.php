@@ -23,7 +23,7 @@ class Image {
     {
         foreach(is_array($this->data) ? $this->data : [] as $k => $v) {
             if (Input::hasFile($k)) {
-                $this->uploadedIds[] = $this->upload('image', $k, null, null, '', null, true);
+                $this->uploadedIds = array_merge($this->uploadedIds, $this->upload('image', $k, null, null, '', null, true));
                 event('veer.message.center', trans('veeradmin.image.upload'));
             }
         }
