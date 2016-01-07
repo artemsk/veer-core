@@ -4,226 +4,268 @@ namespace Veer\Services\Administration\Elements;
 use Illuminate\Support\Facades\Input;
 
 class Entity {
-    
+
     protected $id;
     protected $action;
-    protected $title;
-    protected $data = [];
     protected $type; // entity type: page, product, category
+    protected $className;
+    protected $entity;
     
     use HelperTrait, AttachTrait, DeleteTrait;
     
     public function __construct()
     {
         \Eloquent::unguard();
-        $this->id = Input::get('id');
-        $this->action = Input::get('action');
-        $this->title = Input::get('title');
-        $this->data = Input::all();
     }
-    
-    public function setParams($data)
+
+    protected function create($fill)
     {
-        $this->data = $data;
-        return $this;
-    }
-    
-    public function setData($fill)
-    {
-        $this->data['fill'] = $fill;
-        return $this;
-    }
-    
-    public function attach($id, $type = 'images')
-    {
-        $key = ($type == 'tags' || $type == 'attributes') ? $type : ('attach' . ucfirst($type));
-        $this->data[$key] = empty($this->data[$key]) ? ':' . $id : $this->data[$key] . ',' . $id ;
-        return $this;
-    }
-    
-    public function add($params = null)
-    {
-        $this->action = 'add';
-        if(!empty($this->data['title'])) return $this->updateOne();
-    }
-    
-    public function delete($id)
-    {
-        $this->action = 'delete';
-        $methodName = 'delete' . ucfirst($this->type);
-        return $this->{$methodName}($id);
-    }
-    
-    public function update($id, $action = 'update')
-    {
-        $this->id = $id;
-        $this->action = $action;
-        return $this->updateOne();
-    } 
-    
-    /* only for product or page */
-    public function status($id)
-    {
-        $this->id = $id;
-        $this->action = $this->type == 'page' ? 'changeStatusPage.' . $id : 'updateStatus.' . $id;
-        return $this->updateOnePage();
-    } 
-  
-    protected function updateOne()
-    {	
-        $fill = $this->prepareData(); // ?
+        // TODO: validate
         
-        if($this->action == 'add' || $this->action == 'saveAs') {
-            
-            if($this->type == 'page') $fill['hidden'] = true; 
-            elseif($this->type == 'product') $fill['status'] = 'hide'; 
-            
-            $entity = $this->create($fill);
-            event('veer.message.center', trans('veeradmin.'. $this->type .'.new'));
+        $object = new $this->className;
+        $object->fill($fill);
+        $object->save();
+
+        event('veer.message.center', trans('veeradmin.'. $this->type .'.new'));
+        return $object;
+    }
+
+    /**
+     * @param array $data
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function update($data)
+    {
+        if ($this->entity instanceof $this->className && !empty($data)) {
+            $this->entity->fill($this->prepareData($data));
+            $this->entity->save();
+            event('veer.message.center', trans('veeradmin.'. $this->type . '.update'));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function toggle()
+    {
+        return $this->toggleStatus($this->id);
+    }
+
+    /**
+     * @param string $type
+     * @return boolean
+     */
+    protected function isAllowedRelation($type)
+    {
+        $attach_types = ['tags', 'attributes', 'images', 'files', 'categories'];
+
+        if($this->type == 'page') {
+            $attach_types += ['products', 'parent_pages', 'child_pages'];
+        } elseif($this->type == 'product') {
+            $attach_types += ['pages', 'parent_products', 'child_products'];
+        } elseif($this->type == 'category') {
+            $attach_types = ['images', 'products', 'pages']; // only 3 for categories
+        } // TODO: test
+
+        if(!in_array($type, $attach_types)) {
+            event('veer.message.center', trans('veeradmin.error.impossible.attach.type'));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $type
+     * @param mixed $id
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function attach($type, $id)
+    {
+        if($this->isAllowedRelation($type)) {
+            $this->action = null;
+            $key = $type == 'tags' ? 'tags' : ($type == 'attributes' ? 'attribute' : 'attach' . studly_case($type)); // bugfix
+            $value = ':' . (is_array($id) ? implode(',', $id) : $id);
+
+            $this->attachments([$key => $value], $this->entity);
+        }
+        
+        return $this;
+    }
+
+    /**
+     * @param string $type
+     * @param int $id
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function detach($type, $id)
+    {
+        if($this->isAllowedRelation($type)) {
+            $this->action = ($type == 'tags' || $type == 'attributes') ?:
+                    'remove' . studly_case(str_singular($type)) . '.' . $id; // TODO: test
+
+            // tags & attributes will be detached completely
+            $key = $type == 'tags' ? 'tags' : ($type == 'attributes' ? 'attribute' : null); // bugfix
+
+            $this->attachments([$key => null], $this->entity);
+            $this->action = null;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param int $id
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function find($id)
+    {
+        $className = $this->className;
+        $entity = $className::find($id);
+
+        if (is_object($entity)) {
+            $this->id = $id;
+            $this->entity = $entity;
+        }
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return mixed
+     */
+    protected function one()
+    {
+        $this->id = Input::get('id');
+
+        $fill = Input::has('fill') ? $this->prepareData(Input::get('fill')) : null;
+        
+        if($this->action == 'add' || $this->action == 'saveAs') {            
+            if($this->type == 'page') {
+                $fill['hidden'] = true;
+            } elseif($this->type == 'product') {
+                $fill['status'] = 'hide';
+            }
+
+            $entity = $this->create($fill);            
         } else {
-            $className = '\\Veer\\Models\\' . ucfirst($this->type);
+            $className = $this->className;
             $entity = $className::find($this->id);
         }
         
-		if(!is_object($entity)) return event('veer.message.center', trans('veeradmin.error.model.not.found'));
+		if(!is_object($entity)) {
+            event('veer.message.center', trans('veeradmin.error.model.not.found'));
+            return \Redirect::route('admin.show', [str_plural($this->type)]);
+        }
+
+        $this->id = $entity->id;
+        $this->entity = $entity;
         
-        $this->updateDataOrStatus($entity, $fill);
-        $this->attachments($entity);
-		$this->freeForm($entity);
-		
+        $this->goThroughEverything($fill);
+
 		if($this->action == 'add' || $this->action == 'saveAs') {
             app('veer')->skipShow = true;
-            Input::replace(['id' => $entity->id]);
-            return \Redirect::route('admin.show', [str_plural($this->type), 'id' => $entity->id]);
-        }
-    }
-    
-    protected function create($fill)
-    {
-        $className = '\\Veer\\Models\\' . ucfirst($this->type);
-        $object = new $className;
-        $object->fill($fill);        
-        $object->save();
-        return $object;
-    }
-    
-    /**
-     * Products actions
-     * 
-     */
-    protected function quickProductsActions($action)
-    {
-        if (starts_with($action, "changeStatusProduct")) {
-            $r = explode(".", $action);
-            $this->changeProductStatus(\Veer\Models\Product::find($r[1]));
-            event('veer.message.center', trans('veeradmin.product.status'));
-        }
-
-        if (starts_with($action, "deleteProduct")) {
-            $r = explode(".", $action);
-            $this->deleteProduct($r[1]);
-            event('veer.message.center', trans('veeradmin.product.delete') .
-                " " . $this->restore_link('product', $r[1]));
-        }
-
-        if (starts_with($action, "showEarlyProduct")) {
-            \Eloquent::unguard();
-            $r = explode(".", $action);
-            \Veer\Models\Product::where('id', '=', $r[1])->update(array("to_show" => now()));
-            event('veer.message.center', trans('veeradmin.product.show'));
+            Input::replace(['id' => $this->id]);
+            return \Redirect::route('admin.show', [str_plural($this->type), 'id' => $this->id]);
         }
     }
 
     /**
-     * Pages actions
-     * 
+     * @param array $fill
+     * @return void
      */
-    protected function quickPagesActions($action)
+    protected function goThroughEverything($fill = null)
     {
-        if (starts_with($action, "changeStatusPage")) {
-            $r = explode(".", $action);
-            $page = \Veer\Models\Page::find($r[1]);
-            $page->hidden = $page->hidden == true ? false : true;
-            $page->save();
-            event('veer.message.center', trans('veeradmin.page.status'));
+        $this->action != 'update' ?: $this->update($fill);
+        !starts_with($this->action, "changeStatusPage") ?: $this->toggleStatus(substr($this->action, 17));
+        !starts_with($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // TODO: change to changeStatusProduct
+        
+        $this->attachments(Input::all(), $this->entity);
+		$this->freeForm(Input::get('freeForm'));
+    }
+
+    /**
+     * @param array $data
+     * @param \Veer\Models\Page|\Veer\Models\Product|\Veer\Models\Category $object
+     * @return void
+     */
+    protected function attachments($data, $object)
+    {
+        if(empty($data) || !is_array($data) || !($object instanceof $this->className)) {
+            return null;
         }
 
-        if (starts_with($action, "deletePage")) {
-            $r = explode(".", $action);
-            $this->deletePage($r[1]);
-            event('veer.message.center', trans('veeradmin.page.delete') .
-                " " . $this->restore_link('page', $r[1]));
-        }
-    }    
-    
-    protected function updateDataOrStatus($object, $fill)
-    {
-        switch($this->action) {
-            case 'update':
-                $object->fill($fill);
-                $object->save();
-                event('veer.message.center', trans('veeradmin.'. $this->type . '.update'));
-                break;
-            
-            // page status
-            case 'changeStatusPage.' . $object->id:
-                $object->hidden = $object->hidden == true ? false : true;
-                $object->save();
-                event('veer.message.center', trans('veeradmin.'. $this->type . '.status'));
-                break;
-            
-            // product status
-            case 'updateStatus.' . $object->id:
-                $this->changeProductStatus($object);
-                event('veer.message.center', trans('veeradmin.'. $this->type . '.status'));
-                break; 
-        } 
-    }
-    
-    protected function attachments($object)
-    {
         $type = str_plural($this->type);
-        $this->data += ['tags' => '', 'attribute' => '', 'attachImages' => '', 
+        $data += ['tags' => '', 'attribute' => '', 'attachImages' => '',
             'attachFiles' => '', 'attachCategories' => '', 'attachPages' => '',
             'attachProducts' => '', 'attachChildPages' => '', 'attachParentPages' => '',
-            'attachChildProducts' => '', 'attachParentProducts' => ''];
-        
+            'attachChildProducts' => '', 'attachParentProducts' => '', 'attachChildCategories' => '',
+            'attachParentCategories' => '']; // child & parent categories are not used
+
         $params = [
             "actionButton" => $this->action,
-            "tags" => $this->data['tags'],
-            "attributes" => $this->data['attribute'],
-            "attachImages" => $this->data['attachImages'],
-            "attachFiles" => $this->data['attachFiles'],
-            "attachCategories" => $this->data['attachCategories'],
-            "attachChild" . ucfirst($type) => $this->data['attachChild' . ucfirst($type)],
-            "attachParent" . ucfirst($type) => $this->data['attachParent' . ucfirst($type)]
+            "tags" => $data['tags'],
+            "attributes" => $data['attribute'],
+            "attachImages" => $data['attachImages'],
+            "attachFiles" => $data['attachFiles'],
+            "attachCategories" => $data['attachCategories'],
+            "attachChild" . ucfirst($type) => $data['attachChild' . ucfirst($type)],
+            "attachParent" . ucfirst($type) => $data['attachParent' . ucfirst($type)]
         ];
-        
-        $params += $type == 'pages' ? ["attachProducts" => $this->data['attachProducts']] : 
-            ["attachPages" => $this->data['attachPages']];
-        
-        $prefix = $type == 'pages' ? 'pg' : 'prd';
-        
+
+        if($type == 'pages' || $type == 'categories') {
+            $params += ["attachProducts" => $data['attachProducts']];
+        }
+        if($type == 'products' || $type == 'categories') {
+            $params += ["attachPages" => $data['attachPages']];
+        }
+
+        $prefix = $type == 'pages' ? 'pg' : ($type == 'products' ? 'prd' : 'ct');
+
 		$this->connections($object, $object->id, $type, $params, [
             "prefix" => ["image" => $prefix, "file" => $prefix]
         ]);
-    }    
-    
-    protected function freeForm($object)
+    }
+
+    /**
+     * @param string $data
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
+    public function freeForm($data)
     {
-        if(empty($this->data['freeForm'])) { return null; }
-        
-        preg_match_all("/^(.*)$/m", trim($this->data['freeForm']), $ff); // TODO: test
-        if(empty($ff[1]) || !is_array($ff[1])) return null;
+        if(empty($data)) {
+            return $this;
+        }
+
+        preg_match_all("/^(.*)$/m", trim($data), $ff); // TODO: test
+        if(empty($ff[1]) || !is_array($ff[1])) {
+            return $this;
+        }
         
         foreach($ff[1] as $freeForm) {
             if(starts_with($freeForm, 'Tag:')) {
-                $this->attachElements($freeForm, $object, 'tags', null, ",", "Tag:");
+                $this->attachElements($freeForm, $this->entity, 'tags', null, ",", "Tag:");
             } else {
-                $this->attachElements($freeForm, $object, 'attributes', null, ",", "Attribute:");
+                $this->attachElements($freeForm, $this->entity, 'attributes', null, ",", "Attribute:");
             }
-        } 
+        }
+
+        return $this;
+    }
+    
+    /**
+     * @param array $fill
+     */
+    protected function prepareData($fill) 
+    {
+        return $fill;
     }
 
-    protected function prepareData() {}
+    /**
+     * @param int $id
+     */
+    public function toggleStatus($id) {}
 }

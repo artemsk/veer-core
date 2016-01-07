@@ -29,7 +29,7 @@ class Structure {
 	 */
 	public function updateCategories()
 	{
-		return (new Elements\Category)->run();	
+		return Elements\Category::request();
 	}
 
 	/**
@@ -37,7 +37,7 @@ class Structure {
 	 */
 	public function updateProducts()
 	{
-		return (new Elements\Product)->run();	
+		return Elements\Product::request();
 	}
 		
 	/**
@@ -45,7 +45,7 @@ class Structure {
 	 */
 	public function updatePages()
 	{
-		return (new Elements\Page)->run();	
+		return Elements\Page::request();
 	}
 	
 	/**

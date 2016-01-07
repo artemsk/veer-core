@@ -152,7 +152,7 @@ function getNotificationMessages() {
 }
 
 function sortableLoad() {
-    $('.sortable').sortable().bind('sortupdate', function(e, ui) {
+    $('.sortable').sortable().off('sortupdate').on('sortupdate', function(e, ui) {
         $.ajax({
             type: 'POST',
             data: { 'action': 'sort', 'oldindex' : ui.oldindex, 
@@ -165,14 +165,21 @@ function sortableLoad() {
     });
 }
 
-function reloadContent(url, selector, skipreload) {
+function reloadContent(url, selector, animation) {
     $.ajax({
         type: 'GET',
         //data: '_json=true',
         url: url,
         success: function(results) {
             var content = $('<div />').append(results).find(selector).html();
-            $(selector).html(content);
+            if(animation !== false) {
+                $(selector).addClass('animated').addClass(animation).html(content);
+                setTimeout(function() {
+                    $(selector).removeClass('animated').removeClass(animation);
+                }, 1000);
+            } else {
+                $(selector).html(content);
+            }
             NProgress.done();            
             //overlayHide();
             setupPlugins();
@@ -355,11 +362,16 @@ $(document).on('submit', '.category-add', {}, function(event) {
         type: 'POST',
         url: $(this).attr('action'),
         data: $(this).serialize() + '&action=add',
-        success: function(results) { 
-            $('.categories-list-' +siteid + ' ul').addClass('animated').addClass('bounce').html(results);
-            setTimeout(function() {
-            $('.categories-list-' +siteid + ' ul').removeClass('animated').removeClass('bounce');
-            }, 1000);
+        success: function(results) {
+            if(results === '') {
+                reloadContent($(this).attr('action'), '.categories-list-' +siteid + ' ul', 'bounce');
+            } else {
+                $('.categories-list-' +siteid + ' ul').addClass('animated').addClass('bounce').html(results);
+                setTimeout(function() {
+                $('.categories-list-' +siteid + ' ul').removeClass('animated').removeClass('bounce');
+                }, 1000);
+                
+            }
             $('.sortable').sortable();
             getNotificationMessages(); 
         },
@@ -391,7 +403,7 @@ $(document).on('submit', '.ajax-form-submit form', {}, function(event) {
                     $(selector).html(results);
                     NProgress.done();
                 } else {
-                    reloadContent(url, selector);
+                    reloadContent(url, selector, false);
                 }
                 getNotificationMessages();
             }

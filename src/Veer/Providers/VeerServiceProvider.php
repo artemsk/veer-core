@@ -22,11 +22,7 @@ class VeerServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function register()
-	{
-        $this->mergeConfigFrom(
-            __DIR__.'/../../../config/veer.php', 'veer'
-        );
-        
+	{        
 		$this->registerVeerApp();
 		
 		$this->registerVeerShop();

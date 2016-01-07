@@ -1,37 +1,125 @@
-<?php namespace Veer\Services\Administration\Elements;
+<?php
+
+namespace Veer\Services\Administration\Elements;
 
 use Illuminate\Support\Facades\Input;
 
 class Product extends Entity {
-        
-    protected $title = null;
+
+    protected $type = 'product';
+    protected $className = \Veer\Models\Product::class;
     
-    public function __construct()
+    /**
+     *
+     * @return void
+     */
+    public static function request()
     {
-        parent::__construct();
-        $this->title = Input::get('fill.title');
-        $this->type = 'product';
+        $class = new static;
+        $class->action = Input::get('action');
+
+        if (Input::has('id')) {
+            return $class->one();
+        }
+
+        $changeStatusProduct = starts_with($class->action, "changeStatusProduct") ? substr($class->action, 20) : null;
+        $deleteProduct = starts_with($class->action, "deleteProduct") ? substr($class->action, 14) : null;
+        $showEarlyProduct = starts_with($class->action, "showEarlyProduct") ? substr($class->action, 17) : false;
+        $quickAddPage = Input::has('fill.title') ? Input::all() : null;
+
+        $class->toggleStatus($changeStatusProduct)
+            ->delete($deleteProduct)
+            ->available($showEarlyProduct)
+            ->add($quickAddPage)
+            ->quickFreeForm(Input::get('freeForm'));
     }
-    
-    public function run()
+
+    /**
+     * @param int $id
+     * @return \Veer\Models\Product|boolean
+     */
+    protected function getObject($id)
     {
-        if(!empty($this->id)) return $this->updateOne();   
-        
-        $this->quickProductsActions($this->action);  
-        
-        if(!empty($this->data['freeFrom'])) return $this->quickFreeForm();
-        if(!empty($this->title)) return $this->quickAdd();
+        if(empty($id)) {
+            return false;
+        }
+
+        $product = $this->entity instanceof $this->className &&
+            $this->entity->id == $id ? $this->entity : \Veer\Models\Product::find($id);
+
+        return is_object($product) ? $product : false;
     }
-        
-    protected function quickAdd()
+
+    /**
+     * @param int $id
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function toggleStatus($id)
     {
-        $this->data += ['prices' => '', 'options' => '', 'categories' => ''];        
-        $prices = explode(":", $this->data['prices']);
-        $options = explode(":", $this->data['options']);
-        
+        $product = $this->getObject($id);
+        if($product) {
+            $this->changeProductStatus($product);
+            event('veer.message.center', trans('veeradmin.product.status'));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param int $id
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function delete($id)
+    {
+        if(!empty($id) && $this->deleteProduct($id)) {
+            event('veer.message.center', trans('veeradmin.product.delete') .
+                " " . $this->restore_link('product', $id));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param int|null $id
+     * @param timestamp|null $when
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function available($id = null, $when = null)
+    {
+        if($id === false) {
+            return $this;
+        }
+
+        if(empty($id)) {
+            $id = $this->id;
+        }
+
+        if(empty($when)) {
+            $when = now();
+        }
+
+        if($this->entity instanceof $this->className && $this->entity->id == $id) {
+            $this->entity->to_show = $when;
+            $this->entity->save();
+        } else {
+            \Veer\Models\Product::where('id', '=', $id)->update(['to_show' => $when]);
+        }
+
+        event('veer.message.center', trans('veeradmin.product.show'));
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function prepareDataForQuickAdd($data)
+    {
+        $prices = explode(":", $data['prices']);
+        $options = explode(":", $data['options']);
         $fill = [
-            'title' => trim($this->title),
-            'url' => !empty($this->data['fill']['url']) ? trim($this->data['fill']['url']) : '',            
+            'title' => array_get($data, 'fill.title'),
+            'url' => !empty($data['fill']['url']) ? trim($data['fill']['url']) : '',
         ];
 
         foreach(['price', 'price_sales', 'price_opt', 'price_base', 'currency'] as $i => $type) {
@@ -41,32 +129,57 @@ class Product extends Entity {
         foreach(['qty', 'weight', 'score', 'star'] as $i => $type) {
             $fill[$type] = array_get($options, $i, 0);
         }
-        
+
         $fill['production_code'] = array_get($options, 4, '');
         $fill['status'] = 'hide';
+        return $fill;
+    }
+
+    /**
+     * @param array $data
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function add($data)
+    {
+        if(empty($data) || !is_array($data)) {
+            return $this;
+        }
         
+        $data += ['prices' => '', 'options' => '', 'categories' => ''];
+        $fill = $this->prepareDataForQuickAdd($data);
         $product = $this->create($fill);
-
-        $categories =  explode(",", $this->data['categories']);
-        if(!empty($categories)) $product->categories()->attach($categories);
-
-        // images
+        $categories = explode(',', $data['categories']);
+        if(!empty($categories)) {
+            $product->categories()->attach($categories);
+        }
+        
         if(Input::hasFile('uploadImage')) {
             $this->upload('image', 'uploadImage', $product->id, 'products', 'prd', null);
         }
 
-        //files
         if(Input::hasFile('uploadFile')) {
             $this->upload('file', 'uploadFile', $product->id, $product, 'prd', null);
         }		
 
-        event('veer.message.center', trans('veeradmin.product.new'));
+        $this->id = $product->id;
+        $this->entity = $product;        
+        return $this;
     }
-    
-    protected function quickFreeForm()
+
+    /**
+     * @param string $data
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function quickFreeForm($data)
     {
-        preg_match_all("/^(.*)$/m", trim($this->data['freeForm']), $parseff); // TODO: test
-        if(empty($parseff[1]) || !is_array($parseff[1])) return null;
+        if(empty($data)) {
+            return $this;
+        }
+
+        preg_match_all("/^(.*)$/m", trim($data), $parseff);
+        if(empty($parseff[1]) || !is_array($parseff[1])) {
+            return $this;
+        }
 
         foreach($parseff[1] as $p) {
             $fields = explode("|", $p);
@@ -96,25 +209,37 @@ class Product extends Entity {
                 }   
             }
             
-            $product = $this->create($fill, 'product');
-           
-            if(!empty($categories)) $product->categories()->attach($categories);
-            if(!empty($image)) $this->addImage($image, $product);
-            if(!empty($file)) $this->addFile($file, $product);              		
+            $product = $this->create($fill);
+            $this->id = $product->id;
+            $this->entity = $product;
+            empty($categories) ?: $product->categories()->attach($categories);
+            empty($image) ?: $this->attachImage($image);
+            empty($file) ?: $this->attachFile($file);
         }	
         
         event('veer.message.center', trans('veeradmin.product.new'));
+        return $this;
     }
-    
-    protected function addImage($image, $product)
+
+    /**
+     * @param string $image
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function attachImage($image)
     {
         $new = new \Veer\Models\Image; 
         $new->img = $image;
         $new->save();
-        $new->products()->attach($product->id);
+        $new->products()->attach($this->id);
+        
+        return $this;
     }
-    
-    protected function addFile($file, $product)
+
+    /**
+     * @param string $file
+     * @return \Veer\Services\Administration\Elements\Product
+     */
+    public function attachFile($file)
     {
         $new = new \Veer\Models\Download; 
         $new->original = 1;
@@ -123,13 +248,13 @@ class Product extends Entity {
         $new->expiration_day = 0;
         $new->expiration_times = 0;
         $new->downloads = 0;
-        $product->downloads()->save($new); 
+        $this->entity->downloads()->save($new);
+        
+        return $this;
     }
        
-    protected function prepareData()
+    protected function prepareData($fill)
     {
-        $fill = array_get($this->data, 'fill', []);
-
         $fill['star'] = isset($fill['star']) ? 1 : 0;
         $fill['download'] = isset($fill['download']) ? 1 : 0;
         $fill['url'] = trim($fill['url']);

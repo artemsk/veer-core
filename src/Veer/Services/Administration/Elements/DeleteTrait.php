@@ -30,7 +30,10 @@ trait DeleteTrait {
 			$p->userlists()->delete();
 			$p->delete();
 			// [orders_products], comments, communications skip
+            return true;
 		}  
+        
+        return false;
     }
     
     /**
@@ -57,13 +60,17 @@ trait DeleteTrait {
 	 */
 	protected function deleteCategory($cid)
 	{
-        if(empty($cid)) return null;
+        if(empty($cid)) {
+            return false;
+        }
+        
 		\Veer\Models\Category::destroy($cid);
 		\Veer\Models\CategoryConnect::where('categories_id','=',$cid)->forceDelete();
 		\Veer\Models\CategoryPivot::where('parent_id','=',$cid)->orWhere('child_id','=',$cid)->forceDelete();
 		\Veer\Models\ImageConnect::where('elements_id','=',$cid)
 		->where('elements_type','=','Veer\Models\Category')->forceDelete();
 		// We do not delete communications for deleted items
+        return true;
 	}
     
     /**
@@ -93,8 +100,10 @@ trait DeleteTrait {
 		if(is_object($t)) {
 			$t->pages()->detach();
 			$t->products()->detach();
-			$t->delete();			
+			$t->delete();
+            return true;
 		}
+        return false;
 	}
     
     /**
@@ -122,7 +131,6 @@ trait DeleteTrait {
 		}
 
         $u = \Veer\Models\User::find($id);
-
 		if(is_object($u)) {
 			$u->discounts()->update(["status" => "canceled"]);
 			$u->userlists()->update(["users_id" => false]);
@@ -133,7 +141,9 @@ trait DeleteTrait {
 			// don't update: orders, bills, pages, comments, communications
 			// do not need: site, role
 			$u->delete();
+            return true;
 		}
+        return false;
     }
 
     /**

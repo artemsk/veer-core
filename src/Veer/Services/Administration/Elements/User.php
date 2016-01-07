@@ -45,9 +45,8 @@ class User {
      */
     public function update($data)
     {
-        if ($this->user instanceof \Veer\Models\User) {
-            $data = !empty($data) ? $this->prepareData($data) : null;
-            $this->user->fill($data);
+        if ($this->user instanceof \Veer\Models\User && !empty($data)) {
+            $this->user->fill($this->prepareData($data));
             $this->user->save();
         }
 

@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../../../assets/' => public_path('assets'),
-        ], 'veer');
+        ], 'veer-assets');
 
         $this->publishes([
             __DIR__.'/../../../config/veer.php' => config_path('veer.php')
@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../../../lang/' => base_path('resources/lang'),
-        ], 'veer');
+        ], 'veer-lang');
     }
 
     /**
@@ -41,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__.'/../../../config/veer.php', 'veer'
+        );
+        
         \Blade::setRawTags('{{', '}}');
         \Blade::setContentTags('{{{', '}}}');
         \Blade::setEscapedContentTags('{{{', '}}}');
