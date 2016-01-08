@@ -114,7 +114,7 @@
 	<input name="_method" type="hidden" value="PUT">
 	<input type="hidden" name="_token" value="{{ csrf_token() }}">
 	<div class="row">
-		<div class="col-sm-4"><p><input class="input-files-enhance" type="file" id="InFile1" name="uploadFiles"  multiple=false></p></div>
+		<div class="col-sm-4"><p><input class="input-files-enhance" type="file" id="InFile1" name="uploadFiles[]"  multiple=false></p></div>
 	</div>	
 	<div class="row">
 		<div class="col-sm-4">

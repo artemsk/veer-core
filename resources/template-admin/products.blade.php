@@ -68,7 +68,7 @@
             <div class="row">
                 <div class="col-sm-6"><p><input type="text" name="fill[url]" class="form-control transparent-input" placeholder="[Url]"></p></div>
                 <div class="col-sm-3"><p><input type="text" name="options" class="form-control transparent-input" placeholder="[Qty:weight:score:star:production code]"></p></div>
-                <div class="col-sm-3 color-upload-form"><p><input class="input-files-enhance transparent-input" type="file" id="InFile2" name="uploadFile[]" multiple=true>Digital product</p></div>
+                <div class="col-sm-3 color-upload-form"><p><input class="input-files-enhance transparent-input" type="file" id="InFile2" name="uploadFiles[]" multiple=true>Digital product</p></div>
             </div>	
             <div class="row">
                 <div class="col-sm-6"><p>

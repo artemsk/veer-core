@@ -118,21 +118,22 @@ class Product extends Entity {
         $prices = explode(":", $data['prices']);
         $options = explode(":", $data['options']);
         $fill = [
-            'title' => array_get($data, 'fill.title'),
-            'url' => !empty($data['fill']['url']) ? trim($data['fill']['url']) : '',
+            'title' => array_get($data, 'fill.title', array_get($data, 'title', '')),
+            'url' => array_get($data, 'fill.url', array_get($data, 'url', '')),
         ];
 
         foreach(['price', 'price_sales', 'price_opt', 'price_base', 'currency'] as $i => $type) {
-            $fill[$type] = array_get($prices, $i, 0);
+            $fill[$type] = !empty($prices[$type]) ? $prices[$i] : (!empty($data[$type]) ? $data[$type] : 0);
         }
 
         foreach(['qty', 'weight', 'score', 'star'] as $i => $type) {
-            $fill[$type] = array_get($options, $i, 0);
+            $fill[$type] = !empty($options[$type]) ? $options[$i] : (!empty($data[$type]) ? $data[$type] : 0);
         }
 
-        $fill['production_code'] = array_get($options, 4, '');
+        $fill['production_code'] = !empty($options[4]) ? $options[4] : array_get($data, 'production_code', '');
         $fill['status'] = 'hide';
-        return $fill;
+
+        return $this->prepareData($fill);
     }
 
     /**
@@ -152,17 +153,13 @@ class Product extends Entity {
         if(!empty($categories)) {
             $product->categories()->attach($categories);
         }
-        
-        if(!empty($data['uploadImage'])) {
-            $this->upload('image', 'uploadImage', $product->id, 'products', 'prd', null, false, $data['uploadImage']);
-        }
-
-        if(!empty($data['uploadFile'])) {
-            $this->upload('file', 'uploadFile', $product->id, $product, 'prd', null, false, $data['uploadFile']);
-        }		
 
         $this->id = $product->id;
-        $this->entity = $product;        
+        $this->entity = $product;
+
+        $this->image(array_get($data, 'uploadImage'));
+        $this->file(array_get($data, 'uploadFiles'));
+
         return $this;
     }
 
@@ -257,7 +254,7 @@ class Product extends Entity {
     {
         $fill['star'] = isset($fill['star']) ? 1 : 0;
         $fill['download'] = isset($fill['download']) ? 1 : 0;
-        $fill['url'] = trim($fill['url']);
+        $fill['url'] = isset($fill['url']) ? trim($fill['url']) : '';
         $fill['price_sales_on'] = parse_form_date(array_get($fill, 'price_sales_on', 0));
         $fill['price_sales_off'] = parse_form_date(array_get($fill, 'price_sales_off', 0));
 

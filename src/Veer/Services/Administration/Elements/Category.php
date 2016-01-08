@@ -311,9 +311,7 @@ class Category extends Entity {
                 break;
             case 'updateImages':
                 if(Input::hasFile('uploadImage')) {
-                    $this->upload('image', 'uploadImage', $this->id, 'categories', 'ct', [
-                        "language" => "veeradmin.category.images.new"
-                    ]);
+                    $this->image(Input::get('uploadImage'));
                 }
             case 'updateProducts':
             case 'updatePages':
@@ -323,42 +321,6 @@ class Category extends Entity {
 
 		$this->detachmentActions();
         $this->productsOrPagesActions();
-    }
-
-    /**
-     * @return void
-     */
-    protected function attachmentActions()
-    {
-        $attachmentActions = [
-            'updateImages' => ['attachImages', 'images'],
-            'updateProducts' => ['attachProducts', 'products'],
-            'updatePages' => ['attachPages', 'pages']
-        ];        
-        $data = $attachmentActions[$this->action];
-        
-        $this->attachElements(Input::get($data[0]), $this->entity, $data[1], [
-            "language" => "veeradmin.category.".$data[1].".attach"
-        ]);
-    }
-
-    /**
-     * @return void
-     */
-    protected function detachmentActions()
-    {
-        $detachmentActions = [
-            'removeImage' => ['images', false],
-            'removeAllImages' => ['images', true],
-            'removeProduct' => ['products', false],
-            'removePage' => ['pages', false]
-        ];
-        
-        foreach($detachmentActions as $action => $data) {
-            $this->detachElements($this->action, $action, $this->entity, $data[0], [
-                "language" => "veeradmin.category.".$data[0].".detach"
-            ], $data[1]);            
-        }
     }
 
     /**

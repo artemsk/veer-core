@@ -3,58 +3,7 @@
 use Illuminate\Support\Facades\Input;
 
 trait AttachTrait {
-
-    /**
-     * Connections
-     * 
-     */
-    protected function connections($object, $id, $type, $attributes = [], $options = [])
-    {
-        $action = array_get($attributes, 'actionButton');
-        
-        if(isset($attributes['tags'])) { $this->attachTags(array_get($attributes, 'tags'), $object); }
-        if(isset($attributes['attributes'])) { $this->attachAttributes(array_get($attributes, 'attributes'), $object); }
-        $this->checkImagesFiles($action, $attributes, $id, $object, $type, $options);
-                
-        $relations = [
-            'images' => ['attachImages', 'removeImage', array_get($options, 'message.images')],
-            'categories' => ['attachCategories', 'removeCategory', null, true],
-            'pages' => ['attachPages', 'removePage', null],
-            'products' => ['attachProducts', 'removeProduct', null],
-            'subproducts' => ['attachChildProducts', 'removeChildProduct', null],
-            'parentproducts' => ['attachParentProducts', 'removeParentProduct', null],
-            'subpages' => ['attachChildPages', 'removeChildPage', null],
-            'parentpages' => ['attachParentPages', 'removeParentPage', null]
-        ];
-        
-        foreach($relations as $relation => $fields) {
-            if(!isset($fields[3]) || isset($attributes[$fields[0]])) {
-                $this->attachElements(array_get($attributes, $fields[0]), $object, $relation, null);
-            }            
-            $this->detachElements($action, array_get($attributes, $fields[1].'Id', $fields[1]), $object, $relation, $fields[2]);
-        }        
-        
-        $this->detachElements($action, 'removeAllImages', $object, 'images', array_get($options, 'message.images'), true);
-    }
-    
-    /**
-     * Check Images and Files
-     * 
-     */
-    protected function checkImagesFiles($action, $attributes, $id, $object, $type, $options)
-    {
-        $key = array_get($attributes, 'uploadImageId', 'uploadImage');
-        $this->upload('image', $key, $id, $type, array_get($options, 'prefix.image'),
-                null, false, array_get($attributes, $key));
- 
-        $file_key = array_get($attributes, 'uploadFilesId', 'uploadFiles');
-        $this->upload('file', $file_key, $id, $object, array_get($options, 'prefix.file'),
-                null, false, array_get($attributes, $file_key));      
-        
-        $this->copyFiles(array_get($attributes, 'attachFiles'), $object);
-        $this->removeFile($action);
-    }
-    
+       
     /**
      * Attach Elements
      * 
@@ -74,36 +23,19 @@ trait AttachTrait {
     }
 
     /**
-     * Detach Elements
-     * TODO: based on faulty html inputs - blablabla.0 <- redo
-     */
-    protected function detachElements($detachString, $type, $object, $relation, $message = [], $allowEmpty = false)
-    {
-        if(!starts_with($detachString, $type)) { return null; }
-
-        $r = explode(".", $detachString);
-
-        if(!empty($r[1])) { $detach = $object->{$relation}()->detach($r[1]); }
-
-        if($allowEmpty === true) { $detach = $object->{$relation}()->detach(); }
-
-        if(!empty($message) && !empty($detach)) {
-            event('veer.message.center', trans(array_get($message, 'language', 'veeradmin.empty')));
-        }        
-    }
-
-    /**
      * Attach Attributes
      * 
      */
-    protected function attachAttributes($attributes, $object)
+    protected function attachAttributes($attributes, $object, $replace = true)
     {
-        if(!is_array($attributes)) { return null; }
+        if(!is_array($attributes)) { $attributes = (array) $attributes; }
 
         \Eloquent::unguard();
-
         $attrArr = [];
         foreach($attributes as $a) {
+            if(!is_array($a)) {
+                $a = (array) $a;
+            }
             $a += ['name' => null, 'val' => '', 'type' => 'descr'];            
             if(empty($a['name'])) { continue; }
 
@@ -124,18 +56,25 @@ trait AttachTrait {
             $attrArr[$attr->id] = ["product_new_price" => array_get($a, 'price', '')];
         }
 
-        $this->attachElements($attrArr, $object, 'attributes', null, ",", ":", true);
+        $this->attachElements($attrArr, $object, 'attributes', null, ",", ":", $replace);
     }
 
     /**
      * Attach Tags
      * 
      */
-    protected function attachTags($tags, $object)
+    protected function attachTags($tags, $object, $separator = ',', $replace = true)
     {
         \Eloquent::unguard();
         $tagArr = [];
-        preg_match_all("/^(.*)$/m", trim($tags), $matches); 
+        
+        if(is_array($tags)) {
+            $matches[1] = $tags;
+        } elseif(!empty($separator)) {
+            $matches[1] = explode($separator, $tags);
+        } else {
+            preg_match_all("/^(.*)$/m", trim($tags), $matches);
+        }        
 
         if(!empty($matches[1]) && is_array($matches[1])) {         
             foreach($matches[1] as $tag) {
@@ -150,7 +89,7 @@ trait AttachTrait {
                 $tagArr[] = $tagDb->id;
             }
         }
-        $this->attachElements($tagArr, $object, 'tags', null, ",", ":", true);
+        $this->attachElements($tagArr, $object, 'tags', null, ",", ":", $replace);
     }
 
     /**
@@ -261,12 +200,6 @@ trait AttachTrait {
 	}
     
     /*
-    abstract public function upload($type, $files, $id, $relationOrObject, $prefix = null, $message = null, $skipRelation = false);
-    
-    abstract protected function copyFiles($files, $object);
-    
-    abstract protected function removeFile($removeFile);
-    
     abstract protected function parseIds($ids, $separator = ",", $start = ":");
      */
 }

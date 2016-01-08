@@ -19,7 +19,7 @@ class Download {
     
     public function run()
     {
-        $this->removeFile($this->action);
+        $this->removeFile($this->action); 
 
         if (starts_with($this->action, 'deleteFile')) {
             $r = explode(".", $this->action);
@@ -36,6 +36,19 @@ class Download {
         }
 
         $this->attachFiles();
+    }
+
+    /**
+     * @deprecated
+     */
+    protected function removeFile($removeFile)
+    {
+        if(!starts_with($removeFile, 'removeFile')) { return null; }
+
+        $r = explode(".", $removeFile);
+        if(isset($r[1]) && !empty($r[1])) {
+            \Veer\Models\Download::where('id', '=', $r[1])->update(['elements_id' => 0, 'elements_type' => '']);
+        }
     }
     
     protected function makeRealLink()

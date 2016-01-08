@@ -121,7 +121,7 @@ class User {
         $addAsAdministrator = Input::get('addAsAdministrator');
         $administrator = Input::get('administrator');
         $attachImages = Input::get('attachImages');
-        $removeImageAction = starts_with($this->action, 'removeImage') ? $this->action : null;
+        $removeImageAction = starts_with($this->action, 'removeImage') ? substr($this->action, 12) : null;
         $attachPages = Input::get('attachPages');
         $removePage = starts_with($this->action, 'removePage') ? substr($this->action, 11) : null;
         $deletePage = starts_with($this->action, 'deletePage') ? substr($this->action, 11) : null;
@@ -338,17 +338,21 @@ class User {
     /**
      * Attach, detach, upload Image
      * @param string $data
-     * @param string $action
+     * @param int $remove_id
      * @return \Veer\Services\Administration\Elements\User
      */
-    public function attachImages($data, $action)
+    public function attachImages($data, $remove_id = null)
     {
-        $this->connections($this->user, $this->id, 'users', [
-            "actionButton" => $action,
-            "attachImages" => $data,
-                ], [
-            "prefix" => ["image" => 'usr', "file" => 'usr']
-        ]);
+        if(!empty($data)) {
+            $this->attachElements($data, $this->user, 'images');
+        }
+
+        if(!empty($remove_id)) {
+            $this->user->images()->detach($remove_id);
+        }
+
+        // check if the files exist in the request
+        $this->upload('image', 'uploadImage', $this->id, 'users', 'usr', null, false, null);
 
         return $this;
     }

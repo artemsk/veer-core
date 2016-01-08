@@ -80,9 +80,9 @@ trait HelperTrait {
      * Copy files to new obj.
      * 
      */
-    protected function copyFiles($files, $object)
+    protected function copyFiles($files, $object, $separator = ',', $start = ':')
     {
-        $filesDb = $this->parseIds($files);
+        $filesDb = !is_array($files) ? $this->parseIds($files, $separator, $start) : $files;
         if(!is_array($filesDb)) { return null; }
         
         foreach($filesDb as $file) {
@@ -94,20 +94,6 @@ trait HelperTrait {
         }        
     }
     
-    /**
-     * Remove (detach) file
-     * 
-     */
-    protected function removeFile($removeFile)
-    {
-        if(!starts_with($removeFile, 'removeFile')) { return null; }
-        
-        $r = explode(".", $removeFile);
-        if(isset($r[1]) && !empty($r[1])) {
-            \Veer\Models\Download::where('id', '=', $r[1])->update(['elements_id' => 0, 'elements_type' => '']);
-        }
-    }
-
     /**
      * Delete file
      * 
@@ -230,8 +216,8 @@ trait HelperTrait {
      */
     protected function parseIds($ids, $separator = ",", $start = ":")
     {
-        if(starts_with($ids, $start)) {
-            return explode($separator, substr($ids, strlen($start)));
+        if(empty($start) || starts_with($ids, $start)) {
+            return empty($separator) ? [$ids] : explode($separator, substr($ids, strlen($start)));
         }
     }
 }

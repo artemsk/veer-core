@@ -102,16 +102,12 @@ class Page extends Entity {
             $page->categories()->attach($categories);
         }
 
-        if(!empty($data['uploadImage'])) {
-            $this->upload('image', 'uploadImage', $page->id, 'pages', 'pg', null, false, $data['uploadImage']);
-        }
-
-        if(!empty($data['uploadFile'])) {
-            $this->upload('file', 'uploadFile', $page->id, $page, 'pg', null, false, $data['uploadFile']);
-        }
-
         $this->id = $page->id;
-        $this->entity = $page;        
+        $this->entity = $page;
+
+        $this->image(array_get($data, 'uploadImage'));
+        $this->file(array_get($data, 'uploadFiles'));
+   
         return $this;
     }
 

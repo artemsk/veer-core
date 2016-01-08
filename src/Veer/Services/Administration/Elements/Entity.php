@@ -62,12 +62,12 @@ abstract class Entity {
         $attach_types = ['tags', 'attributes', 'images', 'files', 'categories'];
 
         if($this->type == 'page') {
-            $attach_types += ['products', 'parent_pages', 'child_pages'];
+            $attach_types = array_merge($attach_types, ['products', 'parent_pages', 'child_pages', 'parentpages', 'subpages']);
         } elseif($this->type == 'product') {
-            $attach_types += ['pages', 'parent_products', 'child_products'];
+            $attach_types = array_merge($attach_types, ['pages', 'parent_products', 'child_products', 'parentproducts', 'subproducts']);
         } elseif($this->type == 'category') {
-            $attach_types = ['images', 'products', 'pages']; // only 3 for categories
-        } // TODO: test
+            $attach_types = ['images', 'products', 'pages', 'parentcategories', 'subcategories', 'parent_categories', 'sub_categories'];
+        }
 
         if(!in_array($type, $attach_types)) {
             event('veer.message.center', trans('veeradmin.error.impossible.attach.type'));
@@ -77,43 +77,116 @@ abstract class Entity {
         return true;
     }
 
+    protected function relationAliases($type)
+    {
+        $aliases = [
+            'parent_pages'           => 'parentpages',
+            'child_pages'            => 'subpages',
+            'parent_products'        => 'parentproducts',
+            'child_products'         => 'subproducts',
+            'attribute'              => 'attributes',
+            'attachImages'           => 'images',
+            'attachFiles'            => 'files',
+            'attachCategories'       => 'categories',
+            'attachPages'            => 'pages',
+            'attachProducts'         => 'products',
+            'attachChildPages'       => 'subpages',
+            'attachParentPages'      => 'parentpages',
+            'attachChildProducts'    => 'subproducts',
+            'attachParentProducts'   => 'parentproducts',
+            'attachChildCategories'  => 'subcategories',
+            'attachParentCategories' => 'parentcategories',
+            'removeImage'            => 'images',
+            'removeCategory'         => 'categories',
+            'removePage'             => 'pages',
+            'removeProduct'          => 'products',
+            'removeChildProduct'     => 'subproducts',
+            'removeParentProduct'    => 'parentproducts',
+            'removeChildPage'        => 'subpages',
+            'removeParentPage'       => 'parentpages',
+            'removeChildCategory'    => 'subcategories',
+            'removeParentCategory'   => 'parentcategories',
+            'removeFile'             => 'files',
+            'removeAttribute'        => 'attributes',
+            'removeTag'              => 'tags'
+        ];
+
+        return isset($aliases[$type]) ? $aliases[$type] : $type;
+    }
+
     /**
      * @param string $type
      * @param mixed $id
+     * @param boolean $replace
      * @return \Veer\Services\Administration\Elements\Entity
      */
-    public function attach($type, $id)
+    public function attach($type, $id, $replace = false, $separator = null, $start = null)
     {
-        if($this->isAllowedRelation($type)) {
-            $this->action = null;
-            $key = $type == 'tags' ? 'tags' : ($type == 'attributes' ? 'attribute' : 'attach' . studly_case($type)); // bugfix
-            $value = ':' . (is_array($id) ? implode(',', $id) : $id);
-
-            $this->attachments([$key => $value], $this->entity);
+        $relation = $this->relationAliases($type);
+        if($this->isAllowedRelation($relation) && !empty($id)) {          
+            $this->attaching($relation, $id, $replace, $separator, $start);
         }
         
         return $this;
     }
 
-    protected function addImageOrFile($file_type, $data)
+    /**
+     * @param string $relation
+     * @param mixed $ids
+     * @param boolean $replace
+     * @param string $separator
+     * @param string $start
+     */
+    protected function attaching($relation, $ids, $replace = false, $separator = ',', $start = ':')
     {
-        if(!empty($data) && !empty($this->id)) {
-            $type = str_plural($this->type);
-            $prefix = $type == 'pages' ? 'pg' : ($type == 'products' ? 'prd' : 'ct');
-            $key = $file_type == 'image' ? 'uploadImage' : 'uploadFile';
+        switch($relation) {
+            case 'attributes':
+                $this->attachAttributes($ids, $this->entity, $replace);
+                break;
+            case 'tags':
+                $this->attachTags($ids, $this->entity, $separator, $replace);
+                break;
+            case 'files':
+                $this->copyFiles($ids, $this->entity, $separator, $start);
+                break;
+            default:
+                $this->attachElements($ids, $this->entity, $relation, null, $separator, $start, $replace);
+                break;
+        }
+    }
 
-            $this->upload($file_type, $key, $this->id, $file_type == 'image' ? str_plural($this->type) : $this->entity, $prefix, [
+    /**
+     * @param string $file_type
+     * @param array|null $data
+     * @param object|null $object
+     */
+    protected function addImageOrFile($file_type, $data = null)
+    {        
+        if(!empty($this->id)) {
+            $relation = str_plural($this->type);
+            $prefix = $relation == 'pages' ? 'pg' : ($relation == 'products' ? 'prd' : 'ct');
+            $key = $file_type == 'image' ? 'uploadImage' : 'uploadFiles';
+
+            $this->upload($file_type, $key, $this->id, ($file_type == 'image' ? $relation : $this->entity), $prefix, [
                 "language" => "veeradmin." . $this->type . "." . str_plural($file_type) . ".new"
             ], false, $data);
         }
     }
 
+    /**
+     * @param array $data
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
     public function image($data)
     {
         $this->addImageOrFile('image', $data);
         return $this;
     }
 
+    /**
+     * @param array $data
+     * @return \Veer\Services\Administration\Elements\Entity
+     */
     public function file($data)
     {
         $this->addImageOrFile('file', $data);
@@ -122,20 +195,31 @@ abstract class Entity {
 
     /**
      * @param string $type
-     * @param int $id
+     * @param mixed $id
+     * @param boolean $strict
      * @return \Veer\Services\Administration\Elements\Entity
      */
-    public function detach($type, $id)
+    public function detach($type, $id = null, $strict = false)
     {
-        if($this->isAllowedRelation($type)) {
-            $this->action = ($type == 'tags' || $type == 'attributes') ?:
-                    'remove' . studly_case(str_singular($type)) . '.' . $id; // TODO: test
-
-            // tags & attributes will be detached completely
-            $key = $type == 'tags' ? 'tags' : ($type == 'attributes' ? 'attribute' : null); // bugfix
-
-            $this->attachments([$key => null], $this->entity);
-            $this->action = null;
+        $relation = $this->relationAliases($type);
+        if($this->isAllowedRelation($relation)) {
+            if($relation == 'files') {
+                if(empty($id) && !$strict) {
+                    \Veer\Models\Download::where('elements_id', '=', $this->id)
+                            ->where('elements_type', '=', $this->className)
+                            ->update(['elements_id' => 0, 'elements_type' => '']);
+                } elseif(!empty($id)) {
+                    \Veer\Models\Download::where('id', '=', $id)
+                            ->update(['elements_id' => 0, 'elements_type' => '']);
+                }
+            } else {                
+                if(empty($id) && !$strict) {
+                    $this->entity->{$relation}()->detach();
+                } elseif(!empty($id)) {
+                    $this->entity->{$relation}()->detach((array)$id);
+                }
+            }
+            event('veer.message.center', trans('veeradmin.' . $this->type . '.' . $relation. '.detach'));
         }
 
         return $this;
@@ -208,51 +292,59 @@ abstract class Entity {
         !starts_with($this->action, "changeStatusPage") ?: $this->toggleStatus(substr($this->action, 17));
         !starts_with($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // TODO: change to changeStatusProduct
         
-        $this->attachments(Input::all(), $this->entity);
+        $this->attachmentActions();
+        $this->detachmentActions();
+        $this->image(Input::get('uploadImage'));
+        $this->file(Input::get('uploadFiles'));        
 		$this->freeForm(Input::get('freeForm'));
     }
 
     /**
-     * @param array $data
-     * @param \Veer\Models\Page|\Veer\Models\Product|\Veer\Models\Category $object
      * @return void
      */
-    protected function attachments($data, $object)
+    protected function attachmentActions()
     {
-        if(empty($data) || !is_array($data) || !($object instanceof $this->className)) {
+        if(!($this->entity instanceof $this->className)) {
             return null;
         }
+       
+        $attachmentTriggers = [
+            'tags', 'attribute', 'attachImages',
+            'attachFiles', 'attachCategories', 'attachPages',
+            'attachProducts', 'attachChildPages', 'attachParentPages',
+            'attachChildProducts', 'attachParentProducts', 'attachChildCategories',
+            'attachParentCategories'
+        ];
+        
+        foreach(Input::all() as $key => $value) {
+            if(in_array($key, $attachmentTriggers) && !empty($value)) {
+                $relation = $this->relationAliases($key);
+                if($this->isAllowedRelation($relation)) {
+                    $replace = ($relation == 'tags' || $relation == 'attributes') ? true : false;
+                    $this->attaching($relation, $value, $replace); // TODO: check attachCategories
+                }
+            }
+        }
+    }
 
-        $type = str_plural($this->type);
-        $data += ['tags' => '', 'attribute' => '', 'attachImages' => '',
-            'attachFiles' => '', 'attachCategories' => '', 'attachPages' => '',
-            'attachProducts' => '', 'attachChildPages' => '', 'attachParentPages' => '',
-            'attachChildProducts' => '', 'attachParentProducts' => '', 'attachChildCategories' => '',
-            'attachParentCategories' => '']; // child & parent categories are not used
-
-        $params = [
-            "actionButton" => $this->action,
-            "tags" => $data['tags'],
-            "attributes" => $data['attribute'],
-            "attachImages" => $data['attachImages'],
-            "attachFiles" => $data['attachFiles'],
-            "attachCategories" => $data['attachCategories'],
-            "attachChild" . ucfirst($type) => $data['attachChild' . ucfirst($type)],
-            "attachParent" . ucfirst($type) => $data['attachParent' . ucfirst($type)]
+    protected function detachmentActions()
+    {
+        $detachTriggers = [
+            'removeImage', 'removeCategory', 'removePage', 'removeProduct',
+            'removeChildProduct', 'removeParentProduct', 'removeChildPage', 'removeParentPage',
+            'removeChildCategory', 'removeParentCategory', 'removeFile', 'removeAttribute', 'removeTag'
         ];
 
-        if($type == 'pages' || $type == 'categories') {
-            $params += ["attachProducts" => $data['attachProducts']];
-        }
-        if($type == 'products' || $type == 'categories') {
-            $params += ["attachPages" => $data['attachPages']];
+        foreach($detachTriggers as $trigger) {
+            if(starts_with($this->action, $trigger)) {
+                $parse = explode('.', $this->action);
+                empty($parse[1]) ?: $this->detach($trigger, $parse[1], true);
+            }
         }
 
-        $prefix = $type == 'pages' ? 'pg' : ($type == 'products' ? 'prd' : 'ct');
-
-		$this->connections($object, $object->id, $type, $params, [
-            "prefix" => ["image" => $prefix, "file" => $prefix]
-        ]);
+        if(starts_with($this->action, 'removeAllImages')) {
+            $this->detach('images');
+        }
     }
 
     /**

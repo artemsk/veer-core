@@ -66,7 +66,7 @@
             <div class="xs-rowdelimiter"></div>
             <div class="row">
                 <div class="col-sm-8"><p><input type="text" class="form-control transparent-input" placeholder="[Url]" name="url"></p></div>
-                <div class="col-sm-4 color-upload-form"><p><input class="input-files-enhance transparent-input" type="file" id="InFile1" name="uploadFile[]" multiple=true>Attach file (*.html for full replacement)</p></div>
+                <div class="col-sm-4 color-upload-form"><p><input class="input-files-enhance transparent-input" type="file" id="InFile1" name="uploadFiles[]" multiple=true>Attach file (*.html for full replacement)</p></div>
             </div>
             <div class="row">
                 <div class="col-sm-6"><p>
