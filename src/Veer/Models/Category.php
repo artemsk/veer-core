@@ -11,7 +11,7 @@ class Category extends \Eloquent {
    
     public function scopeSiteValidation($query, $site_id) {
         return $query->whereHas('categories', function($q) use ($site_id) {
-                $q->where('sites_id','=',$site_id); // TODO: remember 3
+                $q->where('sites_id','=',$site_id); // @todo remember 3
             });
     }    
         

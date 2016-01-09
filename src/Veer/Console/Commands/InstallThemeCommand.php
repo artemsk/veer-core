@@ -172,7 +172,7 @@ class InstallThemeCommand extends Command {
             $c->conf_val = $config;
             $c->theme = $theme;
             $c->save();
-        } // TODO: $config - array
+        } // @todo $config - array
     }
 
     protected function setThemeComponents($components, $siteId, $theme)

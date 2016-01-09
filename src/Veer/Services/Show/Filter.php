@@ -11,7 +11,7 @@ class Filter {
 	 * - with: Images
 	 * - to whom: make() | filter/{id[0].id[1].id[2].id[3]}
 	 * 
-	 * TODO: FILTER_ATTRS key|value ?
+	 * @todo FILTER_ATTRS key|value ?
 	 */
 	public function getFilter($siteId, $id, $queryParams = array())
 	{

@@ -44,7 +44,7 @@ class Utility {
         return $this->handle();
     }
     
-    // TODO: warning! very dangerous!
+    // @todo warning! very dangerous!
     protected function actionRunRawSql()
     {        
         $sql = array_get($this->data, 'freeFormSql');

@@ -58,7 +58,7 @@ class FirstThingCommand extends Command {
 		$site->on_off = 1;
 		$site->save();
 		
-		// TODO: default configuration?
+		// @todo default configuration?
 		
 		$this->info('- Registering administrator...');
 		$this->info('');

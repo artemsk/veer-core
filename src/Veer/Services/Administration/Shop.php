@@ -28,7 +28,7 @@ class Shop {
 	protected function shopActions()
 	{
 		// orders
-		// TODO: move to app(veershop)
+		// @todo move to app(veershop)
 		if(Input::has('pin'))
 		{
 			$pin = key(Input::get('pin'));
@@ -439,7 +439,7 @@ class Shop {
 		
 		if(array_has($fill, 'address'))
 		{
-			$addresses = preg_split('/[\n\r]+/', array_get($fill, 'address') ); // TODO: redo
+			$addresses = preg_split('/[\n\r]+/', array_get($fill, 'address') ); // @todo redo
 			foreach($addresses as $k => $address)
 			{
 				$parts = explode("|", $address);
@@ -735,7 +735,7 @@ class Shop {
 				"name" => !empty($statusName) ? $statusName : '',
 				"comments" => "",
 			));
-			// TODO: cross with updateOrdersStatus in shop actions ? remove
+			// @todo cross with updateOrdersStatus in shop actions ? remove
 		}
 		
 		if($action == "add" && $order->userdiscount_id > 0 && isset($checkDiscount))

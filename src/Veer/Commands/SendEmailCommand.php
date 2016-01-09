@@ -16,7 +16,7 @@ class SendEmailCommand extends Command implements SelfHandling {
 	
 	protected $subject;
 	
-	//public $queued = true; // TODO: queued and not queued sending?
+	//public $queued = true; // @todo queued and not queued sending?
 	
 	/**
 	 * Create a new command instance.

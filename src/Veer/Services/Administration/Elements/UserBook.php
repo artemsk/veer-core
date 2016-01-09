@@ -41,7 +41,7 @@ class UserBook {
 	 */
 	public function updateBook()
 	{
-        // TODO: move to command ?
+        // @todo move to command ?
 		app('veershop')->updateOrNewBook($this->userbook);
 
         event('veer.message.center', trans('veeradmin.book.update'));

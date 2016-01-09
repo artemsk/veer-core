@@ -48,7 +48,7 @@ class Page {
 	 */
 	public function isHtmlFileExist($siteId, $id)
 	{
-        $p_html = config('veer.htmlpages_path') . '/' . $id . '.html'; // TODO: $siteId . '/' . ?
+        $p_html = config('veer.htmlpages_path') . '/' . $id . '.html'; // @todo $siteId . '/' . ?
 		
         if (\File::exists( $p_html )) return $p_html;
 	}

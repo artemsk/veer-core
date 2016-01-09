@@ -15,7 +15,7 @@ class Site {
 		$this->turnon = Input::get('turnon');
     }
     
-    /* TODO: for security reasons - important to check access for users */
+    /* @todo for security reasons - important to check access for users */
 
     public function setParams($data)
     {
@@ -38,7 +38,7 @@ class Site {
     public function create($url)
     {
         $this->data = [
-            'id' => 'dummy', // TODO: test
+            'id' => 'dummy', // @todo test
             'url' => $url,
         ];
         

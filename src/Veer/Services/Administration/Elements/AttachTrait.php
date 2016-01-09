@@ -94,7 +94,7 @@ trait AttachTrait {
 
     /**
      * Update Attributes Connections
-     * TODO: Test
+     * @todo Test
      */
     protected function attachToAttributes($name, $form)
     {
@@ -128,7 +128,7 @@ trait AttachTrait {
 
     /**
      * Parsing free form for tag|image connections
-     * TODO: Test
+     * @todo Test
      * Ex.: values, values, values [:id,id:id,id:id,id]
      */
     protected function parseForm($textarea)
@@ -144,7 +144,7 @@ trait AttachTrait {
     
     /**
      * Attach Based on Form Input
-     * TODO: Test
+     * @todo Test
      * [id,id,id] [id,id,id] [id,id,id] 
      */
     protected function attachFromForm($str, $attach, $type)

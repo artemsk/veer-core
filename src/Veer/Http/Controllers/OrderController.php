@@ -86,9 +86,9 @@ class OrderController extends Controller {
 				
 		return $this->viewIndex('order', $orders, false);
 		
-		// TODO: разбить на отдельные страницы
-		// TODO: вместе с products загружать images & downloads	[доступно после оплаты]	
-		// TODO: если просмотр по коду, то ничего делать нельзя без логина
+		// @todo разбить на отдельные страницы
+		// @todo вместе с products загружать images & downloads	[доступно после оплаты]	
+		// @todo если просмотр по коду, то ничего делать нельзя без логина
 	}
 	
 	/**
@@ -115,7 +115,7 @@ class OrderController extends Controller {
 	{
 		if(!is_object($bills)) { return Redirect::route('index'); }
 		
-		// TODO: only html output; can it be redirect to external payment?
+		// @todo only html output; can it be redirect to external payment?
 		
 		if(!$this->administrator) 
 		{
@@ -141,8 +141,8 @@ class OrderController extends Controller {
 				$orders->load('user', 'userbook', 'userdiscount', 'status', 'delivery', 
 					'payment', 'status_history', 'products', 'bills', 'secrets', 'orderContent');
 				
-				// TODO: do we need to load all information?
-				// TODO: downloads for digital products
+				// @todo do we need to load all information?
+				// @todo downloads for digital products
 
 				/* do not cache */
 				return viewx($this->template.'.success-order', array(

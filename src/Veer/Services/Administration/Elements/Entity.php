@@ -5,22 +5,47 @@ use Illuminate\Support\Facades\Input;
 
 abstract class Entity {
 
-    protected $id;
-    protected $action;
-    protected $type; // entity type: page, product, category
-    protected $className;
-    protected $entity;
-    
     use HelperTrait, AttachTrait, DeleteTrait;
+    
+    /**
+     * @var int
+     */
+    protected $id;
+
+    /**
+     * @var string
+     */
+    protected $action;
+
+    /**
+     * Entity type: page, product, category.
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * @var string
+     */
+    protected $className;
+
+    /**
+     * @var object
+     */
+    protected $entity;
     
     public function __construct()
     {
         \Eloquent::unguard();
     }
 
+    /**
+     * @helper Model create
+     * @param array $fill
+     * @return Veer\Models\Page|Veer\Models\Product|Veer\Models\Category
+     */
     protected function create($fill)
     {
-        // TODO: validate
+        // @todo validate
         
         $object = new $this->className;
         $object->fill($fill);
@@ -31,6 +56,9 @@ abstract class Entity {
     }
 
     /**
+     * Entity update.
+     * 
+     * @helper Model update
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Entity
      */
@@ -46,6 +74,8 @@ abstract class Entity {
     }
 
     /**
+     * Change Entity status.
+     *
      * @return \Veer\Services\Administration\Elements\Entity
      */
     public function toggle()
@@ -77,6 +107,10 @@ abstract class Entity {
         return true;
     }
 
+    /**
+     * @param string $type
+     * @return string
+     */
     protected function relationAliases($type)
     {
         $aliases = [
@@ -115,6 +149,9 @@ abstract class Entity {
     }
 
     /**
+     * Attach to Entity.
+     * 
+     * @helper Model attach|sync
      * @param string $type
      * @param mixed $id
      * @param boolean $replace
@@ -174,6 +211,8 @@ abstract class Entity {
     }
 
     /**
+     * Upload and attach image to Entity.
+     *
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Entity
      */
@@ -184,6 +223,8 @@ abstract class Entity {
     }
 
     /**
+     * Upload and attach file to Entity.
+     *
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Entity
      */
@@ -194,6 +235,9 @@ abstract class Entity {
     }
 
     /**
+     * Detach from Entity.
+     * 
+     * @helper Model detach|update
      * @param string $type
      * @param mixed $id
      * @param boolean $strict
@@ -216,7 +260,7 @@ abstract class Entity {
                 if(empty($id) && !$strict) {
                     $this->entity->{$relation}()->detach();
                 } elseif(!empty($id)) {
-                    $this->entity->{$relation}()->detach((array)$id);
+                    $this->entity->{$relation}()->detach($id);
                 }
             }
             event('veer.message.center', trans('veeradmin.' . $this->type . '.' . $relation. '.detach'));
@@ -226,6 +270,9 @@ abstract class Entity {
     }
 
     /**
+     * Get Entity by id.
+     * 
+     * @helper Model find
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Entity
      */
@@ -243,7 +290,7 @@ abstract class Entity {
     }
 
     /**
-     *
+     * @helper Model create|find
      * @return mixed
      */
     protected function one()
@@ -290,7 +337,7 @@ abstract class Entity {
     {
         $this->action != 'update' ?: $this->update($fill);
         !starts_with($this->action, "changeStatusPage") ?: $this->toggleStatus(substr($this->action, 17));
-        !starts_with($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // TODO: change to changeStatusProduct
+        !starts_with($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // @todo change to changeStatusProduct
         
         $this->attachmentActions();
         $this->detachmentActions();
@@ -321,12 +368,15 @@ abstract class Entity {
                 $relation = $this->relationAliases($key);
                 if($this->isAllowedRelation($relation)) {
                     $replace = ($relation == 'tags' || $relation == 'attributes') ? true : false;
-                    $this->attaching($relation, $value, $replace); // TODO: check attachCategories
+                    $this->attaching($relation, $value, $replace); // @todo check attachCategories
                 }
             }
         }
     }
 
+    /**
+     * @return void
+     */
     protected function detachmentActions()
     {
         $detachTriggers = [
@@ -348,6 +398,8 @@ abstract class Entity {
     }
 
     /**
+     * Parse attachment data for Page from form.
+     *
      * @param string $data
      * @return \Veer\Services\Administration\Elements\Entity
      */
@@ -357,7 +409,7 @@ abstract class Entity {
             return $this;
         }
 
-        preg_match_all("/^(.*)$/m", trim($data), $ff); // TODO: test
+        preg_match_all("/^(.*)$/m", trim($data), $ff); // @todo test
         if(empty($ff[1]) || !is_array($ff[1])) {
             return $this;
         }
@@ -382,11 +434,15 @@ abstract class Entity {
     }
 
     /**
+     * Change Entity status.
+     * 
      * @param int $id
      */
-    public function toggleStatus($id) {}
+    abstract public function toggleStatus($id);
 
     /**
+     * Get current entity id.
+     * 
      * @return int
      */
     public function getId()
@@ -395,10 +451,13 @@ abstract class Entity {
     }
 
     /**
+     * Get current entity object.
+     * 
      * @return object
      */
     public function getEntity()
     {
         return $this->entity;
     }
+    
 }

@@ -29,7 +29,7 @@ class IndexController extends Controller {
 	 */
     public function show404()
 	{
-            // TODO: 404 page
+            // @todo 404 page
 	}
     
     /**

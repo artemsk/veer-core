@@ -229,7 +229,7 @@ class VeerShop {
 	 * Use shop or product currencies
 	 * itemCurrency > shopCurrency > price
 	 * 
-	 * TODO: later get sites_id and get specific db parameter for specific site
+	 * @todo later get sites_id and get specific db parameter for specific site
 	 * 
 	 * @params $price, $itemCurrency
 	 * @return $price
@@ -632,7 +632,7 @@ class VeerShop {
 		// change address if it's pickup
 		if ($delivery->delivery_type == "pickup" && !empty($delivery->address)) 
 		{
-			// TODO: if we have several address how to choose the right one?
+			// @todo if we have several address how to choose the right one?
 			// now it's just one address!
 			$parseAddresses = json_decode($delivery->address);
 
@@ -668,7 +668,7 @@ class VeerShop {
 
 			$order->delivery_price = isset($getData->delivery_price) ? $getData->delivery_price : $delivery->price;
 			$order->delivery_free = isset($getData->delivery_free) ? $getData->delivery_free : false;
-			$order->delivery_hold = isset($getData->delivery_hold) ? $getData->delivery_hold : true; // TODO: do we need this
+			$order->delivery_hold = isset($getData->delivery_hold) ? $getData->delivery_hold : true; // @todo do we need this
 
 			$delivery->discount_enable = isset($getData->discount_enable) ? $getData->discount_enable : $delivery->discount_enable;
 			$delivery->discount_price = isset($getData->discount_price) ? $getData->discount_price : $delivery->discount_price;
@@ -729,7 +729,7 @@ class VeerShop {
 		$conditions_exist = false;
 		$activate_discount = false;		
 		
-		$conditions = preg_split('/[\n\r]+/', $custom_conditions ); // TODO: redo
+		$conditions = preg_split('/[\n\r]+/', $custom_conditions ); // @todo redo
 		
 		if (count($conditions) > 0) 
 		{
@@ -806,11 +806,11 @@ class VeerShop {
 		switch ($payment->paying_time) 
 		{
 			case "now":
-				// TODO: redirect to payment system (but if admin then change to later)
+				// @todo redirect to payment system (but if admin then change to later)
 				break;
 
 			case "later":
-				// TODO: create link to payment system and send it to user (save it somewhere)
+				// @todo create link to payment system and send it to user (save it somewhere)
 				break;
 		}
 		
@@ -823,7 +823,7 @@ class VeerShop {
 			$getData = $paymentFunc->fire($order, $payment);
 
 			$order->payment_done = isset($getData->payment_done) ? $getData->payment_done : false;
-			$order->payment_hold = isset($getData->payment_hold) ? $getData->payment_hold : true; // TODO: do we need this
+			$order->payment_hold = isset($getData->payment_hold) ? $getData->payment_hold : true; // @todo do we need this
 
 			$payment->commission = isset($getData->commission) ? $getData->commission : $payment->commission;
 			$payment->discount_enable = isset($getData->discount_enable) ? $getData->discount_enable : $payment->discount_enable;
@@ -891,8 +891,8 @@ class VeerShop {
 	 * change User Discount Status - call when making of order is over
 	 * @param type $discount
 	 * @param type $status
-	 * TODO: unused $status variable
-     * TODO: expiration for user discounts is not correctly checked (anywhere)
+	 * @todo unused $status variable
+     * @todo expiration for user discounts is not correctly checked (anywhere)
 	 */
 	public function changeUserDiscountStatus($discount, $status = null)
 	{

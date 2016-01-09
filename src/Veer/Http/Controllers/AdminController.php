@@ -216,7 +216,7 @@ class AdminController extends Controller
             $class = "\\Veer\Services\\Administration\\" . $class; 
             $data = (new $class($t))->handle();
         } else {
-            $data = 'Error!'; // TODO
+            $data = 'Error!'; // @todo
             info('Unknown administration class for ' . $t);
         }
         

@@ -42,7 +42,7 @@ class ProductController extends Controller {
 	{
 		if(in_array($id, array('new', 'ordered', 'viewed'))) return $this->showProductLists($id);
 		
-		// TODO: queryParams -> filter?
+		// @todo queryParams -> filter?
 
 		$product = $this->showProduct->getProduct($id, app('veer')->siteId);
 		

@@ -10,7 +10,7 @@ class Component extends \Eloquent {
 	protected $dates = ['deleted_at'];
     
     public function scopeSiteValidation($q, $site_id) {
-        return $q->where('sites_id','=',$site_id); // TODO: remember 1          
+        return $q->where('sites_id','=',$site_id); // @todo remember 1          
     }
     
     public function scopeValidComponents($q, $site_id, $route_name) {

@@ -25,4 +25,4 @@ class UserList extends \Eloquent {
     }
 }
 
-// TODO: взаимосвязь с order?
+// @todo взаимосвязь с order?

@@ -47,7 +47,7 @@ class Image {
         if (starts_with($this->attach, 'NEW')) {
             $attach = empty($this->uploadedIds) ? null : $this->uploadedIds;
         } else {
-            $parseAttach = explode("[", $this->attach); // TODO: test
+            $parseAttach = explode("[", $this->attach); // @todo test
             $attach = explode(",", array_get($parseAttach, 0));
         }
 

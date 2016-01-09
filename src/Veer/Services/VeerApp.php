@@ -115,7 +115,7 @@ class VeerApp
      */
     public function run()
     {
-        \DB::enableQueryLog(); // TODO: remove
+        \DB::enableQueryLog(); // @todo remove
 
         $this->siteUrl = $this->siteUrl();
 

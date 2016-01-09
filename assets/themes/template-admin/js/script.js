@@ -134,7 +134,7 @@ function overlayHide() {
 function getNotificationMessages() {
     $.ajax({
         type: 'GET',
-        url: '../admin/worker', // TODO: check without ../
+        url: '../admin/worker', // @todo check without ../
         data: 'get-messages=true',
         success: function(results) { 
             if(results != '') { 

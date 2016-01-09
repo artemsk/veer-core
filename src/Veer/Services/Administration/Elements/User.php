@@ -86,7 +86,7 @@ class User {
 
         $fill = Input::has('fill') ? $this->prepareData(Input::get('fill')) : null;
 
-        if ($this->action == "add") { // TODO: test
+        if ($this->action == "add") { // @todo test
             $user = $this->validateAndCreate($fill);
         } else {
             $user = \Veer\Models\User::find($this->id);
@@ -144,7 +144,7 @@ class User {
             ->deleteUserBook($deleteUserBook) // independ.
             ->cancelDiscount($cancelDiscount); // independ.
         // orders & bills <> independ.
-        // TODO: shopActions
+        // @todo shopActions
         //$this->shopActions();
     }
 
@@ -315,7 +315,7 @@ class User {
     }
 
     /**
-     * TODO: use ranks to determine who can update whom
+     * @todo use ranks to determine who can update whom
      * @param array $data
      * @return \Veer\Services\Administration\Elements\User
      */
@@ -358,13 +358,13 @@ class User {
     }
 
     /**
-     * @param string $data
+     * @param mixed $data
      * @return \Veer\Services\Administration\Elements\User
      */
     public function attachPages($data)
     {
-        if (!empty(trim($data))) {
-            $pages = $this->parseIds($data);
+        if (!empty($data)) {
+            $pages = !is_array($data) ? $this->parseIds(trim($data)) : $data;
             $this->associate("pages", $pages, $this->id, "users_id");
             event('veer.message.center', trans('veeradmin.user.page.attach'));
         }
@@ -451,13 +451,13 @@ class User {
     }
 
     /**
-     * @param string $data
+     * @param mixed $data
      * @return \Veer\Services\Administration\Elements\User
      */
     public function attachDiscounts($data)
     {
-        if (!empty(trim($data))) {
-            $discounts = $this->parseIds($data);
+        if (!empty($data)) {
+            $discounts = !is_array($data) ? $this->parseIds(trim($data)) : $data;
             $this->associate("UserDiscount", $discounts, $this->id, "users_id", "id", "users_id = 0 and status = 'wait'");
 
             event('veer.message.center', trans('veeradmin.discount.attach'));

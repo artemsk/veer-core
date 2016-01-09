@@ -41,7 +41,7 @@ class Category extends Entity {
     {
         if(!empty($id) && $this->deleteCategory($id)) {
             event('veer.message.center', trans('veeradmin.category.delete'));
-            // TODO: restore link?
+            // @todo restore link?
         }
 
         return $this;
@@ -121,7 +121,7 @@ class Category extends Entity {
     }
     
     /**
-     * TODO: redo, remove
+     * @todo redo, remove
      * @return null | Response::view()
      */
     protected function isAjaxRequest()

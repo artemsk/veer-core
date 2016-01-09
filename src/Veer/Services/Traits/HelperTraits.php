@@ -12,7 +12,7 @@ trait HelperTraits {
             {
                 $query->where('conf_key','=','SITE_TITLE'); 
             }));
-        }); // TODO: remember 5
+        }); // @todo remember 5
 					
 		if(!empty($items)) {	
 			return \Cache::remember(app('veer')->cachingQueries->generateCacheKeyExternal($items), 1, 

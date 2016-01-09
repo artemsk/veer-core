@@ -55,12 +55,12 @@ class UserController extends Controller {
 			return $q->orderBy('pivot_id', 'asc');
 		}));
 
-		// TODO: разбить на отдельные страницы
+		// @todo разбить на отдельные страницы
 		
 		return $this->viewIndex('user', $user, false);	
 	}	
 
-	// TODO: делать для пользователя статистику на основе заказов/комментариев/лайков/посещений? - свойства, слова, товары, разделы и тд
+	// @todo делать для пользователя статистику на основе заказов/комментариев/лайков/посещений? - свойства, слова, товары, разделы и тд
 
 	/**
 	 * Add product to shopping cart
@@ -220,7 +220,7 @@ class UserController extends Controller {
 			return \Redirect::intended();
         } 
 		
-		return $this->login(); // TODO: withErrors()
+		return $this->login(); // @todo withErrors()
 	}        
      
 	/**
@@ -415,10 +415,10 @@ class UserController extends Controller {
 	}
 }
 
-// TODO: Validator: показывать ошибки
-// TODO: регистрация пользователя по секретному коду без какой-либо формы (быстрая регистрация)
-// TODO: send email to user after successful registration
+// @todo Validator: показывать ошибки
+// @todo регистрация пользователя по секретному коду без какой-либо формы (быстрая регистрация)
+// @todo send email to user after successful registration
 
-// TODO: update cart
-// TODO: remove cart
-// TODO: recalculate cart
+// @todo update cart
+// @todo remove cart
+// @todo recalculate cart

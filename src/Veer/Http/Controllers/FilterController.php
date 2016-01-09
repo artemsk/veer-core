@@ -20,7 +20,7 @@ class FilterController extends Controller {
 	 */
 	public function index()
 	{
-		return Redirect::route('index'); // TODO: configuration - set template page or redirect ( & same for search)
+		return Redirect::route('index'); // @todo configuration - set template page or redirect ( & same for search)
 	}
 
 	/**
@@ -28,7 +28,7 @@ class FilterController extends Controller {
 	 */
 	public function show($id)
 	{
-		// TODO: if id=0 then it will try to show everything
+		// @todo if id=0 then it will try to show everything
 		
 		$filtered = $this->showFilter->getFilter(app('veer')->siteId, $id, get_paginator_and_sorting());
 		

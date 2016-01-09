@@ -10,6 +10,6 @@ post('api/lists/{model?}', array('uses' => 'ApiController@lists', 'as' => 'api.l
 get('admin/worker/{commands?}', array('uses' => 'AdminController@worker', 'as' => 'admin.worker'));
 Route::resource('admin', 'AdminController', array('only' => array('index', 'show', 'update')));
 
-// TODO: rewrite:
+// @todo rewrite:
 // check: AuthenticatesAndRegistersUsers, PasswordBroker, ResetsPasswords
 // RemindersController

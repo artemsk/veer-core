@@ -20,7 +20,7 @@ class SearchController extends Controller {
 	 */
 	public function index()
 	{
-		return Redirect::route('index'); // TODO: configuration - set template page or redirect ( & same for search)
+		return Redirect::route('index'); // @todo configuration - set template page or redirect ( & same for search)
 	}
 
 	/**

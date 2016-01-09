@@ -386,7 +386,7 @@ if (!function_exists('paragraphs')) {
 		if(!empty($delimiter)) return explode($delimiter, $text);
 		
 		else $paragraphs = preg_split('#<p([^>])*>#',strtr( $text, array(
-			"</p>" => ""))); // TODO: fix with ? (non greedy)
+			"</p>" => ""))); // @todo fix with ? (non greedy)
 
 		return array_filter($paragraphs, 'strlen');
 	}

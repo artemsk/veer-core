@@ -68,5 +68,5 @@ class CategoryController extends Controller {
 }
 
 
-// TODO: products & pages должны подгружать комментарии
-// TODO: all, new, comments, ratings?
+// @todo products & pages должны подгружать комментарии
+// @todo all, new, comments, ratings?

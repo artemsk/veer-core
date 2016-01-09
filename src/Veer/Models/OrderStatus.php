@@ -27,27 +27,27 @@ class OrderStatus extends \Eloquent {
     
     // CORE    
     public function scopeFirstStatus($query) {
-        return $query->where('flag_first','=','1'); // TODO: remember 10                 
+        return $query->where('flag_first','=','1'); // @todo remember 10                 
     }
     
     public function scopeUnregStatus($query) {
-        return $query->where('flag_unreg','=','1'); // TODO: remember 10               
+        return $query->where('flag_unreg','=','1'); // @todo remember 10               
     }
     
     public function scopeErrorStatus($query) {
-        return $query->where('flag_error','=','1'); // TODO: remember 10                
+        return $query->where('flag_error','=','1'); // @todo remember 10                
     }
     
     public function scopeCloseStatus($query) {
-        return $query->where('flag_close','=','1'); // TODO: remember 10             
+        return $query->where('flag_close','=','1'); // @todo remember 10             
     }
     
     public function scopeDeliveryStatus($query) {
-        return $query->where('flag_delivery','=','1'); // TODO: remember 10                
+        return $query->where('flag_delivery','=','1'); // @todo remember 10                
     }
     
     public function scopePaymentStatus($query) {
-        return $query->where('flag_payment','=','1'); // TODO: remember 10                   
+        return $query->where('flag_payment','=','1'); // @todo remember 10                   
     }
     
     

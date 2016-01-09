@@ -133,7 +133,7 @@
 		<div class="container-fluid footer">
 			<div class="row">
 				 <div class="col-sm-6">					 
-					 <?php app('veer')->statistics(); // TODO: remove from here? ?>
+					 <?php app('veer')->statistics(); // @todo remove from here? ?>
                                      <p>v e e r — <strong>{{ $app['veer']->statistics['version'] }}</strong> — <a href="#" data-toggle="collapse" data-target="#qlog" aria-expanded="true" aria-controls="qlog">queries <strong>{{ $app['veer']->statistics['queries'] }}</strong></a> — loading <strong>{{ $app['veer']->statistics['loading'] }}</strong> — memory <strong>{{ $app['veer']->statistics['memory'] }}</strong></p>
 				 </div>
 				 <div class="col-sm-3 text-center">

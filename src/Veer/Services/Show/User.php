@@ -75,7 +75,7 @@ class User {
 	}
 	
 	/**
-	 * show Users Filtered; TODO: connected with filterOrdersByProduct() method
+	 * show Users Filtered; @todo connected with filterOrdersByProduct() method
 	 */
 	protected function showUsersFiltered($filter_id, $type)
 	{

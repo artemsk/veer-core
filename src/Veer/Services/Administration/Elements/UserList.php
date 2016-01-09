@@ -47,10 +47,10 @@ class UserList {
             $fill['name'] = '[basket]';
         }
 
-        $p = preg_split('/[\n\r]+/', $this->products); // TODO: redo
+        $p = preg_split('/[\n\r]+/', $this->products); // @todo redo
         if(is_array($p)) { $this->saveAndAttachLists($p, '\\'.elements('product'), $fill); }
 
-        $pg = preg_split('/[\n\r]+/', $this->pages); // TODO: redo
+        $pg = preg_split('/[\n\r]+/', $this->pages); // @todo redo
         if(is_array($pg)) { $this->saveAndAttachLists($pg, '\\'.elements('page'), $fill); }
 
         event('veer.message.center', trans('veeradmin.list.new'));

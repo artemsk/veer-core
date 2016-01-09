@@ -6,10 +6,20 @@ use Illuminate\Support\Facades\Input;
 
 class Page extends Entity {
 
+    /**
+     * 
+     * @var string
+     */
     protected $type = 'page';
+
+    /**
+     *
+     * @var string
+     */
     protected $className = \Veer\Models\Page::class;
 
     /**
+     * Actions for pages based on Request. Triggers are hardcoded.
      *
      * @return void
      */
@@ -34,6 +44,8 @@ class Page extends Entity {
     }
            
     /**
+     * Change Page status - hidden or not.
+     *
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Page
      */
@@ -57,6 +69,9 @@ class Page extends Entity {
     }
 
     /**
+     * Delete Page with relations.
+     * 
+     * @helper Model delete
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Page
      */
@@ -71,6 +86,9 @@ class Page extends Entity {
     }
 
     /**
+     * Add Page with relations.
+     * 
+     * @helper Model create
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Page
      */
@@ -81,8 +99,10 @@ class Page extends Entity {
         }
         
         $data += ['url' => '', 'txt' => '', 'categories' => null, 'title' => ''];        
-        $txt = preg_replace("/{{(?s).*}}/", "", $data['txt'], 1); // TODO: test preg:
+        $txt = preg_replace("/{{(?s).*}}/", "", $data['txt'], 1); // @todo test preg:
         preg_match("/{{(?s).*}}/", $data['txt'], $small);
+        $small_txt = !empty($small[0]) ? trim(substr(trim($small[0]), 2, -2)) :
+            (!empty($data['small_txt']) ? $data['small_txt'] : '');
 
         $max = \DB::table((new $this->className)->getTable())->max('manual_order');
         $fill = [
@@ -91,7 +111,7 @@ class Page extends Entity {
             'hidden' => 1,
             'manual_order' => $max + 10,
             'users_id' => \Auth::id(),
-            'small_txt' => !empty($small[0]) ? trim(substr(trim($small[0]), 2, -2)) : '',
+            'small_txt' => trim($small_txt),
             'txt' => trim($txt)
         ];
         
@@ -112,6 +132,8 @@ class Page extends Entity {
     }
 
     /**
+     * Sort pages. Max 24 per batch (depends on pagination).
+     *
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Page
      */
@@ -126,7 +148,7 @@ class Page extends Entity {
         if(!empty($url_params)) {
             parse_str(starts_with($url_params, '?') ? substr($url_params, 1) : $url_params, $parse_str);
             if(!empty($parse_str['page'])) {
-                \Input::merge(['page' => $parse_str['page']]); // TODO: check & test
+                \Input::merge(['page' => $parse_str['page']]);
             }
         }
 
@@ -167,5 +189,6 @@ class Page extends Entity {
             $fill['url'] = trim($fill['url']);
         }
         return $fill;
-    }  
+    }
+    
 }

@@ -128,7 +128,7 @@ class Site {
     protected function getUsersOnline()
     {
         /**
-         * TODO: only for 'file' session driver (for now)
+         * @todo only for 'file' session driver (for now)
          */
         $sessions    = \File::allFiles(base_path()."/storage/framework/sessions");
         $fiveminutes = time() - (5 * 60);

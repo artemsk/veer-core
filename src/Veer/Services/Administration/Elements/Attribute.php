@@ -54,7 +54,7 @@ class Attribute {
      */
     public function add($name, $value)
     {
-        preg_match_all("/^(.*)$/m", trim($value), $manyValues); // TODO: test
+        preg_match_all("/^(.*)$/m", trim($value), $manyValues); // @todo test
         
         if(empty($manyValues[1]) || !is_array($manyValues[1]) || empty($name)) {
             return $this;
