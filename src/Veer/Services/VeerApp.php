@@ -23,7 +23,7 @@ class VeerApp
      *  Booted?
      *
      */
-    public $booted = false;
+    protected $booted = false;
 
     /**
      *  Current url. 
@@ -344,4 +344,13 @@ class VeerApp
 
         return $this->statistics;
     }
+
+    /**
+     * Is booted?
+     */
+    public function isBooted()
+    {
+        return $this->booted;
+    }
+    
 }

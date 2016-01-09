@@ -341,4 +341,14 @@ class Category extends Entity {
         (new Page)->toggleStatus($changeStatusPage)
             ->delete($deletePage); 
     }
+
+    /**
+     * Category does not have a status. Do nothing.
+     *
+     * @param int $id
+     */
+    public function toggleStatus($id)
+    {
+        return $this;
+    }
 }

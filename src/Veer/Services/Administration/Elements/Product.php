@@ -6,10 +6,20 @@ use Illuminate\Support\Facades\Input;
 
 class Product extends Entity {
 
+    /**
+     *
+     * @var string
+     */
     protected $type = 'product';
+
+    /**
+     *
+     * @var string
+     */
     protected $className = \Veer\Models\Product::class;
     
     /**
+     * Actions for products based on Request. Triggers are hardcoded.
      *
      * @return void
      */
@@ -35,6 +45,7 @@ class Product extends Entity {
     }
 
     /**
+     * @helper Model find
      * @param int $id
      * @return \Veer\Models\Product|boolean
      */
@@ -51,6 +62,8 @@ class Product extends Entity {
     }
 
     /**
+     * Change Product status - on sale|out of stock|hidden.
+     *
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -66,6 +79,9 @@ class Product extends Entity {
     }
 
     /**
+     * Delete Product with relations.
+     *
+     * @helper Model delete
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -80,6 +96,9 @@ class Product extends Entity {
     }
 
     /**
+     * Make Product available if it's not.
+     *
+     * @helper Model update
      * @param int|null $id
      * @param timestamp|null $when
      * @return \Veer\Services\Administration\Elements\Product
@@ -137,6 +156,9 @@ class Product extends Entity {
     }
 
     /**
+     * Add new Product with relations.
+     *
+     * @helper Model create
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -164,6 +186,9 @@ class Product extends Entity {
     }
 
     /**
+     * Create Product from form.
+     *
+     * @helper Model create
      * @param string $data
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -192,7 +217,7 @@ class Product extends Entity {
                         break;
                     case 'image':
                     case 'file':
-                        ${$type} = array_get($fields, $i);
+                        ${$type} = array_get($fields, $i); // $image, $file
                         break;
                     case 'descr':
                         $fill[$type] = substr(array_get($fields, $i, ''), 2, -2);
@@ -219,6 +244,9 @@ class Product extends Entity {
     }
 
     /**
+     * Attach image (only filename) to Product.
+     *
+     * @helper Model create|attach
      * @param string $image
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -233,6 +261,9 @@ class Product extends Entity {
     }
 
     /**
+     * Attach file (only filename) to Product
+     *
+     * @helper Model create
      * @param string $file
      * @return \Veer\Services\Administration\Elements\Product
      */
@@ -249,7 +280,11 @@ class Product extends Entity {
         
         return $this;
     }
-       
+
+    /**
+     * @param array $fill
+     * @return array
+     */
     protected function prepareData($fill)
     {
         $fill['star'] = isset($fill['star']) ? 1 : 0;
@@ -265,4 +300,5 @@ class Product extends Entity {
         $fill['to_show'] = $toShow;
         return $fill;
     }
+    
 }

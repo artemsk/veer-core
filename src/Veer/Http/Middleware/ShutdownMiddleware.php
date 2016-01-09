@@ -18,7 +18,7 @@ class ShutdownMiddleware {
 
 	public function terminate($request, $response)
 	{
-		if (!\App::runningInConsole() && \App::bound('veer') && app('veer')->booted) {
+		if (!\App::runningInConsole() && \App::bound('veer') && app('veer')->isBooted()) {
 
 			$timeToLoad = empty(app('veer')->statistics['loading']) ? 0 : app('veer')->statistics['loading'];
 			

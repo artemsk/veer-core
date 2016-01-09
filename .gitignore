@@ -12,3 +12,6 @@ _tests
 apigen.phar
 phpDocumentor.phar
 phpunit.phar
+api
+tests/studs/testing.sqlite
+

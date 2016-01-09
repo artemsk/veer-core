@@ -14,10 +14,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../../../resources/' => base_path('resources/views'),
-        ], 'veer');
-
-        $this->publishes([
             __DIR__.'/../../../assets/' => public_path('assets'),
         ], 'veer-assets');
 
@@ -32,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../../../lang/' => base_path('resources/lang'),
         ], 'veer-lang');
+
+        $this->app['view']->addLocation(realpath(__DIR__ . '/../../../resources'));
     }
 
     /**
