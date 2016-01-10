@@ -148,7 +148,9 @@
 
 	<div id="qlog" class="collapse out">
 		<pre>
-		<?php dump(DB::getQueryLog()) ?>
+        @if(!app()->runningUnitTests())
+            {{ dump(DB::getQueryLog()) }}
+        @endif
 		</pre>
 	</div>
     

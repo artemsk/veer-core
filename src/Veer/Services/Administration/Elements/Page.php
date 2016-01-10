@@ -180,6 +180,8 @@ class Page extends Entity {
      */
     protected function prepareData($fill)
     {
+        $fill += ['txt' => '', 'small_txt' => '', 'title' => '_unnamed_'];
+
         foreach(['original', 'show_small', 'show_comments', 'show_title', 'show_date', 'in_list'] as $field) {
             $fill[$field] = !empty($fill[$field]) ? 1 : 0;
         }

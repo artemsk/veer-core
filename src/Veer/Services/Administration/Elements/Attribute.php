@@ -20,6 +20,7 @@ class Attribute {
     {
         $class = new static;
         $class->action = Input::get('action');
+
         $deleteAttrValue = starts_with($class->action, "deleteAttrValue") ? substr($class->action, 16) : false;
         $newValue = Input::get('newValue');
         $newName = Input::get('newName');        
@@ -34,13 +35,16 @@ class Attribute {
     }
 
     /**
+     * Delete Attribute.
+     *
+     * @todo restore link ?
+     * @helper Model delete
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Attribute
      */
     public function delete($id)
     {
-        if(!empty($id)) {
-            $this->deleteAttribute($id);
+        if(!empty($id) && $this->deleteAttribute($id)) {
             event('veer.message.center', trans('veeradmin.attribute.delete'));
         }
 
@@ -48,27 +52,38 @@ class Attribute {
     }
 
     /**
+     * Add new Attribute with values.
+     *
+     * @todo test preg_match_all
+     * @todo test adding because of strange freeform methods
+     * 
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      * @return \Veer\Services\Administration\Elements\Attribute
      */
     public function add($name, $value)
     {
-        preg_match_all("/^(.*)$/m", trim($value), $manyValues); // @todo test
-        
-        if(empty($manyValues[1]) || !is_array($manyValues[1]) || empty($name)) {
-            return $this;
+        if(is_array($value)) {
+            $manyValues[1] = $value;
+        } else {
+            preg_match_all("/^(.*)$/m", trim($value), $manyValues);
         }
         
-        foreach ($manyValues[1] as $v) {
-            $this->attachToAttributes($name, $v);
+        if(!empty($manyValues[1]) && is_array($manyValues[1]) && !empty($name)) {
+            foreach ($manyValues[1] as $v) {
+                $this->attachToAttributes($name, $v);
+            }
+
+            event('veer.message.center', trans('veeradmin.attribute.new'));
         }
-        
-        event('veer.message.center', trans('veeradmin.attribute.new'));
+
         return $this;
     }
 
     /**
+     * Rename Attribute name
+     *
+     * @helper Model update
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Attribute
      */
@@ -86,6 +101,10 @@ class Attribute {
     }
 
     /**
+     * Update attribute date by id.
+     *
+     * @todo rewrite?
+     * @helper Model update
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Attribute
      */
@@ -113,5 +132,5 @@ class Attribute {
 
         return $this;
     }
+    
 }
-

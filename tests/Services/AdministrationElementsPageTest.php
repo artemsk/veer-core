@@ -6,26 +6,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class AdministrationElementsPageTest extends TestCase
 {
-
-    /**
-     *  + add
-        + delete
-        request
-        + sort
-        + toggleStatus
-     *  + attach
-        + detach
-        + find
-        freeForm
-        + toggle
-        + update
-     *  + image
-     *  + file
-     *  + getEntity
-     *  + getId
-     * 
-     */
-
+    protected $requestUrl = '/admin/pages';
     protected $inMemoryDb = false;
 
     protected $page;
@@ -79,19 +60,8 @@ EOD;
         return $fileUpload;
     }
 
-    public function testAddData()
+    protected function assertCorrectlyAddedPage()
     {
-        $image = $this->getTestFile($this->testImage);
-        $file = $this->getTestFile($this->testFile);
-
-        $this->page->add([
-            'title' => 'TestTitle',
-            'url' => ' http://bolshaya.net ',
-            'txt' => '{{ Small text }} Main Text',
-            'uploadImage' => $image,
-            'uploadFiles' => $file
-        ]);
-
         $entity = $this->page->getEntity();
         $this->assertTrue(is_object($entity));
         $this->assertGreaterThan(0, $entity->id);
@@ -119,6 +89,22 @@ EOD;
         $path = (!config('veer.use_cloud_image')) ?  storage_path() . '/' . $folder . '/' .
                 config('veer.' . $assets_path) : config('veer.' . $assets_path);
         $this->assertTrue(file_exists($path . '/' . $f->fname));
+    }
+
+    public function testAddData()
+    {
+        $image = $this->getTestFile($this->testImage);
+        $file = $this->getTestFile($this->testFile);
+
+        $this->page->add([
+            'title' => 'TestTitle',
+            'url' => ' http://bolshaya.net ',
+            'txt' => '{{ Small text }} Main Text',
+            'uploadImage' => $image,
+            'uploadFiles' => $file
+        ]);
+
+        $this->assertCorrectlyAddedPage();
     }
 
     public function testRepeatAdd()
@@ -390,6 +376,170 @@ EOD;
         foreach($entity->getRelations() as $relation) {
             $this->assertEquals(0, count($relation));
         }
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestUpdateStatus()
+    {
+        $entity = Veer\Models\Page::first();
+
+        $this->sendAdminRequest([
+            'action' => 'changeStatusPage.' . $entity->id
+        ]);
+
+        $this->assertResponseOk();
+        $entityUpdated = Veer\Models\Page::find($entity->id);
+        $this->assertNotEquals($entity->hidden, $entityUpdated->hidden);
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestDelete()
+    {
+        $entity = Veer\Models\Page::first();
+
+        $this->sendAdminRequest([
+            'action' => 'deletePage.' . $entity->id
+        ]);
+
+        $this->assertResponseOk();
+        $entityUpdated = Veer\Models\Page::find($entity->id);
+        $this->assertTrue(!is_object($entityUpdated));
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestAdd()
+    {
+        $number = Veer\Models\Page::count();
+
+        $image = $this->getTestFile($this->testImage);
+        $file = $this->getTestFile($this->testFile);
+
+        $this->sendAdminRequest([
+            'title' => 'TestTitle',
+            'url' => ' http://bolshaya.net ',
+            'txt' => '{{ Small text }} Main Text',
+            'uploadImage' => $image,
+            'uploadFiles' => $file
+        ]);
+        
+        $this->assertResponseOk();
+        $this->assertEquals($number + 1, Veer\Models\Page::count());
+
+        $latest = Veer\Models\Page::orderBy('id', 'desc')->first();
+        $this->page->find($latest->id);
+        $this->assertCorrectlyAddedPage();
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestAddWithLogoutUser()
+    {
+        \Auth::logout();
+        $number = Veer\Models\Page::count();
+
+        $this->sendAdminRequest([
+            'title' => 'TestTitle',
+            'url' => ' http://bolshaya.net ',
+            'txt' => '{{ Small text }} Main Text'
+        ]);
+        
+        $this->assertRedirectedToRoute('user.login');
+        $this->assertEquals($number, Veer\Models\Page::count());
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestSort()
+    {
+        $all = \Veer\Models\Page::take(24)->get()->sortBy('manual_order');
+        if($all->count() <= 2) {
+            $this->testRepeatAdd();
+            $all = \Veer\Models\Page::take(24)->get()->sortBy('manual_order');
+        }
+
+        $first = $all->first();
+        $last = $all->last();
+
+        $this->sendAdminRequest([
+            'action' => 'sort',
+            'oldindex' => $all->count() - 1,
+            'newindex' => 0,
+            'parentid' => '',
+            '_refurl' => '?sort=manual_order&sort_direction=asc&page=1',
+            'sort' => 'manual_order',
+            'sort_direction' => 'asc'
+        ]);
+
+        $all = \Veer\Models\Page::take(24)->get()->sortBy('manual_order');
+        $new_first = $all->first();
+
+        $this->assertResponseOk();
+        $this->assertNotEquals($first->id, $new_first->id);
+        $this->assertEquals($last->id, $new_first->id);
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestWithIdAddingEmpty()
+    {
+        $number = Veer\Models\Page::count();
+
+        $response = $this->sendAdminRequest([
+            'id' => 'new',
+            'action' => 'add',
+            'fill' => []
+        ]);
+
+        $this->assertResponseStatus(302);
+        $this->assertEquals($number + 1, Veer\Models\Page::count());
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestWithIdAdd()
+    {
+        $number = Veer\Models\Page::count();
+
+        $this->sendAdminRequest([
+            'id' => 'new',
+            'action' => 'saveAs', // the same as 'add'
+            'fill' => [
+                'title' => 'PageAddedByRequest'
+            ]
+        ]);
+
+        $this->assertResponseStatus(302);
+        $this->assertEquals($number + 1, Veer\Models\Page::count());
+    }
+
+    /**
+     * @group request
+     */
+    public function testRequestWithIdUpdate()
+    {
+        $entity = Veer\Models\Page::first();
+
+        $this->sendAdminRequest([
+            'id' => $entity->id,
+            'action' => 'update', // the same as 'add'
+            'fill' => [
+                'title' => 'UpdatedTitlePage' . str_random(24)
+            ]
+        ]);
+
+        $this->assertResponseOk();
+        $updatedEntity = Veer\Models\Page::find($entity->id);
+        $this->assertNotEquals($updatedEntity->title, $entity->title);
     }
 
 }

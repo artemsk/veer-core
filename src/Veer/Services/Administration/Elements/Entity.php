@@ -428,10 +428,7 @@ abstract class Entity {
     /**
      * @param array $fill
      */
-    protected function prepareData($fill) 
-    {
-        return $fill;
-    }
+    abstract protected function prepareData($fill);
 
     /**
      * Change Entity status.

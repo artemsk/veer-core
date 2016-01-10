@@ -4,13 +4,27 @@ namespace Veer\Services\Administration\Elements;
 
 use Illuminate\Support\Facades\Input;
 
+/**
+ * Category model actions and commands.
+ * Helper for requests.
+ */
 class Category extends Entity {
-
-    protected $type = 'category';
-    protected $className = \Veer\Models\Category::class;
 
     /**
      *
+     * @var string
+     */
+    protected $type = 'category';
+
+    /**
+     *
+     * @var string
+     */
+    protected $className = \Veer\Models\Category::class;
+
+    /**
+     * Actions for categories based on Request. Triggers are hardcoded.
+     * 
      * @return void
      */
     public static function request()
@@ -29,11 +43,14 @@ class Category extends Entity {
 
         $class->sort($sortCategory)
             ->addCategory($addCategory);
-        
         //return $class->isAjaxRequest();
     }
 
     /**
+     * Delete a Category with relations.
+     *
+     * @helper Model delete
+     * @todo use restore link?
      * @param int $id
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -41,13 +58,15 @@ class Category extends Entity {
     {
         if(!empty($id) && $this->deleteCategory($id)) {
             event('veer.message.center', trans('veeradmin.category.delete'));
-            // @todo restore link?
         }
 
         return $this;
     }
 
     /**
+     * Add a Category alias.
+     *
+     * @helper Model create
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Category|\Response
      */
@@ -64,6 +83,9 @@ class Category extends Entity {
     }
 
     /**
+     * Add a Category.
+     *
+     * @helper Model create|save
      * @param string $title
      * @param int $siteid
      * @param array $options
@@ -95,6 +117,8 @@ class Category extends Entity {
 	}
 
     /**
+     * Sort categories.
+     * 
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -143,6 +167,9 @@ class Category extends Entity {
     }
 
     /**
+     * Attach a parent Category to current Category.
+     *
+     * @helper Model attach
      * @param int $parent_id
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -156,6 +183,9 @@ class Category extends Entity {
     }
 
     /**
+     * Detach a parent Category from current.
+     *
+     * @helper Model detach
      * @param int $parent_id
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -170,6 +200,9 @@ class Category extends Entity {
     }
 
     /**
+     * Attach a child category to current.
+     *
+     * @helper Model attach
      * @param mixed $child
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -191,6 +224,9 @@ class Category extends Entity {
     }
 
     /**
+     * Detach a child Category from current.
+     *
+     * @helper Model detach
      * @param int $child_id
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -205,6 +241,9 @@ class Category extends Entity {
     }
 
     /**
+     * Change parent Category in the child Category (detach from current).
+     *
+     * @helper Model attach|detach
      * @param int $child_id
      * @param int $parent_id
      * @param int|null $current_parent_id
@@ -234,6 +273,8 @@ class Category extends Entity {
     }
 
     /**
+     * Sort child categories of the current category.
+     * 
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Category
      */
@@ -351,4 +392,13 @@ class Category extends Entity {
     {
         return $this;
     }
+
+    /**
+     * @param array $fill
+     */
+    protected function prepareData($fill)
+    {
+        return $fill;
+    }
+    
 }

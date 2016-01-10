@@ -8,6 +8,7 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
      * @var string
      */
     protected $baseUrl = 'http://localhost';
+    protected $requestUrl;
     protected $inMemoryDb = true;
     protected $deleteDbFile = true;
 
@@ -40,6 +41,7 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
         }
         
         $this->app['config']->set('app.key', 'SomeRandomStringWith32Characters');
+        $this->app['config']->set('app.debug', true);
         $this->app['config']->set('database.default','sqlite');
         $this->app['config']->set('database.connections.sqlite.database', $this->inMemoryDb ? ':memory:' : $databaseUrl);
 
@@ -93,5 +95,10 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
         if($this->deleteDbFile && $fileSystem->exists($databaseUrl)) {
             $fileSystem->delete($databaseUrl);
         }
+    }
+
+    protected function sendAdminRequest($data, $method = 'PUT')
+    {
+        return $this->call($method, $this->requestUrl, $data);
     }
 }
