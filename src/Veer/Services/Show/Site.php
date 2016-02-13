@@ -159,7 +159,7 @@ class Site {
             }
 
             $classes = \File::isDirectory($this->app_path . ucfirst($place)) ? \File::allFiles($this->app_path . ucfirst($place)) : [];
-            foreach($classes as $c) {
+            foreach($classes as $c) { // TODO: use class finder
                 $filedata = pathinfo($c);
                 $content = file_get_contents(
                     $filedata['dirname']. '/' . $filedata['basename'],

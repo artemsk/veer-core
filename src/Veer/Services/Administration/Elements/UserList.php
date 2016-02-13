@@ -39,7 +39,7 @@ class UserList {
     public function add($id, $qty = 1, $to = 'product', $list = '[basket]', $params = [], $returnId = true)
     {
         $params += [
-            'sites_id' => app('veer')->siteid,
+            'sites_id' => app('veer')->siteId,
             'users_id' => \Auth::id(),
             'session_id' => \Session::getId(),
             'attrs' => '',

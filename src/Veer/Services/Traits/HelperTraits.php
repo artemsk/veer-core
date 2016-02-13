@@ -29,9 +29,12 @@ trait HelperTraits {
 	 */
 	protected function getExistingBillTemplates()
 	{
-		$billsTypes = \File::allFiles(base_path()."/resources/views/components/bills");
+        $path = __DIR__ . '/../../../../';
+		$billsTypes = \File::allFiles($path . "resources/components/bills");
+        $customPath = base_path() . '/resources/views/bills';
+        $customBillTypes = \File::isDirectory($customPath) ? \File::allFiles($customPath) : [];
 		
-		foreach(isset($billsTypes) ? $billsTypes : array() as $billFile) {
+		foreach(array_merge($billsTypes, $customBillTypes) as $billFile) {
 			app('veer')->loadedComponents['billsTypes'][ array_get(pathinfo($billFile), 'filename') ] = array_get(pathinfo($billFile), 'filename');
 		}	
 	}
