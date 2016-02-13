@@ -21,7 +21,7 @@ class Structure {
 	 */
 	public function updateSites()
 	{
-        return (new Elements\Site)->run();
+        return Elements\Site::request();
     }	
         
 	/**
@@ -53,7 +53,7 @@ class Structure {
 	 */
 	public function updateImages()
 	{
-        return (new Elements\Image)->run();
+        return Elements\Image::request();
     }
 	
 	/**
@@ -61,7 +61,7 @@ class Structure {
 	 */
 	public function updateTags()
 	{		
-		return (new Elements\Tag)->run();
+		return Elements\Tag::request();
 	}
 	
 	/**
@@ -69,7 +69,7 @@ class Structure {
 	 */
 	public function updateDownloads()
 	{
-		return (new Elements\Download)->run();		
+		return Elements\Download::request();
 	}	
 	
 	/**

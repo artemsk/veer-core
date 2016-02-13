@@ -8,43 +8,48 @@ class UserBook {
 
     use DeleteTrait;
     
-    protected $delete;
+    protected $type = 'userbook';
     protected $action;
-    protected $data = [];
-    protected $userbook;
 
     public function __construct()
     {
         \Eloquent::unguard();
-        $this->delete = head(Input::get('deleteUserbook', []));
-        $this->action = Input::get('action');
-        $this->data = Input::all();
-        $this->userbook = head(Input::get('userbook', []));
     }
 
-    public function run()
+    public static function request()
     {
-        if(!empty($this->delete)) {
-            $this->deleteUserBook($this->delete);
+        $class = new static;
+        $class->action = Input::get('action');
 
-            return event('veer.message.center', trans('veeradmin.book.delete') .
-				" " .$this->restore_link('UserBook', $this->delete));
-        }
-
-        if($this->action == 'addUserbook' || $this->action == 'updateUserbook') {
-            $this->updateBook();
+        !Input::has('deleteUserbook') ?: $class->delete(Input::get('deleteUserbook'));
+        if($class->action == 'addUserbook' || $class->action == 'updateUserbook') {
+            $class->update(head(Input::get('userbook', [])));
         }
     }
 
-    /**
-	 * update Books
-	 */
-	public function updateBook()
-	{
-        // @todo move to command ?
-		app('veershop')->updateOrNewBook($this->userbook);
+    public function delete($id)
+    {
+        $id = is_array($id) ? head($id) : $id;
+        if(!empty($id) && $this->deleteUserBook($id)) {
+            event('veer.message.center', trans('veeradmin.book.delete') .
+				" " .$this->restore_link('UserBook', $id));
+        }
 
+        return $this;
+    }
+
+    public function add($userbook)
+    {
+        return $this->update($userbook);
+    }
+
+	public function update($userbook)
+	{
+        // @todo move to command or here ?
+		app('veershop')->updateOrNewBook($userbook);
         event('veer.message.center', trans('veeradmin.book.update'));
+
+        return $this;
 	}
     
 }

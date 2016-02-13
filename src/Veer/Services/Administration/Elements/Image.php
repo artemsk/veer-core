@@ -7,51 +7,80 @@ class Image {
     use HelperTrait, AttachTrait, DeleteTrait;
     
     protected $action;
-    protected $data = [];
-    protected $attach;
     protected $uploadedIds = [];
     protected $type = 'image';    
     
     public function __construct()
     {
-        $this->data = Input::all();
-        $this->attach = Input::get('attachImages');
-        $this->action = Input::get('action');
+        \Eloquent::unguard();
     }
-    
-    public function run()
+
+    public static function request()
     {
-        foreach(is_array($this->data) ? $this->data : [] as $k => $v) {
-            if (Input::hasFile($k)) {
-                $this->uploadedIds = array_merge($this->uploadedIds, $this->upload('image', $k, null, null, '', null, true));
+        $class = new static;
+        $class->action = Input::get('action');
+
+        foreach(array_keys(Input::all()) as $k) {
+            if (Input::hasFile($k)) { // @todo attention
+                $class->uploadedIds = array_merge($class->uploadedIds, $class->upload('image', $k, null, null, '', null, true));
                 event('veer.message.center', trans('veeradmin.image.upload'));
             }
         }
 
-        $this->attachImages();
-        
-        if (starts_with($this->action, 'deleteImage')) {
-            $r = explode(".", $this->action);
-            $this->deleteImage($r[1]);
-            event('veer.message.center', trans('veeradmin.image.delete'));
-        }    
+        !Input::has('attachImages') ?: $class->attachImages(Input::get('attachImages'));
+        !starts_with($class->action, 'deleteImage') ?: $class->delete(substr($class->action, 12));
     }
-    
-    protected function attachImages()
-    {
-        if (empty($this->attach)) return null;
-        
-        preg_match("/\[(?s).*\]/", $this->attach, $small);
-        $parseTypes = explode(":", substr(array_get($small, 0, ''), 2, -1));
 
-        if (starts_with($this->attach, 'NEW')) {
-            $attach = empty($this->uploadedIds) ? null : $this->uploadedIds;
-        } else {
-            $parseAttach = explode("[", $this->attach); // @todo test
-            $attach = explode(",", array_get($parseAttach, 0));
+    public function add($data, $relation = null, $attach_id = null, $returnId = true)
+    {
+        $prefix = 'img';
+        switch($relation) {
+            case 'products': $prefix = 'prd'; break;
+            case 'pages': $prefix = 'pg'; break;
+            case 'categories': $prefix = 'ct'; break;
+            case 'users': $prefix = 'usr'; break;
+        }
+        
+        $id = $this->upload('image', 'uploadImage', $attach_id, $relation, $prefix, null, empty($relation) ? true : false, $data);
+
+        return $returnId ? $id : $this;
+    }
+
+    public function delete($id)
+    { 
+        if(!empty($id) && $this->deleteImage($id)) {
+            event('veer.message.center', trans('veeradmin.image.delete'));
         }
 
-        $this->attachFromForm($parseTypes, $attach, 'images');
-        event('veer.message.center', trans('veeradmin.image.attach'));       
+        return $this;
+    }
+
+    // @todo test, just helper
+    // @todo move to attachtrait (used by download too)
+    protected function attachImages($data)
+    {
+        if(empty($data)) {
+            return $this;
+        }
+
+        $parseTypes = $this->parseForm($data);
+        $attach = [];
+        if(!empty($parseTypes['target']) && is_array($parseTypes['target'])) {
+            foreach($parseTypes['target'] as $t) {
+                $t = trim($t);
+                if (empty($t) || $t == "NEW") {
+                    if (!empty($this->uploadedIds)) {
+                        $attach = array_merge($attach, $this->uploadedIds);
+                    }
+                    continue;
+                }
+                $attach[] = $t;
+            }
+        }
+
+        $this->attachFromForm($parseTypes['elements'], $attach, 'images');
+        event('veer.message.center', trans('veeradmin.image.attach'));
+
+        return $this;
     }    
 }

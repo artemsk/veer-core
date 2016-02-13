@@ -153,10 +153,52 @@ trait DeleteTrait {
     /**
 	 * delete Book
 	 * @param int $id
+     * @todo relations
 	 */
 	protected function deleteUserBook($id)
 	{
-        return \Veer\Models\UserBook::where('id', '=', $id)->delete();
+        \Veer\Models\UserBook::where('id', '=', $id)->delete();
+        return true;
+	}
+
+    /**
+	 * delete User Role
+	 * @param type $id
+	 */
+	protected function deleteUserRole($id)
+	{
+		$u = \Veer\Models\UserRole::find($id);
+		if(is_object($u)) {
+			$u->users()->update(['roles_id' => null]);
+			$u->delete();
+            return true;
+		}
+        return false;
+	}
+
+    /**
+	 * delete Search
+	 * @param int $id
+	 */
+	protected function deleteSearch($id)
+	{
+        $s = \Veer\Models\Search::find($id);
+		if(is_object($s)) {
+			$s->users()->detach();
+			$s->delete();
+            return true;
+		}
+        return false;
+	}
+
+    /**
+	 * delete List
+     * @todo relations
+	 */
+	protected function deleteList($id)
+	{
+		\Veer\Models\UserList::where('id', '=', $id)->delete();
+        return true;
 	}
 
     /**

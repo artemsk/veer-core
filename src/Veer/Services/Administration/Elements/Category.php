@@ -5,7 +5,7 @@ namespace Veer\Services\Administration\Elements;
 use Illuminate\Support\Facades\Input;
 
 /**
- * Category model actions and commands.
+ * Category model's actions and commands.
  * Helper for requests.
  */
 class Category extends Entity {

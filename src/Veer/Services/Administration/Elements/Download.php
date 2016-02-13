@@ -7,103 +7,181 @@ class Download {
     use HelperTrait, AttachTrait, DeleteTrait;
     
     protected $action;
-    protected $data = [];
     protected $uploadedIds = [];
     protected $type = 'download';
 
+    protected $entity;
+
     public function __construct()
     {
-        $this->action = Input::get('action');
-        $this->data = Input::all();
+        \Eloquent::unguard();
     }
-    
-    public function run()
-    {
-        $this->removeFile($this->action); 
 
-        if (starts_with($this->action, 'deleteFile')) {
-            $r = explode(".", $this->action);
-            $this->deleteFile($r[1]);
+    public static function request()
+    {
+        $class = new static;
+        $class->action = Input::get('action');
+        list($command, $id) = array_pad(explode('.', $class->action, 2), 2, null);
+
+        switch($command) {
+            case 'removeFile':
+                $class->remove($id);
+                break;
+            case 'deleteFile':
+                $class->delete($id);
+                break;
+            case 'makeRealLink':
+                $class->mklink($id, Input::all());
+                break;
+            case 'copyFile':
+                $class->copyFileToPagesOrProducts($id, Input::all());
+                break;
+        }
+
+        !Input::hasFile('uploadFiles') ?:
+                $class->uploadedIds[] = $class->upload('file', 'uploadFiles', null, null, '', null, true);
+
+        !Input::has('attachFiles') ?: $class->copyFilesToPagesOrProductsFromForm(Input::get('attachFiles'));
+    }
+
+    public function add($data, $relation = null, $attach_id = null, $returnId = true)
+    {
+        $prefix = 'fl';
+        $model = null;
+        switch($relation) {
+            case 'products':
+                $model = \Veer\Models\Product::find($attach_id);
+                $prefix = 'prd';
+                break;
+            case 'pages':
+                $model = \Veer\Models\Page::find($attach_id);
+                $prefix = 'pg';
+                break;
+            case 'categories':
+                $model = \Veer\Models\Category::find($attach_id);
+                $prefix = 'ct';
+                break;
+            case 'users':
+                $model = \Veer\Models\User::find($attach_id);
+                $prefix = 'usr';
+                break;
+        }
+
+        $id = $this->upload('image', 'uploadImage', $attach_id, $model, $prefix, null, is_object($model) ? false : true, $data);
+        return $returnId ? $id : $this;
+    }
+
+    public function remove($id)
+    {
+        if(!empty($id)) {
+            \Veer\Models\Download::where('id', '=', $id)
+                    ->update(['elements_id' => 0, 'elements_type' => '']);
+        }
+
+        return $this;
+    }
+
+    public function delete($id)
+    {
+        if(!empty($id) && $this->deleteFile($id)) {
             event('veer.message.center', trans('veeradmin.file.delete'));
+            // @todo restore link?
         }
 
-        $this->makeRealLink();
-        $this->copyFile();
-
-        if(!empty($this->data['uploadFiles']) && Input::hasFile($this->data['uploadFiles'])) {
-            $this->uploadedIds = array_merge($this->uploadedIds, $this->upload('file', 'uploadFiles', null, null, '', null, true));
-            event('veer.message.center', trans('veeradmin.file.upload'));
-        }
-
-        $this->attachFiles();
-    }
-
-    /**
-     * @deprecated
-     */
-    protected function removeFile($removeFile)
-    {
-        if(!starts_with($removeFile, 'removeFile')) { return null; }
-
-        $r = explode(".", $removeFile);
-        if(isset($r[1]) && !empty($r[1])) {
-            \Veer\Models\Download::where('id', '=', $r[1])->update(['elements_id' => 0, 'elements_type' => '']);
-        }
+        return $this;
     }
     
-    protected function makeRealLink()
+    public function mklink($id = null, $data = null, $returnId = false)
     {
-        if(!starts_with($this->action, 'makeRealLink')) return null;
+        if(empty($id) && !isset($this->entity->id)) {
+            return $this;
+        } elseif(empty($id)) {
+            $id = $this->entity->id;
+        }
+
+        $data = (array) $data;
+        $data += ['times' => 0, 'expiration_day' => null, 'link_name' => null];
         
-        $this->data += ['times' => 0, 'expiration_day' => null, 'link_name' => null];
+        $file = is_object($this->entity) ? $this->entity : \Veer\Models\Download::find($id);
+        if(!is_object($file)) {
+            return $this;
+        }
+
+        $new = $file->replicate();
+        $new->secret = empty($data['link_name']) ? bcrypt(str_random(100) . date("Ymd", time())) :
+            $data['link_name']; // @todo test
         
-        $r = explode(".", $this->action);
-        $f = \Veer\Models\Download::find($r[1]);
-        if (!is_object($f)) return null;
-        
-        $new = $f->replicate();
-        $new->secret = empty($this->data['link_name']) ? str_random(100) . date("Ymd", time()) : $this->data['link_name'];
-        
-        if($this->data['times'] > 0 || !empty($this->data['expiration_day'])) {
+        if($data['times'] > 0 || !empty($data['expiration_day'])) {
             $new->expires = 1;
-            $new->expiration_times = $this->data['times'];
-            if(!empty($this->data['expiration_day'])) {
-                $new->expiration_day = \Carbon\Carbon::parse($this->data['expiration_day']);
+            $new->expiration_times = $data['times'];
+            if(!empty($data['expiration_day'])) {
+                $new->expiration_day = \Carbon\Carbon::parse(strtotime($data['expiration_day']));
             }
         }
 
         $new->original = 0;
-        $new->save();
-        
+        $new->save();        
         event('veer.message.center', trans('veeradmin.file.download'));
+
+        return $returnId ? $new->id : $this;
+    }
+
+    public function copy($id, $type, $ids = [])
+    {
+        if(empty($id)) {
+            return $this;
+        }
+
+        $pages_ids = $products_ids = [];
+        if($type == 'pages') {
+            $pages_ids = (array) $ids;
+        } elseif($type == 'products') {
+            $products_ids = (array) $ids;
+        } else {
+            return $this;
+        }
+
+        if(!empty($id)) {
+            $this->prepareCopying($id, $products_ids, $pages_ids);
+        }
+
+        return $this;
     }
     
-    protected function copyFile()
+    protected function copyFileToPagesOrProducts($id, $data = null)
     {
-        if(!starts_with($this->action, 'copyFile')) return null;
+        if(empty($id)) {
+            return $this;
+        }
 
-        $this->data += ['prdId' => [], 'pgId' => []];
+        $data = (array) $data;
+        $data += ['prdId' => [], 'pgId' => []];
         
-        $r = explode(".", $this->action);
-        $prdIds = explode(",", $this->data['prdId']);
-        $pgIds = explode(",", $this->data['pgId']);
-        $this->prepareCopying($r[1], $prdIds, $pgIds);
+        $prdIds = is_array($data['prdId']) ? $data['prdId'] : explode(",", $data['prdId']);
+        $pgIds = is_array($data['pgId']) ? $data['pgId'] : explode(",", $data['pgId']);
+        $this->prepareCopying($id, $prdIds, $pgIds);
 
-        event('veer.message.center', trans('veeradmin.file.copy'));     
+        event('veer.message.center', trans('veeradmin.file.copy'));
+
+        return $this;
     }
-    
-    protected function attachFiles()
+
+    // helper for form
+    protected function copyFilesToPagesOrProductsFromForm($data)
     {
-        if (empty($this->data['attachFiles'])) return null;
+        if(empty($data) || !is_array($data)) {
+            return $this;
+        }
 
-        $parseTypes = $this->parseForm($this->data['attachFiles']);
+        $parseTypes = $this->parseForm($data);
         $attach = [];
-
         if(!empty($parseTypes['target']) && is_array($parseTypes['target'])) {
             foreach($parseTypes['target'] as $t) {
                 $t = trim($t);
                 if (empty($t) || $t == "NEW") {
-                    if (!empty($this->uploadedIds)) $attach = array_merge($attach, $this->uploadedIds);                    
+                    if (!empty($this->uploadedIds)) {
+                        $attach = array_merge($attach, $this->uploadedIds);
+                    }
                     continue;
                 }
                 $attach[] = $t;
@@ -117,5 +195,18 @@ class Download {
         }
         
         event('veer.message.center', trans('veeradmin.file.attach'));
+
+        return $this;
+    }
+
+    /**
+     * @param \Veer\Models\Download $file
+     * @return \Veer\Services\Administration\Elements\Download
+     */
+    public function set(\Veer\Models\Download $file)
+    {
+        $this->entity = $file;
+        
+        return $this;
     }
 }

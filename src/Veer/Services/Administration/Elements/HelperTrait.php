@@ -47,11 +47,11 @@ trait HelperTrait {
             $new->{$field} = $fname;
             foreach($default as $key => $value) { $new->{$key} = $value; }
             
-            if($type == 'image' || $skipRelation == true) {
+            if($type == 'image' || $skipRelation === true) {
                 $new->save();
             } 
             
-            if($skipRelation == false) {
+            if($skipRelation === false) {
                 if($type == "image") { $new->{$relationOrObject}()->attach($id); }
                 if($type == "file") { $relationOrObject->downloads()->save($new); }
             }
@@ -101,7 +101,7 @@ trait HelperTrait {
     protected function deleteFile($id)
     {
         $f = \Veer\Models\Download::find($id);
-        if(!is_object($f)) { return null; }
+        if(!is_object($f)) { return false; }
         
         $allCopies = \Veer\Models\Download::where('fname', '=', $f->fname)->get();
         
@@ -110,6 +110,8 @@ trait HelperTrait {
         }
         
         $f->delete();
+
+        return true;
     }
 
     /** 
@@ -139,7 +141,7 @@ trait HelperTrait {
             foreach($ids as $id) {
                 $object = $className::find(trim($id));
                 if(is_object($object)) {
-                    $this->copyFiles(":" . $fileId, $object);
+                    $this->copyFiles([$fileId], $object);
                 }
             }
         }        

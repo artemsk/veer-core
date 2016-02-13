@@ -16,17 +16,20 @@ class Attribute {
         \Eloquent::unguard();
     }
 
+    /**
+     * Actions for attributes based on Request.
+     * @return void
+     */
     public static function request()
     {
         $class = new static;
         $class->action = Input::get('action');
 
-        $deleteAttrValue = starts_with($class->action, "deleteAttrValue") ? substr($class->action, 16) : false;
         $newValue = Input::get('newValue');
         $newName = Input::get('newName');        
         $renameAttrName = Input::get('renameAttrName');
 
-        !$deleteAttrValue ?: $class->delete($deleteAttrValue);
+        !starts_with($class->action, "deleteAttrValue") ?: $class->delete(substr($class->action, 16));
         $class->action != 'newAttribute' ?: $class->add($newName, $newValue);
         $class->rename($renameAttrName)
             ->update(Input::all());
@@ -35,7 +38,7 @@ class Attribute {
     }
 
     /**
-     * Delete Attribute.
+     * Delete an Attribute.
      *
      * @todo restore link ?
      * @helper Model delete
@@ -52,7 +55,7 @@ class Attribute {
     }
 
     /**
-     * Add new Attribute with values.
+     * Add a new Attribute with values.
      *
      * @todo test preg_match_all
      * @todo test adding because of strange freeform methods
@@ -81,7 +84,7 @@ class Attribute {
     }
 
     /**
-     * Rename Attribute name
+     * Rename an Attribute's name
      *
      * @helper Model update
      * @param array $data
@@ -101,9 +104,9 @@ class Attribute {
     }
 
     /**
-     * Update attribute date by id.
+     * Update an Attribute's date by id.
      *
-     * @todo rewrite?
+     * @todo rewrite? not necessary as it is a helper method, for norma update eloquent can be used
      * @helper Model update
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Attribute

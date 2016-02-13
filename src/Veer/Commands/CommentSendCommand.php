@@ -40,11 +40,12 @@ class CommentSendCommand extends Command implements SelfHandling
         list(, $emails, $recipients) = $this->parseMessage(array_get($this->data,
                 'fill.txt'));
 
-        ( new \Veer\Commands\PrepareMailMessageCommand(array(
-        "object" => $comment,
-        "emails" => $emails,
-        "recipients" => $recipients,
-        "type" => "comment")))->handle();
+        (new \Veer\Commands\PrepareMailMessageCommand([
+            "object" => $comment,
+            "emails" => $emails,
+            "recipients" => $recipients,
+            "type" => "comment"
+        ]))->handle();
 
         return $comment->id;
     }

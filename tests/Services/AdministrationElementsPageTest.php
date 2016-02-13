@@ -23,10 +23,7 @@ EOD;
     {
         parent::setUp();
         
-        $this->page = new \Veer\Services\Administration\Elements\Page;
-        $admin = \Veer\Models\UserAdmin::where('banned', 0)->first();
-        \Auth::loginUsingId($admin->users_id);
-
+        $this->page = new \Veer\Services\Administration\Elements\Page;      
         $this->testImage = __DIR__ . '/../studs/image.jpg';
         $this->testFile = __DIR__ . '/../studs/file.txt';
     }

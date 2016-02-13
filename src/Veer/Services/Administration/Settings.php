@@ -32,6 +32,11 @@ class Settings {
         $this->actionSave   = \Input::get('save');
     }
 
+    public static function request()
+    {
+        
+    }
+
     public function setParams($siteid, $confs = null, $new = null)
     {
         $this->siteid = $siteid;
@@ -60,18 +65,6 @@ class Settings {
         return false;
     }
 
-    public function pushDelete($delete)
-    {
-        $this->actionDelete = $delete;
-        return $this;
-    }
-
-    public function pushUpdate($update)
-    {
-        $this->actionSave = $update;
-        return $this;
-    }
-
     /**
      * main entry point
      */
@@ -92,14 +85,6 @@ class Settings {
         }
     }
     
-    /** 
-     * alias 
-     */
-    public function run() 
-    {
-        return $this->handle();
-    }
-
     protected function ajaxRequest()
     {
         $items = (new \Veer\Services\Show\Site)->{$this->data[5]}($this->siteid,

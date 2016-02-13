@@ -2,20 +2,58 @@
 
 namespace Veer\Services\Administration\Elements;
 
-class Communication extends MessageEntity {
+class Communication {
 
-    protected $model = \Veer\Models\Communication::class;
-    protected $command = \Veer\Commands\CommunicationSendCommand::class;
     protected $type = 'communication';
 
-    protected $inputKeys = ['hideMessage' => 'hide', 'unhideMessage' => 'unhide', 'deleteMessage' => 'delete'];
-    protected $addKey = 'addMessage';
-    protected $dataKey = 'communication';
+    public function __construct()
+    {
+        \Eloquent::unguard();
+    }
 
-    protected $data;
-    protected $action;
-    protected $hide;
-    protected $unhide;
-    protected $delete;
+    public static function request()
+    {
+        $class = new static;
+        Input::get('action') != 'addMessage' ?: $class->add(Input::get('communication'));
+        !Input::has('hideMessage') ?: $class->hide(head(Input::get('hideMessage', [])));
+        !Input::has('unhideMessage') ?: $class->unhide(head(Input::get('unhideMessage', [])));
+        !Input::has('deleteMessage') ?: $class->delete(head(Input::get('deleteMessage', [])));
+    }
+
+    public function add($data)
+    {
+        (new \Veer\Commands\CommunicationSendCommand($data))->handle();
+
+        event('veer.message.center', trans('veeradmin.' . $this->type . '.new'));
+
+        return $this;
+    }
+
+    public function hide($id)
+    {
+        \Veer\Models\Communication::where('id', '=', $id)->update(['hidden' => true]);
+
+        event('veer.message.center', trans('veeradmin.' . $this->type . '.hide'));
+
+        return $this;
+    }
+
+    public function unhide($id)
+    {
+        \Veer\Models\Communication::where('id', '=', $id)->update(['hidden' => false]);
+
+        event('veer.message.center', trans('veeradmin.' . $this->type . '.unhide'));
+
+        return $this;
+    }
+
+    public function delete($id)
+    {
+        \Veer\Models\Communication::where('id', '=', $id)->delete();
+
+		event('veer.message.center', trans('veeradmin.' . $this->type . '.delete'));
+
+        return $this;
+    }
 
 }

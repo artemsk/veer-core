@@ -25,7 +25,7 @@ class Users {
 	 */
 	public function updateRoles()
 	{
-		return (new Elements\Role)->run();
+		return Elements\Role::request();
 	}
 
 	/**
@@ -33,7 +33,7 @@ class Users {
 	 */
 	public function updateCommunications()
 	{
-		return (new Elements\Communication)->run();
+		return Elements\Communication::request();
 	}
 
 	/**
@@ -41,7 +41,7 @@ class Users {
 	 */
 	public function updateComments()
 	{
-		return (new Elements\Comment)->run();
+		return Elements\Comment::request();
 	}
 
 	/**
@@ -49,7 +49,7 @@ class Users {
 	 */
 	public function updateSearches()
 	{
-		return (new Elements\Search)->run();
+		return Elements\Search::request();
 	}
 
 	/**
@@ -57,7 +57,7 @@ class Users {
 	 */
 	public function updateLists()
 	{
-		return (new Elements\UserList)->run();
+		return Elements\UserList::request();
 	}	
 
 	/**
@@ -65,7 +65,7 @@ class Users {
 	 */
 	public function updateBooks()
 	{
-		return (new Elements\UserBook)->run();
+		return Elements\UserBook::request();
 	}
 
 	/**

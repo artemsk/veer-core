@@ -51,7 +51,10 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
         }
         // generally it is not ran during console calls, but it is ok for testing, because
         // system knows that site's url is localhost
-        app('veer')->run(); 
+        app('veer')->run();
+
+        $admin = \Veer\Models\UserAdmin::where('banned', 0)->first();
+        \Auth::loginUsingId($admin->users_id);
     }
 
     protected function migrate()

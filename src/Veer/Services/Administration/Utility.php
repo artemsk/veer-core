@@ -4,62 +4,59 @@ use Veer\Services\VeerApp;
 
 class Utility {
    
-    protected $data;
-    protected $action = null;
+    protected $action;
     
     public function __construct()
     {
-        //Event::fire('router.filter: csrf');
-        $this->data = \Input::all();
-        $this->action = \Input::get('actionButton');
+        //
     }
     
-    public function setParams($data)
+    // @todo unite request & handle
+    public static function request()
     {
-        $this->data = $data;
-        return $this;
-    }
-    
-    public function setPingEmail($email)
-    {
-        $this->data['customPingEmail'] = $email;
-        return $this;
-    }
-    
-    public function setTable($tableName)
-    {
-        $this->data['tableName'] = $tableName;
-        return $this;
+        $class = new static;
+        $class->action = \Input::get('actionButton');
+
+        switch($class->action) {
+            case 'runRawSql':
+                $class->sql(Input::get('freeFormSql'));
+                break;
+            case 'checkLatestVersion':
+                return $class->getVersion(false, true);
+            case 'sendPingEmail':
+                $class->pingEmail(Input::get('customPingEmail'));
+                break;
+            case 'clearTrashed':
+                $class->clearTrashed(Input::get('tableName'));
+                break;
+            case 'clearCache':
+                $class->clearCache();
+                break;
+        }
     }
     
     public function handle()
     {
-        if(in_array($this->action, ['runRawSql', 'checkLatestVersion', 'sendPingEmail', 'clearTrashed', 'clearCache'])) {
-            return $this->{'action' . ucfirst($this->action)}();
-        }
+        return self::request();
     }
-    
-    public function run()
-    {
-        return $this->handle();
-    }
-    
-    // @todo warning! very dangerous!
-    protected function actionRunRawSql()
-    {        
-        $sql = array_get($this->data, 'freeFormSql');
         
-		if(!empty($sql)) \DB::statement($sql);
+    // @todo warning! very dangerous!
+    public function sql($sql)
+    {        
+		if(!empty($sql)) {
+            \DB::statement($sql);
+        }
         
         info('SQL: ' . $sql);
+        return $this;
     }
     
-    public function actionCheckLatestVersion()
+    public function getVersion($current = true, $returnView = false)
     {
         $latest = $this->_checkLatestVersion();
 			
         // for ajax calls
-        if(app('request')->ajax()) {
+        if(app('request')->ajax() && $returnView) {
             // should we return view?
             return view('components.version', array(
                 "latest" => $latest,
@@ -67,32 +64,38 @@ class Utility {
             ));		
         }
         
-        return $latest;
+        return $current ? VeerApp::VEERVERSION : $latest;
     }
     
-    public function actionSendPingEmail()
+    public function pingEmail($email = null)
     {
-        $pingEmail = array_get($this->data, 'customPingEmail', config('mail.from.address'));
-        if(empty($pingEmail)) return null;
-        
+        $pingEmail = empty($email) ? config('mail.from.address') : $email;
+        if(empty($pingEmail)) {
+            return $this;
+        }
+
         \Mail::send('emails.ping', [], function($message) use ($pingEmail) {
             $message->to($pingEmail);
         });
+
+        return $this;
     }
     
-    public function actionClearTrashed()
+    public function clearTrashed($table)
     {
-        $tableName = array_get($this->data, 'tableName');
-        
-        if(!empty($tableName)) {
-            \Illuminate\Support\Facades\DB::table($tableName)
+        if(!empty($table)) {
+            \Illuminate\Support\Facades\DB::table($table)
                     ->whereNotNull('deleted_at')->delete();
         }
+
+        return $this;
     }
     
-    public function actionClearCache()
+    public function clearCache()
     {
         \Cache::flush();
+
+        return $this;
     }
     
     protected function _checkLatestVersion()

@@ -5,64 +5,63 @@ use Illuminate\Support\Facades\Input;
 class Search {
 
     protected $action;
-    protected $delete;
-    protected $search;
-    protected $users;
+    protected $type = 'search';
     
     public function __construct()
     {
         \Eloquent::unguard();
-        $this->action = Input::get('action');
-        $this->search = trim(Input::get('search'));
-        $this->delete = head(Input::get('deleteSearch', []));
-        $this->users = Input::get('users');
     }
 
-    public function run()
+    public static function request()
     {
-        if(!empty($this->delete)) {
-            return $this->deleteSearch();
-        }
+        $class = new static;
+        $class->acton = Input::get('action');
 
-        if($this->action == 'addSearch' && !empty($this->search)) {
-            $this->addSearch();
-        }
+        !Input::has('deleteSearch') ?: $class->delete(Input::get('deleteSearch'));
+        $class->action != 'addSearch' ?: $class->add(Input::get('search'), Input::get('users'));
     }
 
-    protected function addSearch()
+    public function delete($id)
     {
-        $search = \Veer\Models\Search::firstOrCreate(["q" => $this->search]);
+        $id = is_array($id) ? head($id) : $id;        
+        if(!empty($id) && $this->deleteSearch($id)) {
+            event('veer.message.center', trans('veeradmin.search.delete'));
+        }
+
+        return $this;
+    }
+
+    public function add($q, $users_id = null, $returnId = false)
+    {
+        $search = \Veer\Models\Search::firstOrCreate(["q" => $q]);
         $search->increment('times');
         $search->save();
 
-        if(starts_with($this->users, ':')) {
+        if(!empty($users_id)) {
+            if(!is_array($users_id)) {
+                $users_id = explode(',', trim($users_id, ': '));
+            }
 
-            $users = substr($this->users, 1);
-
-            if(!empty($this->users)) {
-                $users = explode(",", trim($users));
-
-                if(count($users) > 0) $search->users()->attach($users);
+            if($users_id) {
+                $search->users()->attach($users_id);
+                event('veer.message.center', trans('veeradmin.search.new'));
             }
         }
 
-        event('veer.message.center', trans('veeradmin.search.new'));
+        return $returnId ? $search->id : $this;
     }
 
-    /**
-	 * delete Search
-	 * @param int $id
-	 */
-	protected function deleteSearch()
-	{
-        $s = \Veer\Models\Search::find($this->delete);
+    // @todo detach users id from search
+    public function attach($users_id, $id)
+    {
+        if(!empty($users_id) && !empty($id)) {
+            $search = \Veer\Models\Search::find($id);
+            if(is_object($search)) {
+                $search->users()->attach($users_id);
+                event('veer.message.center', trans('veeradmin.search.new'));
+            }
+        }
 
-		if(is_object($s)) {
-			$s->users()->detach();
-			$s->delete();
-		}
-
-        event('veer.message.center', trans('veeradmin.search.delete'));
-	}
-
+        return $this;
+    }
 }

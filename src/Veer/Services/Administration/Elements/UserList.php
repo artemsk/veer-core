@@ -6,54 +6,86 @@ use Illuminate\Support\Facades\Input;
 
 class UserList {
 
-    protected $delete;
+    use DeleteTrait;
+    
     protected $action;
-    protected $products;
-    protected $pages;
-    protected $data = [];
+    protected $type = 'userlist';
 
     public function __construct()
     {
-        \Eloquent::unguard();
-        $this->delete = head(Input::get('deleteList', []));
-        $this->action = Input::get('action');
-        $this->products = trim(Input::get('products'));
-        $this->pages = trim(Input::get('pages'));
-        $this->data = Input::all();
+        \Eloquent::unguard();        
     }
 
-    public function run()
+    public static function request()
     {
-        if(!empty($this->delete)) {
-            return $this->deleteList();
-        }
+        $class = new static;
+        $class->action = Input::get('action');
 
-        if($this->action == 'addList' && (!empty($this->products) || !empty($this->pages))) {
-            $this->addList();
-        }
+        !Input::has('deleteList') ?: $class->delete(Input::get('deleteList'));
+        $class->action != 'addList' ?: $class->addList(Input::all());
     }
 
-    public function addList()
+    public function delete($id)
     {
-        $fill = array_get($this->data, 'fill', []);
+        $id = is_array($id) ? head($id) : $id;
+        if(!empty($id) && $this->deleteList($id)) {
+            event('veer.message.center', trans('veeradmin.book.delete') .
+				" " .$this->restore_link('UserBook', $id));
+        }
 
+        return $this;
+    }
+
+    public function add($id, $qty = 1, $to = 'product', $list = '[basket]', $params = [], $returnId = true)
+    {
+        $params += [
+            'sites_id' => app('veer')->siteid,
+            'users_id' => \Auth::id(),
+            'session_id' => \Session::getId(),
+            'attrs' => '',
+            'name' => $list,
+            'quantity' => $qty
+        ];
+
+        $model = '\\' . elements($to);
+        $o = new \Veer\Models\UserList;
+        $o->fill(array_except($params, 'attrs'));
+
+        if(is_array($params['attrs']) && !empty($params['attrs'])) {
+            $o->attributes = json_encode($params['attrs']);
+        }
+
+		$o->save();
+
+        $item = $model::find(trim($id));
+        if(is_object($item)) { $item->userlists()->save($o); } 
+
+        return $returnId ? $o->id : $this;
+    }
+
+    public function addList($data)
+    {
+        $products = trim(array_get($data, 'products'));
+        $pages = trim(array_get($data, 'pages'));
+
+        $fill = array_get($data, 'fill', []);
         $fill += [
             'users_id' => \Auth::id(),
             'session_id' => \Session::getId(),
             'name' => '[basket]'
         ];
-
-        if(!empty($this->data['checkboxes']['basket'])) {
+        if(!empty($data['checkboxes']['basket'])) {
             $fill['name'] = '[basket]';
         }
 
-        $p = preg_split('/[\n\r]+/', $this->products); // @todo redo
-        if(is_array($p)) { $this->saveAndAttachLists($p, '\\'.elements('product'), $fill); }
+        preg_match_all("/^(.*)$/m", trim($products), $p);
+        if(isset($p[1]) && is_array($p[1])) { $this->saveAndAttachLists($p[1], 'product', $fill); }
 
-        $pg = preg_split('/[\n\r]+/', $this->pages); // @todo redo
-        if(is_array($pg)) { $this->saveAndAttachLists($pg, '\\'.elements('page'), $fill); }
+        preg_match_all("/^(.*)$/m", trim($pages), $pg);
+        if(isset($pg[1]) && is_array($pg[1])) { $this->saveAndAttachLists($pg[1], 'page', $fill); }
 
         event('veer.message.center', trans('veeradmin.list.new'));
+        return $this;
     }
 
     /**
@@ -64,40 +96,15 @@ class UserList {
 	 */
 	protected function saveAndAttachLists($p, $model, $fill)
 	{
-		foreach($p as $element) {
-            
+		foreach($p as $element) {            
 			$parseElements = explode(":", $element);
-
 			$id = array_get($parseElements, 0);
 			$qty = array_get($parseElements, 1, 1);
 			$attrStr = array_get($parseElements, 2);
-
 			$attrs = explode(",", $attrStr);
 
-			$item = $model::find(trim($id));
-
-			if(is_object($item) && $id > 0) {
-				$cart = new \Veer\Models\UserList;
-				$cart->fill($fill);
-				$cart->quantity = !empty($qty) ? $qty : 1;
-
-				if(is_array($attrs) && !empty($attrs)) {
-					$cart->attributes = json_encode($attrs);
-				}
-
-				$cart->save();
-				$item->userlists()->save($cart);
-			}
+            $this->add($id, !empty($qty) ? $qty : 1, $model, $fill['name'], $fill + ['attrs' => $attrs]);
 		}
-	}
-
-	/**
-	 * delete List
-	 */
-	protected function deleteList()
-	{
-		\Veer\Models\UserList::where('id', '=', $this->delete)->delete();
-        event('veer.message.center', trans('veeradmin.list.delete'));
-	}
+	}	
 
 }
