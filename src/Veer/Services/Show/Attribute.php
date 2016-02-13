@@ -120,7 +120,7 @@ class Attribute {
 			
 			if(is_object($parent_attribute)) 
 			{	
-				$p = \Veer\Models\Attribute::where('name', 'like', $parent_attribute->name)->get();	
+				$p = \Veer\Models\Attribute::where('name', 'like', $parent_attribute->name)->get();	// @todo like?
 			}
 		} 
 		

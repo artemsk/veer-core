@@ -2,6 +2,8 @@
 
 namespace Veer\Services\Administration\Elements;
 
+use Illuminate\Support\Facades\Input;
+
 class Communication {
 
     protected $type = 'communication';

@@ -106,7 +106,7 @@ class Attribute {
     /**
      * Update an Attribute's date by id.
      *
-     * @todo rewrite? not necessary as it is a helper method, for norma update eloquent can be used
+     * @todo rewrite? not necessary as it is a helper method, for normal update eloquent can be used
      * @helper Model update
      * @param array $data
      * @return \Veer\Services\Administration\Elements\Attribute
