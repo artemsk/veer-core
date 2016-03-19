@@ -19,15 +19,15 @@ class Utility {
 
         switch($class->action) {
             case 'runRawSql':
-                $class->sql(Input::get('freeFormSql'));
+                $class->sql(\Input::get('freeFormSql'));
                 break;
             case 'checkLatestVersion':
                 return $class->getVersion(false, true);
             case 'sendPingEmail':
-                $class->pingEmail(Input::get('customPingEmail'));
+                $class->pingEmail(\Input::get('customPingEmail'));
                 break;
             case 'clearTrashed':
-                $class->clearTrashed(Input::get('tableName'));
+                $class->clearTrashed(\Input::get('tableName'));
                 break;
             case 'clearCache':
                 $class->clearCache();

@@ -34,7 +34,7 @@ class Settings {
 
     public static function request()
     {
-        
+        return (new static)->handle();
     }
 
     public function setParams($siteid, $confs = null, $new = null)

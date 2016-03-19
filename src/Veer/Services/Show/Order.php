@@ -133,9 +133,9 @@ class Order {
 	protected function loadOrderRelations($items)
 	{
 		// do not load 'downloads' because we have products->with(downloads)
-		$items->load('status', 'delivery', 'payment', 'secrets', 'orderContent');
+		$items->load('status', 'delivery', 'payment', 'secrets', 'orderContent', 'site');
 		
-		$items->load(array(
+		$items->load([
 			'user' => function($q) { $q->with('role', 'administrator'); },
 
 			'userbook' => function($q) { $q->with('orders'); }, 
@@ -146,7 +146,8 @@ class Order {
 
 			'products' => function($q) { $q->with('images', 'categories', 'tags', 'attributes', 'downloads'); }, // @todo sort images in orders?
 
-			'status_history' => function($q) { $q->withTrashed(); }));		
+			'status_history' => function($q) { $q->withTrashed(); }
+        ]);
 	}
 	
 	/**

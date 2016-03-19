@@ -143,9 +143,10 @@ class User {
             ->addOrUpdateUserBook($addOrUpdateUserBook) // independ.
             ->deleteUserBook($deleteUserBook) // independ.
             ->cancelDiscount($cancelDiscount); // independ.
+
         // orders & bills <> independ.
-        // @todo shopActions
-        //$this->shopActions();
+        Order::request_actions();
+        Bill::request();
     }
 
     /**

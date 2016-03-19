@@ -13,7 +13,6 @@ class AdminController extends Controller
         parent::__construct();
 
         $this->middleware('auth');
-
         $this->middleware('auth.admin');
 
         app('veer')->loadedComponents['template'] = app('veer')->template = $this->template
@@ -40,37 +39,35 @@ class AdminController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $t
+     * @param string $model
      */
-    public function show($t)
+    public function show($model)
     {
-        $specialRoute = $this->specialRoutes($t);
-        
-        if(!empty($specialRoute)) return $specialRoute;
+        $specialRoute = $this->specialRoutes($model);
+        if(!empty($specialRoute)) { return $specialRoute; }
 
-        if (in_array($t,
-                ["categories", "pages", "products", "users", "orders"]))
-                $t = $this->checkOnePageEntities($t);
+        if(in_array($model, ['categories', 'pages', 'products', 'users', 'orders'])) {
+            $model = $this->checkOnePageEntities($model);
+        }                
 
-        $view = $t == "lists" ? "userlists" : $t;
-
-        $items = $this->getItems($t);
-
-        if (isset($items)) return $this->sendViewOrJson($items, $view);
+        $items = $this->getItems($model);
+        if(!empty($items)) {
+            return $this->sendViewOrJson($items, $model == 'lists' ? 'userlists' : $model);
+        }
     }
 
     /**
      * special routes: search or restore
      */
-    protected function specialRoutes($t)
+    protected function specialRoutes($model)
     {
-        if (Input::has('SearchField')) {
-            $search = ( new \Veer\Services\Show\Search)->searchAdmin($t);
+        if(Input::has('SearchField')) {
+            $search = (new \Veer\Services\Show\Search)->searchAdmin($model);
 
-            if (is_object($search)) return $search;
+            if(is_object($search)) { return $search; }
         }
 
-        if ($t == "restore") {
+        if($model == "restore") {
             $this->restore(Input::get('type'), Input::get('id'));
             return back();
         }
@@ -79,17 +76,15 @@ class AdminController extends Controller
     /**
      * get Items
      */
-    protected function getItems($t)
+    protected function getItems($model)
     {
-        $show = $this->getRouteParams(array(Input::get('filter') => Input::get('filter_id')));
-
-        if (array_key_exists($t, $show)) {
-            $className = '\Veer\Services\Show\\'.$show[$t][0];
-
-            return (new $className)->{$show[$t][1]}($show[$t][2]);
+        $data = $this->getRouteParams($model, [Input::get('filter') => Input::get('filter_id')]);
+        if(extract($data)) {
+            $params = !empty($params) ? $params : null;
+            return (new $class)->{$method}($params);
         }
 
-        logger('Not found admin route: ' . $t);
+        logger('Not found admin route: ' . $model);
     }
 
     /**
@@ -110,123 +105,123 @@ class AdminController extends Controller
     /**
      * check entities which have separate page for single entity
      */
-    protected function checkOnePageEntities($t)
+    protected function checkOnePageEntities($model)
     {
-        $check = $t == "categories" ? Input::get('category') : Input::get('id');
+        $check = $model == "categories" ? Input::get('category') : Input::get('id');
 
-        return empty($check) ? $t : str_singular($t);
+        return empty($check) ? $model : str_singular($model);
     }
 
     /**
      * configure administration routes
      */
-    protected function getRouteParams($filters)
+    protected function getRouteParams($model, $filters)
     {
-        return array(
-            "sites" => ["Site", "getSites", null],
-            "categories" => ["Category", "getAllCategories", Input::get('image')],
-            "category" => ["Category", "getCategoryAdvanced", Input::get('category')],
-            "pages" => ["Page", "getAllPages", [$filters, [Input::get('sort') => Input::get('sort_direction')]]],
-            "page" => ["Page", "getPageAdvanced", Input::get('id')],
-            "products" => ["Product", "getAllProducts", [$filters, [Input::get('sort') => Input::get('sort_direction')]]],
-            "product" => ["Product", "getProductAdvanced", Input::get('id')],
-            "images" => ["Image", "getImages", $filters],
-            "attributes" => ["Attribute", "getUngroupedAttributes", null],
-            "tags" => ["Tag", "getTagsWithoutSite", null],
-            "downloads" => ["Download", "getDownloads", null],
-            "users" => ["User", "getAllUsers", $filters],
-            "user" => ["User", "getUserAdvanced", Input::get('id')],
-            "books" => ["UserProperties", "getBooks", $filters],
-            "lists" => ["UserProperties", "getLists", $filters], // userlists view
-            "searches" => ["UserProperties", "getSearches", $filters],
-            "communications" => ["UserProperties", "getCommunications", $filters],
-            "comments" => ["UserProperties", "getComments", $filters],
-            "roles" => ["UserProperties", "getRoles", $filters],
-            "orders" => ["Order", "getAllOrders", $filters],
-            "order" => ["Order", "getOrderAdvanced", Input::get('id')],
-            "bills" => ["OrderProperties", "getBills", $filters],
-            "discounts" => ["OrderProperties", "getDiscounts", $filters],
-            "shipping" => ["OrderProperties", "getShipping", $filters],
-            "payment" => ["OrderProperties", "getPayment", $filters],
-            "statuses" => ["OrderProperties", "getStatuses", null],
-            "configuration" => ["Site", "getConfiguration", Input::get('site')],
-            "components" => ["Site", "getComponents", Input::get('site')],
-            "secrets" => ["Site", "getSecrets", null],
-            "jobs" => ["Site", "getQdbJobs", $filters],
-            "etc" => ["Site", "getUtility", $filters]
-        );
+        $data = [];
+        switch($model) {
+            case 'sites': return ['class' => \Veer\Services\Show\Site::class, 'method' => 'getSites'];
+
+            case 'categories': $data += ['method' => 'getAllCategories', 'params' => Input::get('image')];
+            case 'category': $data += ['method' => 'getCategoryAdvanced', 'params' => Input::get('category')];
+                return $data += ['class' => \Veer\Services\Show\Category::class];
+
+            case 'pages': $data += ['method' => 'getAllPages', 'params' => [$filters, [Input::get('sort') => Input::get('sort_direction')]]];
+            case 'page': $data += ['method' => 'getPageAdvanced', 'params' => Input::get('id')];
+                return $data += ['class' => \Veer\Services\Show\Page::class];
+
+            case 'products': $data += ['method' => 'getAllProducts', 'params' => [$filters, [Input::get('sort') => Input::get('sort_direction')]]];
+            case 'product': $data += ['method' => 'getProductAdvanced', 'params' => Input::get('id')];
+                return $data += ['class' => \Veer\Services\Show\Product::class];
+
+            case 'images': return ['class' => \Veer\Services\Show\Image::class, 'method' => 'getImages', 'params' => $filters];
+            case 'attributes': return ['class' => \Veer\Services\Show\Attribute::class, 'method' => 'getUngroupedAttributes'];
+            case 'tags': return ['class' => \Veer\Services\Show\Tag::class, 'method' => 'getTagsWithoutSite'];
+            case 'downloads': return ['class' => \Veer\Services\Show\Download::class, 'method' => 'getDownloads'];
+
+            case 'users': $data += ['method' => 'getAllUsers', 'params' => $filters];
+            case 'user': $data += ['method' => 'getUserAdvanced', 'params' => Input::get('id')];
+                return $data += ['class' => \Veer\Services\Show\User::class];
+
+            case 'books': $data += ['method' => 'getBooks', 'params' => $filters];
+            case 'lists': $data += ['method' => 'getLists', 'params' => $filters]; // userlists view
+            case 'searches': $data += ['method' => 'getSearches', 'params' => $filters];
+            case 'communications': $data += ['method' => 'getCommunications', 'params' => $filters];
+            case 'comments': $data += ['method' => 'getComments', 'params' => $filters];
+            case 'roles': $data += ['method' => 'getRoles', 'params' => $filters];
+                return $data += ['class' => \Veer\Services\Show\UserProperties::class];
+
+            case 'orders':$data += ['method' => 'getAllOrders', 'params' => $filters];
+            case 'order':$data += ['method' => 'getOrderAdvanced', 'params' => Input::get('id')];
+                return $data += ['class' => \Veer\Services\Show\Order::class];
+
+            case 'bills': $data += ['method' => 'getBills', 'params' => $filters];
+            case 'discounts': $data += ['method' => 'getDiscounts', 'params' => $filters];
+            case 'shipping': $data += ['method' => 'getShipping', 'params' => $filters];
+            case 'payment': $data += ['method' => 'getPayment', 'params' => $filters];
+            case 'statuses': $data += ['method' => 'getStatuses', 'params' => null];
+                return $data += ['class' => \Veer\Services\Show\OrderProperties::class];
+            
+            case 'configuration': $data += ['method' => 'getConfiguration', 'params' => Input::get('site')];
+            case 'components': $data += ['method' => 'getComponents', 'params' => Input::get('site')];
+            case 'secrets': $data += ['method' => 'getSecrets', 'params' => ''];
+            case 'jobs': $data += ['method' => 'getQdbJobs', 'params' => $filters];
+            case 'etc': $data += ['method' => 'getUtility', 'params' => $filters];
+                return $data += ['class' => \Veer\Services\Show\Site::class];
+            default: return $data;
+        }
     }
     
     /**
      * configure administration routes for create/update/delete etc.
      */
-    protected function getRouteParamsAction($t)
+    protected function getRouteParamsAction($model)
     {
-        switch($t) {
+        switch($model) {
             case 'configuration':
             case 'components':
-            case 'secrets':
-                return 'Settings';
-            case 'jobs':
-                return 'Job';
-            case 'etc':
-                return 'Utility';
-            case 'attributes':
-            case 'categories':
-            case 'downloads':
-            case 'images':
-            case 'pages': 
-            case 'products':
-            case 'sites':
-            case 'tags':
-                return 'Structure';
-            case 'users': 
-            case 'roles':
-            case 'communications':
-            case 'comments':
-            case 'searches':
-            case 'lists': 
-            case 'books':
-                return 'Users';
-            case 'statuses': 
-            case 'bills':
-            case 'discounts':
-            case 'orders':
-            case 'payment':
-            case 'shipping':
-                return 'Shop';
-           
-            default: break;            
+            case 'secrets': return \Veer\Services\Administration\Settings::class;
+            case 'jobs': return \Veer\Services\Administration\Job::class;
+            case 'etc': return \Veer\Services\Administration\Utility::class;
+            case 'attributes': return \Veer\Services\Administration\Elements\Attribute::class;
+            case 'categories': return \Veer\Services\Administration\Elements\Category::class;
+            case 'downloads': return \Veer\Services\Administration\Elements\Download::class;
+            case 'images': return \Veer\Services\Administration\Elements\Image::class;
+            case 'pages': return \Veer\Services\Administration\Elements\Page::class;
+            case 'products': return \Veer\Services\Administration\Elements\Product::class;
+            case 'sites': return \Veer\Services\Administration\Elements\Site::class;
+            case 'tags': return \Veer\Services\Administration\Elements\Tag::class;
+            case 'users': return \Veer\Services\Administration\Elements\User::class;
+            case 'roles': return \Veer\Services\Administration\Elements\Role::class;
+            case 'communications': return \Veer\Services\Administration\Elements\Communication::class;
+            case 'comments': return \Veer\Services\Administration\Elements\Comment::class;
+            case 'searches': return \Veer\Services\Administration\Elements\Search::class;
+            case 'lists': return \Veer\Services\Administration\Elements\UserList::class;
+            case 'books': return \Veer\Services\Administration\Elements\UserBook::class;
+            case 'statuses': return \Veer\Services\Administration\Elements\Status::class;
+            case 'bills': return \Veer\Services\Administration\Elements\Bill::class;
+            case 'discounts': return \Veer\Services\Administration\Elements\Discount::class;
+            case 'orders': return \Veer\Services\Administration\Elements\Order::class;
+            case 'payment': return \Veer\Services\Administration\Elements\Payment::class;
+            case 'shipping': return \Veer\Services\Administration\Elements\Shipping::class;           
         }
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $t
+     * @param  string $model
      * @return Response
      */
-    public function update($t)
+    public function update($model)
     {
-        if (Input::has('SearchButton')) return $this->show($t);
+        if(Input::has('SearchButton')) { return $this->show($model); }
 
-        $class = $this->getRouteParamsAction($t);
-
-        if(!empty($class)) {
-            $class = "\\Veer\Services\\Administration\\" . $class; 
-            $data = (new $class($t))->handle();
-        } else {
-            $data = 'Error!'; // @todo
-            info('Unknown administration class for ' . $t);
-        }
+        app('veer')->skipShow = false;        
+        $class = $this->getRouteParamsAction($model);
+        $data = !empty($class) ? $class::request() : 'Error!';
         
-        if (!app('request')->ajax() && !(app('veer')->skipShow)) {
-            return $this->show($t);
-        }
-
-        return $data;
+        return !app('request')->ajax() && !(app('veer')->skipShow) ? $this->show($model) : $data;
     }
-
     
     public function worker()
     {
@@ -236,18 +231,16 @@ class AdminController extends Controller
         }
     }
 
-
     /**
      * Restore soft deleted entity
      */
-    protected function restore($type = null, $id = null)
+    protected function restore($model = null, $id = null)
     {
-        if (empty($type) || empty($id))
-            return;
+        if(empty($model) || empty($id)) { return; }
 
-        $type = "\\" . elements($type);
+        $model = "\\" . elements($model);
 
-        $type::withTrashed()->where('id', $id)->restore();
+        $model::withTrashed()->where('id', $id)->restore();
 
         event('veer.message.center', trans('veeradmin.restored'));
     }

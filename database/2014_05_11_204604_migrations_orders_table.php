@@ -20,11 +20,11 @@ class MigrationsOrdersTable extends Migration {
             $table->bigInteger('cluster_oid')->default(0)->index();
             $table->string('type', 10)->index();
             $table->bigInteger('users_id')->index()->nullable();
-            $table->string('user_type', 128);
+            $table->string('user_type', 128)->nullable();
             $table->string('name', 255);
             $table->string('email', 255)->index();
             $table->string('phone', 128)->index();
-            $table->string('delivery_method', 128)->index();
+            $table->string('delivery_method', 128)->nullable()->index();
             $table->integer('delivery_method_id')->nullable()->index();
             $table->bigInteger('userbook_id')->nullable();
             $table->string('country', 96);
@@ -40,7 +40,7 @@ class MigrationsOrdersTable extends Migration {
             $table->decimal('used_discount', 12, 2)->nullable();
             $table->bigInteger('userdiscount_id')->nullable();
             $table->boolean('free')->default(0)->index();
-            $table->string('payment_method', 128)->index();
+            $table->string('payment_method', 128)->nullable()->index();
             $table->integer('payment_method_id')->nullable()->index();
             $table->boolean('payment_hold')->default(0)->index();
             $table->boolean('payment_done')->default(0);

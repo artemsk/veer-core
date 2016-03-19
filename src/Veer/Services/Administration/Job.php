@@ -68,6 +68,11 @@ class Job {
     {
         return $this->handle();
     }
+
+    public static function request()
+    {
+        return (new static)->handle();
+    }
     
     public function deleteJob()
     {

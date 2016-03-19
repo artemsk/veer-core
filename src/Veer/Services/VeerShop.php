@@ -103,7 +103,7 @@ class VeerShop {
 		// 4
 		// We check if existing user have discount
 		$discounts = $this->discounts($price, $custom);
-		
+
 		if($discounts['discount'] == true) {
 			return $this->currency($discounts['price'], $product['currency'], $custom);
 		}
@@ -140,7 +140,7 @@ class VeerShop {
 				$whereraw = "id = ".array_get($custom, 'discount_id');
 			}
 		}
-		
+
 		if($this->discount_checked == false) {
 			if(!app('session')->has('discounts_checked')) {
 				app('veer')->cachingQueries->make(\Veer\Models\UserDiscount::where('sites_id','=',$siteId)
@@ -279,10 +279,7 @@ class VeerShop {
 		
 		\Eloquent::unguard();
 		
-		$bookId = array_get($book, 'bookId', null);
-
-		if(isset(app('veer')->administrator_credentials))
-		{
+		if(isset(app('veer')->administrator_credentials)) {
 			$usersId = array_get($book, 'fill.users_id', \Auth::id());
 			if(empty($usersId)) { $usersId = \Auth::id(); }
 		}
@@ -291,9 +288,9 @@ class VeerShop {
 		
 		$book['fill']['users_id'] = $usersId;
 		
-		$b = empty($bookId) ? new \Veer\Models\UserBook : \Veer\Models\UserBook::firstOrNew(array("id" => $bookId));
+		$b = empty($book['bookId']) ? new \Veer\Models\UserBook : \Veer\Models\UserBook::firstOrNew(['id' => $book['bookId']]);
 		
-		if(isset($book['fill']['address']) && empty($book['fill']['address'])) { return false; }
+		if(empty($book['fill']['address'])) { return false; }
 		
 		if(isset($book['fill'])) { $b->fill($book['fill']); }
 		$b->primary = array_get($book, 'checkboxes.primary', false) ? true : false;
@@ -377,7 +374,7 @@ class VeerShop {
 			$q->where('users.id', '=', $order->users_id);
 		})->pluck('role');
 
-		if (isset($userRole)) $order->user_type = $userRole;
+        $order->user_type = !empty($userRole) ? $userRole : '';
 
 		if (!empty($order->userdiscount_id)) {
 			$checkDiscount = \Veer\Models\UserDiscount::where('id', '=', $order->userdiscount_id)
@@ -401,8 +398,7 @@ class VeerShop {
 			}
 		}
 
-		if(!empty($book)) 
-		{
+		if(!empty($book)) {
 			$book['fill']['users_id'] = $order->users_id;
 
 			$newBook = $this->updateOrNewBook($book, $pretend);
@@ -451,14 +447,11 @@ class VeerShop {
 	 */
 	public function attachOrderContent($newContent, $order)
 	{
-		if (starts_with($newContent, ":")) 
-		{
+		if (starts_with($newContent, ":")) {
 			$parseContent = explode(":", substr($newContent, 1));
-			foreach ($parseContent as $product) 
-			{
+			foreach ($parseContent as $product) {
 				$p = explode(",", $product);
-				if (array_get($p, 0) != null) 
-				{
+				if (array_get($p, 0) != null) {
 					$content = $this->editOrderContent(new \Veer\Models\OrderProduct, array(
 						"product" => 1,
 						"products_id" => array_get($p, 0),

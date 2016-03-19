@@ -201,6 +201,22 @@ trait DeleteTrait {
         return true;
 	}
 
+    protected function deleteOrder($id)
+	{
+        $order = \Veer\Models\Order::find($id);
+		if(is_object($order)) {
+			\Veer\Models\OrderHistory::where('orders_id', '=', $id)->delete();
+			$order->orderContent()->delete();
+			$order->bills()->delete();
+			$order->secrets()->delete();
+			// communications skip
+
+			$order->delete();
+            return true;
+		}
+        return false;
+	}
+
     /**
      * Restore link
      * 
