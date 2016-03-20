@@ -10,7 +10,6 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
     protected $baseUrl = 'http://localhost';
     protected $requestUrl;
     protected $inMemoryDb = true;
-    protected $deleteDbFile = true;
 
     /**
      * Creates the application.
@@ -49,7 +48,7 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
             $this->migrate();
             $this->createSiteAndAdminUser();
         }
-        // generally it is not ran during console calls, but it is ok for testing, because
+        // generally it is not run during console calls, but it is ok for testing, because
         // system knows that site's url is localhost
         app('veer')->run();
 
@@ -92,16 +91,27 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
     public function tearDown()
     {
         parent::tearDown();
+    }
 
-        $databaseUrl = __DIR__ . '/../tests/studs/testing.sqlite';
-        $fileSystem = new \Illuminate\Filesystem\Filesystem;
-        if($this->deleteDbFile && $fileSystem->exists($databaseUrl)) {
-            $fileSystem->delete($databaseUrl);
-        }
+    protected function deleteDbFile()
+    {
+        @unlink(__DIR__ . '/../tests/studs/testing.sqlite');
     }
 
     protected function sendAdminRequest($data, $method = 'PUT')
     {
         return $this->call($method, $this->requestUrl, $data);
+    }
+
+    protected function getTestFile($file)
+    {
+        $copyFileName = __DIR__ . '/studs/tmp_file.' . pathinfo($file)['extension'];
+        file_put_contents($copyFileName, file_get_contents($file));
+
+        $fileUpload = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+            $copyFileName, pathinfo($file)['basename'], \File::mimeType($file), \File::size($file), 0, 1
+        );
+
+        return $fileUpload;
     }
 }

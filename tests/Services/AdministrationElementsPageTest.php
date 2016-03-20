@@ -45,18 +45,6 @@ EOD;
         $this->assertEmpty($this->page->getId());
     }
 
-    protected function getTestFile($file)
-    {
-        $copyFileName = __DIR__ . '/../studs/tmp_file.' . pathinfo($file)['extension'];
-        file_put_contents($copyFileName, file_get_contents($file));
-
-        $fileUpload = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-            $copyFileName, pathinfo($file)['basename'], \File::mimeType($file), \File::size($file), 0, 1
-        );
-
-        return $fileUpload;
-    }
-
     protected function assertCorrectlyAddedPage()
     {
         $entity = $this->page->getEntity();

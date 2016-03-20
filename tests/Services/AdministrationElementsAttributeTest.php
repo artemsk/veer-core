@@ -8,7 +8,6 @@ class AdministrationElementsAttributeTest extends TestCase
 {
     protected $requestUrl = '/admin/attributes';
     protected $inMemoryDb = false;
-    //protected $deleteDbFile = false;
 
     protected $attribute;
 
