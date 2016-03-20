@@ -17,7 +17,7 @@ class MigrationsOrdersHistoryTable extends Migration {
             $table->bigInteger('orders_id')->default(0)->index();
             $table->bigInteger('status_id')->nullable();
             $table->string('name', 128);
-            $table->longText('comments');
+            $table->longText('comments')->nullable();
             $table->boolean('to_customer')->default(false);
             $table->longText('order_cache')->nullable();
             $table->nullableTimestamps();

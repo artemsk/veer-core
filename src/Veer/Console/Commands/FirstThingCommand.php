@@ -63,10 +63,10 @@ class FirstThingCommand extends Command {
 		$this->info('- Registering administrator...');
 		$this->info('');
 		
-		$email = $this->ask('What is your email?');
+		$email = $this->argument('email') ?: $this->ask('What is your email?');
 		
-		$password = $this->secret('What is the password?');
-		
+		$password = $this->argument('password') ?: $this->secret('What is the password?');
+
 		$this->info('');
 		
 		$user = new \Veer\Models\User;
@@ -99,6 +99,8 @@ class FirstThingCommand extends Command {
 	{
 		return array(
 			array('url', InputArgument::REQUIRED, 'Installation url to start things up. with http://'),
+            array('email', InputArgument::OPTIONAL, 'Administrator email.'),
+            array('password', InputArgument::OPTIONAL, 'Administrator password.'),
 		);
 	}
 

@@ -22,8 +22,8 @@ class MigrationsOrdersProductsTable extends Migration {
             $table->decimal('price_per_one', 12, 2)->nullable();
             $table->bigInteger('quantity')->nullable();
             $table->decimal('price', 12, 2)->nullable();
-            $table->longText('attributes');
-            $table->longText('comments');
+            $table->longText('attributes')->nullable();
+            $table->longText('comments')->nullable();
             $table->nullableTimestamps();
             $table->softDeletes();
         });
