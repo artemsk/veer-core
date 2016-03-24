@@ -1,7 +1,7 @@
 <?php
 
-class AdministrationElementsCategoryTest extends TestCase
-{
+class AdministrationElementsCategoryTest extends TestCase {
+    
     protected $requestUrl = '/admin/categories';
     protected $inMemoryDb = true;
 

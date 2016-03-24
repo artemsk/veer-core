@@ -1,7 +1,7 @@
 <?php
 
-class AdministrationElementsDownloadTest extends TestCase
-{
+class AdministrationElementsDownloadTest extends TestCase {
+    
     protected $requestUrl = '/admin/downloads';
     protected $inMemoryDb = true;
 

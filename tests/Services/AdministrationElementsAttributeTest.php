@@ -1,11 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
-class AdministrationElementsAttributeTest extends TestCase
-{
+class AdministrationElementsAttributeTest extends TestCase {
+    
     protected $requestUrl = '/admin/attributes';
     protected $inMemoryDb = false;
 

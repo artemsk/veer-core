@@ -4,8 +4,8 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class AdministrationElementsPageTest extends TestCase
-{
+class AdministrationElementsPageTest extends TestCase {
+    
     protected $requestUrl = '/admin/pages';
     protected $inMemoryDb = false;
 
