@@ -9,14 +9,14 @@
     <title>{{ ucfirst(app('router')->current()->admin) }} — Manage & Configure — Veer.</title>
     
     <!-- Bootstrap -->
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/'.array_get(app('veer')->siteConfig, 'ADMIN_CSS', 'css').'.css') }}" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/animate.css') }}" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/fileinput.min.css') }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/bootstrap.min.css', $template) }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/' . array_get(app('veer')->siteConfig, 'ADMIN_CSS', 'css').'.css', $template) }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/animate.css', $template) }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/fileinput.min.css', $template) }}" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/datepicker3.css') }}" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/bootstrap-switch.min.css') }}" rel="stylesheet">
-    <link href="{{ asset(config('veer.assets_path').'/'.$template.'/css/nprogress.css') }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/datepicker3.css', $template) }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/bootstrap-switch.min.css', $template) }}" rel="stylesheet">
+    <link href="{{ veer_assets('css/nprogress.css', $template) }}" rel="stylesheet">
 
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,900,700,300,300italic,900italic&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -165,14 +165,14 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/holder.js') }}"></script>
-	<script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/fileinput.min.js') }}"></script>
-	<script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/bootstrap-datepicker.js') }}"></script>
-	<script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/bootstrap-switch.min.js') }}"></script>
-	<script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/html.sortable.min.js') }}"></script>	
-    <script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/nprogress.js') }}"></script>
-	<script src="{{ asset(config('veer.assets_path').'/'.$template.'/js/script.js') }}"></script>
+    <script src="{{ veer_assets('js/bootstrap.min.js', $template) }}"></script>
+    <script src="{{ veer_assets('js/holder.js', $template) }}"></script>
+	<script src="{{ veer_assets('js/fileinput.min.js', $template) }}"></script>
+	<script src="{{ veer_assets('js/bootstrap-datepicker.js', $template) }}"></script>
+	<script src="{{ veer_assets('js/bootstrap-switch.min.js', $template) }}"></script>
+	<script src="{{ veer_assets('js/html.sortable.min.js', $template) }}"></script>
+    <script src="{{ veer_assets('js/nprogress.js', $template) }}"></script>
+	<script src="{{ veer_assets('js/script.js', $template) }}"></script>
     @yield('scripts')
   </body>
 </html>

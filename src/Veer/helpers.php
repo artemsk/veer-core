@@ -448,3 +448,16 @@ if (!function_exists('veer')) {
 		return app('veer');
 	}
 }
+
+if (!function_exists('veer_assets')) {
+
+	/**
+	 */
+	function veer_assets($key = null, $template = null)
+	{
+        if(empty($template)) { $template = veer_get('template'); }
+
+        return asset(config('veer.assets_path') . '/' .
+                (empty($template) ? config('veer.template') : $template) . '/' . $key);
+	}
+}
