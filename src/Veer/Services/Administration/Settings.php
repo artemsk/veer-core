@@ -24,7 +24,7 @@ class Settings {
     public function __construct($type = 'configuration')
     {
         $this->data = $this->dataProvider[$type];
-        
+
         $this->siteid       = \Input::get('siteid');
         $this->confs        = \Input::get($this->data[1]);
         $this->new          = \Input::get('new');
@@ -32,9 +32,9 @@ class Settings {
         $this->actionSave   = \Input::get('save');
     }
 
-    public static function request()
+    public static function request($type = 'configuration')
     {
-        return (new static)->handle();
+        return (new static($type))->handle();
     }
 
     public function setParams($siteid, $confs = null, $new = null)

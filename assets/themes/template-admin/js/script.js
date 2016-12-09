@@ -386,7 +386,8 @@ $(document).on('submit', '.ajax-form-submit form', {}, function(event) {
         var selector = $(this).parents('.ajax-form-submit').attr('data-replace-div');
         var skipreload = $(this).parents('.ajax-form-submit').attr('data-skip-reload');
         var formdata = new FormData($(this).get(0));
-
+        formdata.append(clickedButton.attr('name'), clickedButton.val());
+        
         event.preventDefault();
         var url = $(this).attr('action');
 

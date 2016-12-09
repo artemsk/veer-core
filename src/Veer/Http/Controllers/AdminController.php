@@ -218,7 +218,7 @@ class AdminController extends Controller
 
         app('veer')->skipShow = false;        
         $class = $this->getRouteParamsAction($model);
-        $data = !empty($class) ? $class::request() : 'Error!';
+        $data = !empty($class) ? $class::request($model) : 'Error!';
         
         return !app('request')->ajax() && !(app('veer')->skipShow) ? $this->show($model) : $data;
     }
