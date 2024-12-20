@@ -42,7 +42,7 @@ class QueuedbServiceProvider extends ServiceProvider {
 	 */	
     protected function registerQdbCommand($app)
     {
-        $app['command.queue.qdb'] = $app->share(function ($app) {
+        $app->singleton('command.queue.qdb', function ($app) {
              return new QdbCommand();
         });
     }
