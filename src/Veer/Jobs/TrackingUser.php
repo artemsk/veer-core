@@ -28,7 +28,7 @@ class TrackingUser extends Job
 	{
 		$past = \URL::previous();
 
-		if(!str_contains($past, url())) $this->trackingToFile('referrals', [$past]);
+		if(!str_contains($past, url('/'))) $this->trackingToFile('referrals', [$past]);
 	}
     /**
      * Tracking Urls for Auth.User.
@@ -48,7 +48,7 @@ class TrackingUser extends Job
      */
     protected function trackingIps()
 	{
-		$this->trackingToFile('ips', [\Request::getClientIp(), url(), \Route::currentRouteName()]);
+		$this->trackingToFile('ips', [\Request::getClientIp(), url('/'), \Route::currentRouteName()]);
 	}
     /**
      * Appending statistics to file.

@@ -35,7 +35,7 @@ class TrackingUserCommand extends Command
 	{
 		$past = \URL::previous();
 		
-		if(!str_contains($past, url())) $this->trackingToFile('referrals', [$past]);
+		if(!str_contains($past, url('/'))) $this->trackingToFile('referrals', [$past]);
 	}
     /**
      * Tracking Urls for Auth.User.
@@ -55,7 +55,7 @@ class TrackingUserCommand extends Command
      */
     protected function trackingIps()
 	{
-		$this->trackingToFile('ips', [\Request::getClientIp(), url(), \Route::currentRouteName()]);
+		$this->trackingToFile('ips', [\Request::getClientIp(), url('/'), \Route::currentRouteName()]);
 	}
     /**
      * Appending statistics to file.

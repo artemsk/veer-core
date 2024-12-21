@@ -135,7 +135,7 @@ class VeerApp
      */
     protected function siteUrl()
     {
-        $url = strtr(url(),
+        $url = strtr(url('/'),
             ["www." => "", "index.php/" => "", "index.php" => ""]);
 
         if (\Illuminate\Support\Str::endsWith($url, "/")) {
