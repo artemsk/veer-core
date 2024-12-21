@@ -55,7 +55,7 @@ class DownloadController extends Controller {
 				return $this->downloadingLocalOrCloudFiles($checkLink->fname);
 			}
 			
-			$newLink = "sessionLink".str_random(64);
+			$newLink = "sessionLink".\Illuminate\Support\Str::random(64);
 			\Session::put('downloadlink', $newLink);
 			\Session::put('downloadlinkR', $lnk);
 			return Redirect::route('download.link', $newLink);

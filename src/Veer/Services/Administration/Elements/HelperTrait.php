@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Input;
 trait HelperTrait {
 
     public $uploadDataProvider = [
-        'image' => ['images', 'images_path', 'public', '\\Veer\\Models\\Image', 'img', []],
-        'file' => ['files', 'downloads_path', 'app', '\\Veer\\Models\\Download', 'fname', 
+        'image' => ['images', 'images_path', 'public', \Veer\Models\Image::class, 'img', []],
+        'file' => ['files', 'downloads_path', 'app', \Veer\Models\Download::class, 'fname', 
                     ['original' => 1, 'secret' => '', 'expires' => 0, 'expiration_day' => 0, 'expiration_times' => 0, 'downloads' => 0]]
     ];
 
@@ -16,8 +16,8 @@ trait HelperTrait {
     protected function getUploadedFiles($files, $fileData = null)
     {
         $correct_files = [];
-        if(Input::hasFile($files)) {
-            $correct_files = is_array(Input::file($files)) ? Input::file($files) : [Input::file($files)];
+        if(\Illuminate\Support\Facades\Request::hasFile($files)) {
+            $correct_files = is_array(\Illuminate\Support\Facades\Request::file($files)) ? \Illuminate\Support\Facades\Request::file($files) : [\Illuminate\Support\Facades\Request::file($files)];
         } elseif(!empty($fileData)) {
             $fileData = is_array($fileData) ? $fileData : [$fileData];
             foreach ($fileData as $file) {
@@ -40,26 +40,26 @@ trait HelperTrait {
         $newId = [];
         
         foreach($this->getUploadedFiles($files, $fileData) as $file) {
-            $fname = $prefix . $id . "_" . date('YmdHis', time()) . str_random(10) . "." . $file->getClientOriginalExtension();
+            $fname = $prefix . $id . "_" . date('YmdHis', time()) . \Illuminate\Support\Str::random(10) . "." . $file->getClientOriginalExtension();
             $this->uploadingLocalOrCloudFiles($relation, $file, $fname, config('veer.' . $assets_path), $path . "/" . $folder . "/");
-            
+
             $new = new $model;
             $new->{$field} = $fname;
             foreach($default as $key => $value) { $new->{$key} = $value; }
-            
+
             if($type == 'image' || $skipRelation === true) {
                 $new->save();
             } 
-            
+
             if($skipRelation === false) {
                 if($type == "image") { $new->{$relationOrObject}()->attach($id); }
                 if($type == "file") { $relationOrObject->downloads()->save($new); }
             }
-            
+
             $newId[] = $new->id; // ?
         }
 
-        if(!empty($message)) { event('veer.message.center', array_get($message, 'language')); }
+        if(!empty($message)) { event('veer.message.center', \Illuminate\Support\Arr::get($message, 'language')); }
         return $newId;
     }
 
@@ -218,7 +218,7 @@ trait HelperTrait {
      */
     protected function parseIds($ids, $separator = ",", $start = ":")
     {
-        if(empty($start) || starts_with($ids, $start)) {
+        if(empty($start) || \Illuminate\Support\Str::startsWith($ids, $start)) {
             return empty($separator) ? [$ids] : explode($separator, substr($ids, strlen($start)));
         }
     }

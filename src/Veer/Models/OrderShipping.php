@@ -12,13 +12,13 @@ class OrderShipping extends \Eloquent {
     // Many Shipping Methods <- One
     
     public function site() {
-        return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+        return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
     }
     
     // One Shipping Method -> Many
     
     public function orders() {
-       return $this->hasMany('\Veer\Models\Order', 'delivery_method_id', 'id'); 
+       return $this->hasMany(\Veer\Models\Order::class, 'delivery_method_id', 'id'); 
     }
     
     

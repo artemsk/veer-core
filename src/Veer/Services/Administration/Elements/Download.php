@@ -20,7 +20,7 @@ class Download {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
         list($command, $id) = array_pad(explode('.', $class->action, 2), 2, null);
 
         switch($command) {
@@ -31,17 +31,17 @@ class Download {
                 $class->delete($id);
                 break;
             case 'makeRealLink':
-                $class->mklink($id, Input::all());
+                $class->mklink($id, \Illuminate\Support\Facades\Request::all());
                 break;
             case 'copyFile':
-                $class->copyFileToPagesOrProducts($id, Input::all());
+                $class->copyFileToPagesOrProducts($id, \Illuminate\Support\Facades\Request::all());
                 break;
         }
 
-        !Input::hasFile('uploadFiles') ?:
+        !\Illuminate\Support\Facades\Request::hasFile('uploadFiles') ?:
                 $class->uploadedIds[] = $class->upload('file', 'uploadFiles', null, null, '', null, true);
 
-        !Input::has('attachFiles') ?: $class->copyFilesToPagesOrProductsFromForm(Input::get('attachFiles'));
+        !\Illuminate\Support\Facades\Request::has('attachFiles') ?: $class->copyFilesToPagesOrProductsFromForm(\Illuminate\Support\Facades\Request::input('attachFiles'));
     }
 
     public function add($data, $relation = null, $attach_id = null, $returnId = true)
@@ -108,7 +108,7 @@ class Download {
         }
 
         $new = $file->replicate();
-        $new->secret = empty($data['link_name']) ? bcrypt(str_random(100) . date("Ymd", time())) :
+        $new->secret = empty($data['link_name']) ? bcrypt(\Illuminate\Support\Str::random(100) . date("Ymd", time())) :
             $data['link_name']; // @todo test
         
         if($data['times'] > 0 || !empty($data['expiration_day'])) {
@@ -188,8 +188,8 @@ class Download {
             }
         }
 
-        $prdIds = explode(",", array_get($parseTypes, 'elements.0'));
-        $pgIds = explode(",", array_get($parseTypes, 'elements.1'));
+        $prdIds = explode(",", \Illuminate\Support\Arr::get($parseTypes, 'elements.0'));
+        $pgIds = explode(",", \Illuminate\Support\Arr::get($parseTypes, 'elements.1'));
         foreach ($attach as $f) {
             $this->prepareCopying($f, $prdIds, $pgIds);
         }

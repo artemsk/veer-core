@@ -33,7 +33,7 @@ class SearchController extends Controller {
 			$q = trim(\Input::get('q'));  
 			if( !empty($q) ) 
 			{
-				$search = \Veer\Models\Search::firstOrCreate(array("q" => $q));
+				$search = \Veer\Models\Search::firstOrCreate(["q" => $q]);
 				$search->increment('times');                  
 				$search->save();
 
@@ -69,14 +69,7 @@ class SearchController extends Controller {
 	 */
 	protected function results($searched) 
 	{	
-		$view = viewx($this->template.'.search', array(
-			"products" => $searched['products'],
-			"pages" => $searched['pages'],
-			"categories" => $this->showSearch->withCategories($searched['products'], $searched['pages']),			
-			"tags" => $this->showSearch->withTags($searched['products'], $searched['pages']),
-			"attributes" => $this->showSearch->withAttributes($searched['products'], $searched['pages']),
-			"template" => $this->template
-		)); 
+		$view = viewx($this->template.'.search', ["products" => $searched['products'], "pages" => $searched['pages'], "categories" => $this->showSearch->withCategories($searched['products'], $searched['pages']), "tags" => $this->showSearch->withTags($searched['products'], $searched['pages']), "attributes" => $this->showSearch->withAttributes($searched['products'], $searched['pages']), "template" => $this->template]); 
 	
 		$this->view = $view; 
 			

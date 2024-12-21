@@ -4,22 +4,21 @@ use Veer\Commands\Command;
 
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class TrackingUserCommand extends Command implements SelfHandling {
-
-	/**
-	 * Create a new command instance.
-	 *
-	 */
-	public function __construct()
+class TrackingUserCommand extends Command
+{
+    /**
+     * Create a new command instance.
+     *
+     */
+    public function __construct()
 	{
 		//
 	}
-
-	/**
-	 * Execute the command.
-	 *
-	 */
-	public function handle()
+    /**
+     * Execute the command.
+     *
+     */
+    public function handle()
 	{
 		if(config('veer.history_refs')) $this->trackingReferrals();
 
@@ -27,55 +26,46 @@ class TrackingUserCommand extends Command implements SelfHandling {
 
 		if(config('veer.history_ips')) $this->trackingIps();
 	}
-	
-	/**
-	 * Tracking Referals.
-	 *
-	 * 
-	 */
-	protected function trackingReferrals()
+    /**
+     * Tracking Referals.
+     *
+     * 
+     */
+    protected function trackingReferrals()
 	{
 		$past = \URL::previous();
 		
-		if(!str_contains($past, url())) $this->trackingToFile('referrals', array($past));
+		if(!str_contains($past, url())) $this->trackingToFile('referrals', [$past]);
 	}
-	
-	/**
-	 * Tracking Urls for Auth.User.
-	 * 
-	 * 
-	 */
-	protected function trackingUrls()
+    /**
+     * Tracking Urls for Auth.User.
+     * 
+     * 
+     */
+    protected function trackingUrls()
 	{
 		if(!auth_check_session()) { return; }
 		
-		$this->trackingToFile('urls', array(
-			\Auth::id(), app('url')->current(), \Route::currentRouteName()
-		));
+		$this->trackingToFile('urls', [\Auth::id(), app('url')->current(), \Route::currentRouteName()]);
 	}
-	
-	/**
-	 * Tracking Ips - use for Debugging.
-	 * 
-	 * 
-	 */
-	protected function trackingIps()
+    /**
+     * Tracking Ips - use for Debugging.
+     * 
+     * 
+     */
+    protected function trackingIps()
 	{
-		$this->trackingToFile('ips', array(
-			\Request::getClientIp(), url(), \Route::currentRouteName()
-		));
-	}	
-
-	/**
-	 * Appending statistics to file.
-	 * 
-	 *
-	 */
-	protected function trackingToFile($type, $data)
+		$this->trackingToFile('ips', [\Request::getClientIp(), url(), \Route::currentRouteName()]);
+	}
+    /**
+     * Appending statistics to file.
+     * 
+     *
+     */
+    protected function trackingToFile($type, $data)
 	{
 		app('files')->append(config('veer.history_path') . '/' . $type . '.' . date('Y.W', time()) . '.txt',
 			implode('|', $data) . "\r\n"
 		);
-	}	
-
+	}
 }

@@ -26,16 +26,16 @@ class Page extends Entity {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        if (Input::has('id')) {
+        if (\Illuminate\Support\Facades\Request::has('id')) {
             return $class->one();
         }
 
-        $changeStatusPage = starts_with($class->action, "changeStatusPage") ? substr($class->action, 17) : null;
-        $deletePage = starts_with($class->action, "deletePage") ? substr($class->action, 11) : null;
-        $quickAddPage = Input::has('title') ? Input::all() : null;
-        $sortPages = $class->action == 'sort' ? Input::all() : null;
+        $changeStatusPage = \Illuminate\Support\Str::startsWith($class->action, "changeStatusPage") ? substr($class->action, 17) : null;
+        $deletePage = \Illuminate\Support\Str::startsWith($class->action, "deletePage") ? substr($class->action, 11) : null;
+        $quickAddPage = \Illuminate\Support\Facades\Request::has('title') ? \Illuminate\Support\Facades\Request::all() : null;
+        $sortPages = $class->action == 'sort' ? \Illuminate\Support\Facades\Request::all() : null;
 
         $class->toggleStatus($changeStatusPage)
             ->delete($deletePage)
@@ -125,8 +125,8 @@ class Page extends Entity {
         $this->id = $page->id;
         $this->entity = $page;
 
-        $this->image(array_get($data, 'uploadImage'));
-        $this->file(array_get($data, 'uploadFiles'));
+        $this->image(\Illuminate\Support\Arr::get($data, 'uploadImage'));
+        $this->file(\Illuminate\Support\Arr::get($data, 'uploadFiles'));
    
         return $this;
     }
@@ -143,10 +143,10 @@ class Page extends Entity {
             return $this;
         }
         
-        $url_params = array_get($data, '_refurl');
+        $url_params = \Illuminate\Support\Arr::get($data, '_refurl');
         $parse_str = $data;
         if(!empty($url_params)) {
-            parse_str(starts_with($url_params, '?') ? substr($url_params, 1) : $url_params, $parse_str);
+            parse_str(\Illuminate\Support\Str::startsWith($url_params, '?') ? substr($url_params, 1) : $url_params, $parse_str);
             if(!empty($parse_str['page'])) {
                 \Input::merge(['page' => $parse_str['page']]);
             }

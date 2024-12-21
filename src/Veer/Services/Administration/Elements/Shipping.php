@@ -20,10 +20,10 @@ class Shipping {
     {
         $class = new static;
 
-        !Input::has('deleteShippingMethod') ?: $class->delete(Input::get('deleteShippingMethod'));
-        !Input::has('updateShippingMethod') ?: $class->update(Input::get('updateShippingMethod'))
-                ->with(Input::get('shipping.fill'));
-        !Input::has('addShippingMethod') ?: $class->add()->with(Input::get('shipping.fill'));
+        !\Illuminate\Support\Facades\Request::has('deleteShippingMethod') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteShippingMethod'));
+        !\Illuminate\Support\Facades\Request::has('updateShippingMethod') ?: $class->update(\Illuminate\Support\Facades\Request::input('updateShippingMethod'))
+                ->with(\Illuminate\Support\Facades\Request::input('shipping.fill'));
+        !\Illuminate\Support\Facades\Request::has('addShippingMethod') ?: $class->add()->with(\Illuminate\Support\Facades\Request::input('shipping.fill'));
     }
 
     public function delete($id)
@@ -66,20 +66,20 @@ class Shipping {
     {
         if(!is_object($this->entity)) { return $this; }
 
-        $func_name = array_get($data, 'func_name');
-        $classFullName = starts_with($func_name, "\\") ? $func_name : "\\Veer\\Components\\Ecommerce\\" . $func_name;
+        $func_name = \Illuminate\Support\Arr::get($data, 'func_name');
+        $classFullName = \Illuminate\Support\Str::startsWith($func_name, "\\") ? $func_name : "\\Veer\\Components\\Ecommerce\\" . $func_name;
 
 		if(!empty($func_name) && !class_exists($classFullName)) {
 			event('veer.message.center', trans('veeradmin.shipping.error'));
             return $this;
 		}
 
-		$data['discount_price'] = strtr(array_get($data, 'discount_price'), ["%" => ""]);
+		$data['discount_price'] = strtr(\Illuminate\Support\Arr::get($data, 'discount_price'), ["%" => ""]);
 		$data['enable'] = isset($data['enable']) ? true : false;
 		$data['discount_enable'] = isset($data['discount_enable']) ? true : false;
 
-		if(array_has($data, 'address')) {
-			$addresses = preg_split('/[\n\r]+/', array_get($data, 'address')); // @todo redo
+		if(\Illuminate\Support\Arr::has($data, 'address')) {
+			$addresses = preg_split('/[\n\r]+/', \Illuminate\Support\Arr::get($data, 'address')); // @todo redo
 			foreach($addresses as $k => $address) {
 				$parts = explode("|", $address);
 				$parts = array_filter($parts, function($value) { if(!empty($value)) return $value; });

@@ -21,7 +21,7 @@ class QdbCommand extends Command {
     /**
      * 
      */
-    public function fire()
+    public function handle()
     {
 		$jobid = $this->argument('job_id');
 		if (empty($jobid)) {
@@ -49,9 +49,7 @@ class QdbCommand extends Command {
      */
     protected function getArguments()
     {
-        return array(
-            array('job_id', InputArgument::OPTIONAL, 'Job Id. If empty will be used the first Id in a row.'),
-        );
+        return [['job_id', InputArgument::OPTIONAL, 'Job Id. If empty will be used the first Id in a row.']];
     }
 
     /**
@@ -59,9 +57,7 @@ class QdbCommand extends Command {
      */	
 	protected function getOptions()
 	{
-		return array(
-			array('stats', null, InputOption::VALUE_NONE, 'Statistics.', null),
-		);
+		return [['stats', null, InputOption::VALUE_NONE, 'Statistics.', null]];
 	}
 	
 	/**

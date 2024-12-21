@@ -84,12 +84,12 @@ class Tag {
 	
 	public function withAttributes($id, $siteId)
 	{
-		return $this->withModels('\Veer\Models\Attribute', 'tags', $id, $siteId);			
+		return $this->withModels(\Veer\Models\Attribute::class, 'tags', $id, $siteId);			
 	}		
 	
 	public function withCategories($id, $siteId)
 	{
-		return $this->withModels('\Veer\Models\Category', 'tags', $id, $siteId);			
+		return $this->withModels(\Veer\Models\Category::class, 'tags', $id, $siteId);			
 	}	
 	
 }

@@ -14,7 +14,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         'lock.for.edit' => [
-            'Veer\Events\adminLock'
+            \Veer\Events\adminLock::class
         ],
     ];
 

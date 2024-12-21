@@ -23,16 +23,16 @@ class Attribute {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        $newValue = Input::get('newValue');
-        $newName = Input::get('newName');        
-        $renameAttrName = Input::get('renameAttrName');
+        $newValue = \Illuminate\Support\Facades\Request::input('newValue');
+        $newName = \Illuminate\Support\Facades\Request::input('newName');        
+        $renameAttrName = \Illuminate\Support\Facades\Request::input('renameAttrName');
 
-        !starts_with($class->action, "deleteAttrValue") ?: $class->delete(substr($class->action, 16));
+        !\Illuminate\Support\Str::startsWith($class->action, "deleteAttrValue") ?: $class->delete(substr($class->action, 16));
         $class->action != 'newAttribute' ?: $class->add($newName, $newValue);
         $class->rename($renameAttrName)
-            ->update(Input::all());
+            ->update(\Illuminate\Support\Facades\Request::all());
 
         event('veer.message.center', trans('veeradmin.attribute.update'));
     }
@@ -120,11 +120,11 @@ class Attribute {
         $data += ['renameAttrValue' => [], 'descrAttrValue' => [], 'attrType' => [], 'newAttrValue' => []];
             
         foreach($data['renameAttrValue'] as $k => $v) {
-            $type = array_get($data['attrType'], $k);
+            $type = \Illuminate\Support\Arr::get($data['attrType'], $k);
             
             \Veer\Models\Attribute::where('id', '=', $k)->update([
                 'val' => $v,
-                'descr' => array_get($data['descrAttrValue'], $k, ''),
+                'descr' => \Illuminate\Support\Arr::get($data['descrAttrValue'], $k, ''),
                 'type' => ($type == 'descr' || $type == 1) ? 'descr' : 'choose'
             ]);
         }

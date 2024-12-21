@@ -9,7 +9,7 @@ class OrderProperties {
 	/**
 	 * show Bills
 	 */
-	public function getBills($filters = array(), $orderBy = array('created_at', 'desc'), $paginateItems = 50)
+	public function getBills($filters = [], $orderBy = ['created_at', 'desc'], $paginateItems = 50)
 	{
 		$orderBy = $this->replaceSortingBy($orderBy);
 		
@@ -26,25 +26,25 @@ class OrderProperties {
 	/* filter bills */
 	protected function filterBills($type, $filters)
 	{
-		if(in_array($type, array('order', 'user', 'status', 'payment')) || empty($type))
+		if(in_array($type, ['order', 'user', 'status', 'payment']) || empty($type))
 		{
-			return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\OrderBill",
-				in_array($type, array('payment', 'status')) ? false : true,
+			return $this->buildFilterWithElementsQuery($filters, \Veer\Models\OrderBill::class,
+				in_array($type, ['payment', 'status']) ? false : true,
 				$type == 'payment' ? 'payment_method_id' : null
 			);
 		}
 		
-		return \Veer\Models\OrderBill::where($type, '=', array_get($filters, $type, 0));
+		return \Veer\Models\OrderBill::where($type, '=', \Illuminate\Support\Arr::get($filters, $type, 0));
 	}
 	
 	/**
 	 * show Discounts
 	 */
-	public function getDiscounts( $filters = array(), $paginateItems = 50 )
+	public function getDiscounts( $filters = [], $paginateItems = 50 )
 	{
 		if(key($filters) == "status") $items = \Veer\Models\UserDiscount::where('status', '=', head($filters));
 
-		else $items = $this->buildFilterWithElementsQuery($filters, "\Veer\Models\UserDiscount");
+		else $items = $this->buildFilterWithElementsQuery($filters, \Veer\Models\UserDiscount::class);
 			
 		return $items->orderBy('created_at', 'desc')
 			->with('user', 'orders')
@@ -55,9 +55,9 @@ class OrderProperties {
 	/**
 	 * show Payment Methods
 	 */
-	public function getPayment( $filters = array(), $paginateItems = 50 )
+	public function getPayment( $filters = [], $paginateItems = 50 )
 	{
-		return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\OrderPayment")
+		return $this->buildFilterWithElementsQuery($filters, \Veer\Models\OrderPayment::class)
 			->orderBy('sites_id', 'asc')
 			->with('orders', 'bills')
 			->with($this->loadSiteTitle())
@@ -67,9 +67,9 @@ class OrderProperties {
 	/**
 	 * show Shipping Methods
 	 */
-	public function getShipping( $filters = array(), $paginateItems = 50 )
+	public function getShipping( $filters = [], $paginateItems = 50 )
 	{
-		return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\OrderShipping")
+		return $this->buildFilterWithElementsQuery($filters, \Veer\Models\OrderShipping::class)
 			->orderBy('sites_id', 'asc')
 			->with('orders')
 			->with($this->loadSiteTitle())

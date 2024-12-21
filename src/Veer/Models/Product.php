@@ -32,54 +32,54 @@ class Product extends \Eloquent {
     // Many Products <-> Many
     
     public function subproducts() {
-        return $this->belongsToMany('\Veer\Models\Product','products_pivot', 'parent_id', 'child_id');
+        return $this->belongsToMany(\Veer\Models\Product::class,'products_pivot', 'parent_id', 'child_id');
     }
     
     public function parentproducts() {
-        return $this->belongsToMany('\Veer\Models\Product','products_pivot', 'child_id', 'parent_id');
+        return $this->belongsToMany(\Veer\Models\Product::class,'products_pivot', 'child_id', 'parent_id');
     }
     
     public function pages() {
-        return $this->belongsToMany('\Veer\Models\Page','pages_products', 'products_id', 'pages_id');        
+        return $this->belongsToMany(\Veer\Models\Page::class,'pages_products', 'products_id', 'pages_id');        
     }
     
     public function categories() {
-        return $this->morphToMany('\Veer\Models\Category', 'elements', 'categories_connect', 'elements_id', 'categories_id');
+        return $this->morphToMany(\Veer\Models\Category::class, 'elements', 'categories_connect', 'elements_id', 'categories_id');
     }
     
     public function tags() {
-        return $this->morphToMany('\Veer\Models\Tag', 'elements', 'tags_connect', 'elements_id', 'tags_id');
+        return $this->morphToMany(\Veer\Models\Tag::class, 'elements', 'tags_connect', 'elements_id', 'tags_id');
     }    
  
     public function attributes() {
-        return $this->morphToMany('\Veer\Models\Attribute', 'elements', 'attributes_connect', 'elements_id', 'attributes_id')
+        return $this->morphToMany(\Veer\Models\Attribute::class, 'elements', 'attributes_connect', 'elements_id', 'attributes_id')
 				->withPivot('product_new_price');
     } 
     
     public function images() {
-        return $this->morphToMany('\Veer\Models\Image', 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
+        return $this->morphToMany(\Veer\Models\Image::class, 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
     } 
     
     public function orders() {
-        return $this->belongsToMany('\Veer\Models\Order','orders_products', 'products_id', 'orders_id');        
+        return $this->belongsToMany(\Veer\Models\Order::class,'orders_products', 'products_id', 'orders_id');        
     }
     
     // One Product -> Many
     
     public function comments() {
-        return $this->morphMany('\Veer\Models\Comment', 'elements');
+        return $this->morphMany(\Veer\Models\Comment::class, 'elements');
     }   
     
     public function downloads() {
-        return $this->morphMany('\Veer\Models\Download', 'elements');
+        return $this->morphMany(\Veer\Models\Download::class, 'elements');
     }
     
     public function userlists() {
-        return $this->morphMany('\Veer\Models\UserList', 'elements');
+        return $this->morphMany(\Veer\Models\UserList::class, 'elements');
     }
 
     public function communications() {
-        return $this->morphMany('\Veer\Models\Communication', 'elements');
+        return $this->morphMany(\Veer\Models\Communication::class, 'elements');
     }       
     
    // products on home

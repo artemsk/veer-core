@@ -28,7 +28,7 @@ class downloadRemoteLink
     protected function increment()
     {
         $remoteDownloadsCount = \File::exists(storage_path().'/app/remoteFiles.json') ?
-            (array)json_decode(\File::get(storage_path().'/app/remoteFiles.json')) : array();
+            (array)json_decode(\File::get(storage_path().'/app/remoteFiles.json')) : [];
 
         $counted = isset($remoteDownloadsCount[$this->remoteLink . '/' . $this->remoteFile]) ?
             $remoteDownloadsCount[$this->remoteLink . '/' . $this->remoteFile] : 0;

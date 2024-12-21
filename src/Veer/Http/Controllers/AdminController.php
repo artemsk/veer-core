@@ -29,7 +29,7 @@ class AdminController extends Controller
     public function index()
     {
         return redirect()->route('admin.show', 'sites');
-        
+
         /*return view(app('veer')->template.'.dashboard',
             array(
             "template" => app('veer')->template
@@ -61,14 +61,14 @@ class AdminController extends Controller
      */
     protected function specialRoutes($model)
     {
-        if(Input::has('SearchField')) {
+        if(\Illuminate\Support\Facades\Request::has('SearchField')) {
             $search = (new \Veer\Services\Show\Search)->searchAdmin($model);
 
             if(is_object($search)) { return $search; }
         }
 
         if($model == "restore") {
-            $this->restore(Input::get('type'), Input::get('id'));
+            $this->restore(\Illuminate\Support\Facades\Request::input('type'), \Illuminate\Support\Facades\Request::input('id'));
             return back();
         }
     }
@@ -78,7 +78,7 @@ class AdminController extends Controller
      */
     protected function getItems($model)
     {
-        $data = $this->getRouteParams($model, [Input::get('filter') => Input::get('filter_id')]);
+        $data = $this->getRouteParams($model, [\Illuminate\Support\Facades\Request::input('filter') => \Illuminate\Support\Facades\Request::input('filter_id')]);
         if(extract($data)) {
             $params = !empty($params) ? $params : null;
             return (new $class)->{$method}($params);
@@ -92,14 +92,11 @@ class AdminController extends Controller
      */
     protected function sendViewOrJson($items, $view)
     {
-        if (null != Input::get('_json')) return response()->json($items);
+        if (null != \Illuminate\Support\Facades\Request::input('_json')) return response()->json($items);
 
         /* for admin we always use 'view' instead of 'viewx' */
         return view($this->template.'.'.$view,
-            array(
-            "items" => $items,
-            "template" => $this->template
-        ));
+            ["items" => $items, "template" => $this->template]);
     }
 
     /**
@@ -107,9 +104,9 @@ class AdminController extends Controller
      */
     protected function checkOnePageEntities($model)
     {
-        $check = $model == "categories" ? Input::get('category') : Input::get('id');
+        $check = $model == "categories" ? \Illuminate\Support\Facades\Request::input('category') : \Illuminate\Support\Facades\Request::input('id');
 
-        return empty($check) ? $model : str_singular($model);
+        return empty($check) ? $model : \Illuminate\Support\Str::singular($model);
     }
 
     /**
@@ -121,16 +118,16 @@ class AdminController extends Controller
         switch($model) {
             case 'sites': return ['class' => \Veer\Services\Show\Site::class, 'method' => 'getSites'];
 
-            case 'categories': $data += ['method' => 'getAllCategories', 'params' => Input::get('image')];
-            case 'category': $data += ['method' => 'getCategoryAdvanced', 'params' => Input::get('category')];
+            case 'categories': $data += ['method' => 'getAllCategories', 'params' => \Illuminate\Support\Facades\Request::input('image')];
+            case 'category': $data += ['method' => 'getCategoryAdvanced', 'params' => \Illuminate\Support\Facades\Request::input('category')];
                 return $data += ['class' => \Veer\Services\Show\Category::class];
 
-            case 'pages': $data += ['method' => 'getAllPages', 'params' => [$filters, [Input::get('sort') => Input::get('sort_direction')]]];
-            case 'page': $data += ['method' => 'getPageAdvanced', 'params' => Input::get('id')];
+            case 'pages': $data += ['method' => 'getAllPages', 'params' => [$filters, [\Illuminate\Support\Facades\Request::input('sort') => \Illuminate\Support\Facades\Request::input('sort_direction')]]];
+            case 'page': $data += ['method' => 'getPageAdvanced', 'params' => \Illuminate\Support\Facades\Request::input('id')];
                 return $data += ['class' => \Veer\Services\Show\Page::class];
 
-            case 'products': $data += ['method' => 'getAllProducts', 'params' => [$filters, [Input::get('sort') => Input::get('sort_direction')]]];
-            case 'product': $data += ['method' => 'getProductAdvanced', 'params' => Input::get('id')];
+            case 'products': $data += ['method' => 'getAllProducts', 'params' => [$filters, [\Illuminate\Support\Facades\Request::input('sort') => \Illuminate\Support\Facades\Request::input('sort_direction')]]];
+            case 'product': $data += ['method' => 'getProductAdvanced', 'params' => \Illuminate\Support\Facades\Request::input('id')];
                 return $data += ['class' => \Veer\Services\Show\Product::class];
 
             case 'images': return ['class' => \Veer\Services\Show\Image::class, 'method' => 'getImages', 'params' => $filters];
@@ -139,7 +136,7 @@ class AdminController extends Controller
             case 'downloads': return ['class' => \Veer\Services\Show\Download::class, 'method' => 'getDownloads'];
 
             case 'users': $data += ['method' => 'getAllUsers', 'params' => $filters];
-            case 'user': $data += ['method' => 'getUserAdvanced', 'params' => Input::get('id')];
+            case 'user': $data += ['method' => 'getUserAdvanced', 'params' => \Illuminate\Support\Facades\Request::input('id')];
                 return $data += ['class' => \Veer\Services\Show\User::class];
 
             case 'books': $data += ['method' => 'getBooks', 'params' => $filters];
@@ -151,7 +148,7 @@ class AdminController extends Controller
                 return $data += ['class' => \Veer\Services\Show\UserProperties::class];
 
             case 'orders':$data += ['method' => 'getAllOrders', 'params' => $filters];
-            case 'order':$data += ['method' => 'getOrderAdvanced', 'params' => Input::get('id')];
+            case 'order':$data += ['method' => 'getOrderAdvanced', 'params' => \Illuminate\Support\Facades\Request::input('id')];
                 return $data += ['class' => \Veer\Services\Show\Order::class];
 
             case 'bills': $data += ['method' => 'getBills', 'params' => $filters];
@@ -161,8 +158,8 @@ class AdminController extends Controller
             case 'statuses': $data += ['method' => 'getStatuses', 'params' => null];
                 return $data += ['class' => \Veer\Services\Show\OrderProperties::class];
             
-            case 'configuration': $data += ['method' => 'getConfiguration', 'params' => Input::get('site')];
-            case 'components': $data += ['method' => 'getComponents', 'params' => Input::get('site')];
+            case 'configuration': $data += ['method' => 'getConfiguration', 'params' => \Illuminate\Support\Facades\Request::input('site')];
+            case 'components': $data += ['method' => 'getComponents', 'params' => \Illuminate\Support\Facades\Request::input('site')];
             case 'secrets': $data += ['method' => 'getSecrets', 'params' => ''];
             case 'jobs': $data += ['method' => 'getQdbJobs', 'params' => $filters];
             case 'etc': $data += ['method' => 'getUtility', 'params' => $filters];
@@ -214,7 +211,7 @@ class AdminController extends Controller
      */
     public function update($model)
     {
-        if(Input::has('SearchButton')) { return $this->show($model); }
+        if(\Illuminate\Support\Facades\Request::has('SearchButton')) { return $this->show($model); }
 
         app('veer')->skipShow = false;        
         $class = $this->getRouteParamsAction($model);

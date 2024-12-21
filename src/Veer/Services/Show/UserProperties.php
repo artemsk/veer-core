@@ -9,9 +9,9 @@ class UserProperties {
 	 */
 	static public function showUnreadNumbers($model, $raw = null, $period = 5)
 	{
-		$modelFull = "\\" . elements( str_singular($model) );
+		$modelFull = "\\" . elements( \Illuminate\Support\Str::singular($model) );
 			
-		$numbers = $modelFull::where('created_at', '>=', self::getUnreadTimestamp( str_plural($model) ));
+		$numbers = $modelFull::where('created_at', '>=', self::getUnreadTimestamp( \Illuminate\Support\Str::plural($model) ));
 		
 		if (!empty($raw)) { $numbers->whereRaw($raw); }
 		
@@ -35,13 +35,13 @@ class UserProperties {
 	/**
 	 * show Users Books
 	 */
-	public function getBooks($filters = array(), $paginateItems = 25)
+	public function getBooks($filters = [], $paginateItems = 25)
 	{
 		$type = key($filters);
 		
-		if($type == "orders") $items = $this->buildFilterWithElementsQuery($filters, "\Veer\Models\UserBook", $pluralize = false, "userbook_id");
+		if($type == "orders") $items = $this->buildFilterWithElementsQuery($filters, \Veer\Models\UserBook::class, $pluralize = false, "userbook_id");
 				
-		else $items = $this->buildFilterWithElementsQuery($filters, "\Veer\Models\UserBook");
+		else $items = $this->buildFilterWithElementsQuery($filters, \Veer\Models\UserBook::class);
 		
 		return $items->orderBy('created_at','desc')
 			->with('user', 'orders')
@@ -51,9 +51,9 @@ class UserProperties {
 	/**
 	 * show Users Lists
 	 */
-	public function getLists($filters = array(), $paginateItems = 50)
+	public function getLists($filters = [], $paginateItems = 50)
 	{
-		$items = $this->buildFilterWithElementsQuery($filters, "\Veer\Models\UserList")
+		$items = $this->buildFilterWithElementsQuery($filters, \Veer\Models\UserList::class)
 			->orderBy('name','asc')
 			->orderBy('created_at','desc')
 			->with('user', 'elements')
@@ -62,9 +62,9 @@ class UserProperties {
 		
 		list($itemsRegroup, $itemsUsers) = $this->iterateLists($items);
 		
-		$items['regrouped'] = isset($itemsRegroup) ? $itemsRegroup : array();
+		$items['regrouped'] = isset($itemsRegroup) ? $itemsRegroup : [];
 		
-		$items['users'] = isset($itemsUsers) ? $itemsUsers : array();
+		$items['users'] = isset($itemsUsers) ? $itemsUsers : [];
 		
 		$items['basket'] = \Veer\Models\UserList::where('name','=','[basket]')->count();
 		
@@ -90,15 +90,15 @@ class UserProperties {
 			}
 		}
 		
-		return array($itemsRegroup, $itemsUsers);
+		return [$itemsRegroup, $itemsUsers];
 	}
 	
 	/**
 	 * show Searches
 	 */
-	public function getSearches($filters = array(), $paginateItems = 50)
+	public function getSearches($filters = [], $paginateItems = 50)
 	{
-		return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\Search")
+		return $this->buildFilterWithElementsQuery($filters, \Veer\Models\Search::class)
 			->orderBy('times', 'desc')
 			->orderBy('created_at', 'desc')
 			->with('users')
@@ -119,11 +119,11 @@ class UserProperties {
 	/**
 	 * Show Comments
 	 */
-	public function getComments($filters = array(), $paginateItems = 50) 
+	public function getComments($filters = [], $paginateItems = 50) 
 	{		
 		$this->setUnreadTimestamp('comments');
 
-		return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\Comment")->orderBy('id','desc')
+		return $this->buildFilterWithElementsQuery($filters, \Veer\Models\Comment::class)->orderBy('id','desc')
 			->with('elements')
 			->paginate($paginateItems); 
 			// users -> only for user's page
@@ -132,7 +132,7 @@ class UserProperties {
 	/**
 	 * show Communications
 	 */
-	public function getCommunications($filters = array(), $paginateItems = 25)
+	public function getCommunications($filters = [], $paginateItems = 25)
 	{
 		$this->setUnreadTimestamp('communications');
 		
@@ -145,16 +145,16 @@ class UserProperties {
 
 		foreach($items as $key => $item) $itemsUsers[$key] = $this->parseCommunicationRecipients($item->recipients);
 		
-		app('veer')->loadedComponents['recipients'] = isset($itemsUsers) ? $itemsUsers : array();
+		app('veer')->loadedComponents['recipients'] = isset($itemsUsers) ? $itemsUsers : [];
 		
 		return $items;		
 	}	
 	
 	protected function filterCommunications($type, $filters)
 	{			
-		if(!in_array($type, array("type", "url", "order")))
+		if(!in_array($type, ["type", "url", "order"]))
 		{
-			return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\Communication");
+			return $this->buildFilterWithElementsQuery($filters, \Veer\Models\Communication::class);
 		} 
 		
 		if($type == "order")
@@ -163,7 +163,7 @@ class UserProperties {
 				->where('elements_id','=', head($filters));
 		}
 		
-		return \Veer\Models\Communication::where($type, '=', array_get($filters, $type, 0));
+		return \Veer\Models\Communication::where($type, '=', \Illuminate\Support\Arr::get($filters, $type, 0));
 	}
 		
 	/**
@@ -179,7 +179,7 @@ class UserProperties {
 		
 		$getUsers = \Veer\Models\User::whereIn('id', $u)->get();
 	
-		$itemsUsers = array();
+		$itemsUsers = [];
 		
 		foreach($getUsers as $user) $itemsUsers[$user->id] = $user;
 		
@@ -189,9 +189,9 @@ class UserProperties {
 	/**
 	 * show Roles
 	 */
-	public function getRoles( $filters = array(), $paginateItems = 50 )
+	public function getRoles( $filters = [], $paginateItems = 50 )
 	{
-		return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\UserRole")
+		return $this->buildFilterWithElementsQuery($filters, \Veer\Models\UserRole::class)
 			->orderBy('sites_id', 'asc')
 			->with('users')
 			->with($this->loadSiteTitle())

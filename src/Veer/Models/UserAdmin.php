@@ -9,12 +9,12 @@ class UserAdmin extends \Eloquent {
     use \Illuminate\Database\Eloquent\SoftDeletes; 	
 	protected $dates = ['deleted_at'];
 	
-    protected $fillable = array("users_id", "sess_id");
+    protected $fillable = ["users_id", "sess_id"];
     
     // One Admin <-> One
     
     public function user() {
-        return $this->belongsTo('\Veer\Models\User','users_id','id');
+        return $this->belongsTo(\Veer\Models\User::class,'users_id','id');
     }
         
 }

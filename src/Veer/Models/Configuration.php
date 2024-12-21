@@ -7,12 +7,12 @@ class Configuration extends \Eloquent {
 	
     use \Illuminate\Database\Eloquent\SoftDeletes; 	
 	protected $dates = ['deleted_at'];
-    protected $fillable = array("sites_id", "conf_key");
+    protected $fillable = ["sites_id", "conf_key"];
 
     // Many Configuration Values <- One
     
     public function site() {
-        return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+        return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
     }
  
 }

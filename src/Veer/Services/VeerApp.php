@@ -41,7 +41,7 @@ class VeerApp
      *  Database dynamic configuration.
      * 
      */
-    public $siteConfig = array();
+    public $siteConfig = [];
 
     /**
      *  Statistics.
@@ -136,13 +136,9 @@ class VeerApp
     protected function siteUrl()
     {
         $url = strtr(url(),
-            array(
-            "www." => "",
-            "index.php/" => "",
-            "index.php" => "",
-        ));
+            ["www." => "", "index.php/" => "", "index.php" => ""]);
 
-        if (ends_with($url, "/")) {
+        if (\Illuminate\Support\Str::endsWith($url, "/")) {
             $url = substr($url, 0, -1);
         }
 
@@ -201,8 +197,7 @@ class VeerApp
      */
     public function routePrepare($routeName)
     {
-        $this->loadedComponents['template'] = $this->template = array_get($this->siteConfig,
-            'TEMPLATE', config('veer.template'));
+        $this->loadedComponents['template'] = $this->template = \Illuminate\Support\Arr::get($this->siteConfig, 'TEMPLATE', config('veer.template'));
 
         $this->registerComponents($routeName);
 
@@ -224,7 +219,7 @@ class VeerApp
         $c = $this->cachingQueries->remember(1, 'get');
 
         foreach ($c as $component) {
-            $this->{camel_case('register '.$component->components_type)}($component->components_src,
+            $this->{\Illuminate\Support\Str::camel('register '.$component->components_type)}($component->components_src,
                 $params);
         }
     }
@@ -279,7 +274,7 @@ class VeerApp
     protected function loadComponentClass($className, $params = null, $type = "components")
     {
         /* Another vendor's component */
-        if (starts_with($className, '\\')) {
+        if (\Illuminate\Support\Str::startsWith($className, '\\')) {
             $classFullName = $className;
         }
 

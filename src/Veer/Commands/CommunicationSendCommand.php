@@ -5,13 +5,11 @@ namespace Veer\Commands;
 use Veer\Commands\Command;
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class CommunicationSendCommand extends Command implements SelfHandling
+class CommunicationSendCommand extends Command
 {
-
     use \Veer\Services\Traits\MessageTraits;
     protected $data;
     protected $options;
-
     /**
      * Create a new command instance.
      *
@@ -22,7 +20,6 @@ class CommunicationSendCommand extends Command implements SelfHandling
 
         $this->options = $options;
     }
-
     /**
      * Execute the command.
      *
@@ -31,18 +28,14 @@ class CommunicationSendCommand extends Command implements SelfHandling
     {
         \Event::fire('router.filter: csrf');
 
-        if (array_get($this->data, 'message') == null) return false;
+        if (\Illuminate\Support\Arr::get($this->data, 'message') == null) return false;
 
-        list($text, $emails, $recipients) = $this->parseMessage(array_get($this->data,
-                'message'));
+        list($text, $emails, $recipients) = $this->parseMessage(\Illuminate\Support\Arr::get($this->data, 'message'));
 
         $message = $this->saveCommunication($text, $recipients);
 
         if ($message->email_notify == true || !empty($emails)) {
-            ( new \Veer\Commands\PrepareMailMessageCommand(array(
-            "object" => $message,
-            "emails" => $emails,
-            "recipients" => $recipients)))->handle();
+            ( new \Veer\Commands\PrepareMailMessageCommand(["object" => $message, "emails" => $emails, "recipients" => $recipients]))->handle();
         }
 
         return $message->id;
@@ -51,7 +44,6 @@ class CommunicationSendCommand extends Command implements SelfHandling
      * saving Communication to db
      * 
      */
-
     protected function saveCommunication($text, $recipients)
     {
         \Eloquent::unguard();
@@ -60,9 +52,9 @@ class CommunicationSendCommand extends Command implements SelfHandling
 
         $this->setParameters($message);
 
-        $this->setMessagingSource($message, array_get($this->data, 'connected'));
+        $this->setMessagingSource($message, \Illuminate\Support\Arr::get($this->data, 'connected'));
 
-        $message->fill(array_get($this->data, 'fill'));
+        $message->fill(\Illuminate\Support\Arr::get($this->data, 'fill'));
 
         $message->message = $text;
 
@@ -76,16 +68,15 @@ class CommunicationSendCommand extends Command implements SelfHandling
      * set parameters
      * 
      */
-
     protected function setParameters($message)
     {
-        $this->setAuthorName(array_get($this->data, 'fill.users_id'));
+        $this->setAuthorName(\Illuminate\Support\Arr::get($this->data, 'fill.users_id'));
 
         array_set_empty($this->data, 'fill.users_id', \Auth::id());
 
         array_set_empty($this->data, 'fill.sites_id', app('veer')->siteId);
 
-        if (array_get($this->data, 'fill.url') != null || empty($message->elements_id)) {
+        if (\Illuminate\Support\Arr::get($this->data, 'fill.url') != null || empty($message->elements_id)) {
             array_set_empty($this->data, 'fill.url', app('url')->current());
         }
 
@@ -101,18 +92,16 @@ class CommunicationSendCommand extends Command implements SelfHandling
      * get checkboxes values right
      * 
      */
-
     protected function checkboxesValidate($key)
     {
-        $checkboxDefault = array_get($this->options, $key, false);
+        $checkboxDefault = \Illuminate\Support\Arr::get($this->options, $key, false);
 
-        return array_get($this->data, $key, $checkboxDefault) ? true : false;
+        return \Illuminate\Support\Arr::get($this->data, $key, $checkboxDefault) ? true : false;
     }
     /*
      * set author name and data
      *
      */
-
     protected function setAuthorName($userId)
     {
         if (!empty($userId)) {

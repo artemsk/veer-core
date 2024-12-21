@@ -16,9 +16,9 @@ class queuePublishPages
 
     public function fire($job, $data)
     {
-        $category = array_get($data, 'category', null);
+        $category = \Illuminate\Support\Arr::get($data, 'category', null);
 
-        $queueCategory = array_get($data, 'queue', null);
+        $queueCategory = \Illuminate\Support\Arr::get($data, 'queue', null);
 
         if (empty($queueCategory) || empty($category)) return $job->fail();
 
@@ -51,9 +51,9 @@ class queuePublishPages
                     $q->where(function($query) use ($queueCategory) {
                         $query->where('categories_id', '=', $queueCategory);
                     });
-                })->with(array('images' => function($query) {
+                })->with(['images' => function($query) {
                     $query->orderBy('pivot_id', 'asc');
-                }))->sitevalidation(app('veer')->siteId)->where('hidden', '=', 1)->orderBy('manual_order',
+                }])->sitevalidation(app('veer')->siteId)->where('hidden', '=', 1)->orderBy('manual_order',
                     'asc')->orderBy('created_at', 'asc')
                 ->take($this->number_of_items)->select('id', 'url', 'title',
                 'small_txt', 'views', 'created_at', 'users_id', 'hidden')->get();

@@ -32,14 +32,7 @@ class FilterController extends Controller {
 		
 		$filtered = $this->showFilter->getFilter(app('veer')->siteId, $id, get_paginator_and_sorting());
 		
-		$view = viewx($this->template.'.filter', array(
-			"products" => $filtered['products'],
-			"pages" => $filtered['pages'],
-			"categories" => $this->showFilter->withCategories($filtered['products'], $filtered['pages']),			
-			"tags" => $this->showFilter->withTags($filtered['products'], $filtered['pages']),
-			"attributes" => $this->showFilter->withAttributes($filtered['products'], $filtered['pages']),
-			"template" => $this->template
-		)); 
+		$view = viewx($this->template.'.filter', ["products" => $filtered['products'], "pages" => $filtered['pages'], "categories" => $this->showFilter->withCategories($filtered['products'], $filtered['pages']), "tags" => $this->showFilter->withTags($filtered['products'], $filtered['pages']), "attributes" => $this->showFilter->withAttributes($filtered['products'], $filtered['pages']), "template" => $this->template]); 
 
 		$this->view = $view; 
 			

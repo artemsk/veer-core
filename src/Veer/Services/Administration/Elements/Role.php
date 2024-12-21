@@ -23,12 +23,12 @@ class Role {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
-        $class->sites_id = Input::get('InSite');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
+        $class->sites_id = \Illuminate\Support\Facades\Request::input('InSite');
 
-        $class->action != 'updateRoles' ?: $class->update(Input::get('role'));
-        !starts_with($class->action, 'deleteRole') ?: $class->delete(substr($class->action, 11));
-        !Input::has('InUsers') ?: $class->attachUsers(Input::get('InUsers'));
+        $class->action != 'updateRoles' ?: $class->update(\Illuminate\Support\Facades\Request::input('role'));
+        !\Illuminate\Support\Str::startsWith($class->action, 'deleteRole') ?: $class->delete(substr($class->action, 11));
+        !\Illuminate\Support\Facades\Request::has('InUsers') ?: $class->attachUsers(\Illuminate\Support\Facades\Request::input('InUsers'));
     }
 
     public function add($data, $returnId = true)
@@ -112,13 +112,13 @@ class Role {
     {
         $parseAttach = explode("[", $data);
 
-        if (starts_with($data, "NEW")) {
+        if (\Illuminate\Support\Str::startsWith($data, "NEW")) {
             $rolesId = $this->role_id;
         } else {
-            $rolesId = trim(array_get($parseAttach, 0));
+            $rolesId = trim(\Illuminate\Support\Arr::get($parseAttach, 0));
         }
 
-        $usersIds = $this->parseIds(substr(array_get($parseAttach, 1), 0, -1));
+        $usersIds = $this->parseIds(substr(\Illuminate\Support\Arr::get($parseAttach, 1), 0, -1));
 
         if(!empty($usersIds)) {
             $this->associate("users", $usersIds, (int)$rolesId, "roles_id");

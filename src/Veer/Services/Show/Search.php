@@ -13,23 +13,23 @@ class Search {
 	 * - with: Images
 	 * - to whom: make() | search/{id} or $_POST
 	 */
-	public function getSearchResultsWithSite($siteId, $q, $queryParams = array())
+	public function getSearchResultsWithSite($siteId, $q, $queryParams = [])
 	{
-		$p = array('products' => array(), 'pages' => array());
+		$p = ['products' => [], 'pages' => []];
 		
 		$qq = explode(' ', $q);
 
-		$p['products'] = $this->searchModel('\Veer\Models\Product', 
-			array_get($queryParams, 'search_field_product', 'title'), $qq, $siteId, $queryParams);
+		$p['products'] = $this->searchModel(\Veer\Models\Product::class, 
+			\Illuminate\Support\Arr::get($queryParams, 'search_field_product', 'title'), $qq, $siteId, $queryParams);
 
-		$p['pages'] = $this->searchModel('\Veer\Models\Page', 
-			array_get($queryParams, 'search_field_page', 'title'), $qq, $siteId, $queryParams);
+		$p['pages'] = $this->searchModel(\Veer\Models\Page::class, 
+			\Illuminate\Support\Arr::get($queryParams, 'search_field_page', 'title'), $qq, $siteId, $queryParams);
 		
 		return $p;
 	}
 	
 	/* search model */
-	protected function searchModel($model, $field, $q, $siteId = null, $queryParams = array())
+	protected function searchModel($model, $field, $q, $siteId = null, $queryParams = [])
 	{
 		$results = $model::whereNested(function($query) use ($q, $field) {
 				foreach ($q as $word) {
@@ -40,33 +40,33 @@ class Search {
 							->orWhere($field, 'like', '%%%' . $word . '%%%');
 					});
 				}
-			})->with(array('images' => function($query) {
+			})->with(['images' => function($query) {
 			$query->orderBy('pivot_id', 'asc');
-		}));
+		}]);
 
-		if(!empty($siteId) && $model == '\Veer\Models\Product') $results->checked()->siteValidation($siteId);
+		if(!empty($siteId) && $model == \Veer\Models\Product::class) $results->checked()->siteValidation($siteId);
 		
-		if(!empty($siteId) && $model == '\Veer\Models\Page') $results->excludeHidden()->siteValidation($siteId);
+		if(!empty($siteId) && $model == \Veer\Models\Page::class) $results->excludeHidden()->siteValidation($siteId);
 		
-		return $results->orderBy(array_get($queryParams, 'sort', 'created_at'), array_get($queryParams, 'direction', 'desc'))
-			->take(array_get($queryParams, 'take', 25))
-			->skip(array_get($queryParams, 'skip', 0))->get();
+		return $results->orderBy(\Illuminate\Support\Arr::get($queryParams, 'sort', 'created_at'), \Illuminate\Support\Arr::get($queryParams, 'direction', 'desc'))
+			->take(\Illuminate\Support\Arr::get($queryParams, 'take', 25))
+			->skip(\Illuminate\Support\Arr::get($queryParams, 'skip', 0))->get();
 	}
 	
 	protected function parseQ($q)
 	{		
-		if(starts_with($q, '!')) return array_add( explode(":", substr(mb_strtolower($q),1)), 1, null);
+		if(\Illuminate\Support\Str::startsWith($q, '!')) return \Illuminate\Support\Arr::add(explode(":", substr(mb_strtolower($q),1)), 1, null);
 				
-		return array(null, null);
+		return [null, null];
 	}
 	
 	protected function getModelName($model, $t)
 	{
 		if(empty($model)) return $this->findModelNameByUrl($t);
 		
-		if(in_array($model, array('product', 'page', 'category', 'user', 'order'))) { 
+		if(in_array($model, ['product', 'page', 'category', 'user', 'order'])) { 
 			
-			$this->targetModel = str_plural($model);
+			$this->targetModel = \Illuminate\Support\Str::plural($model);
 			
 			return elements($this->targetModel); 
 		}
@@ -74,18 +74,7 @@ class Search {
 	
 	protected function findModelNameByUrl($t)
 	{
-		$models = array(
-			"books" => "UserBook",
-			"lists" => "UserList",
-			"roles" => "UserRole",
-			"statuses" => "OrderStatus",
-			"payment" => "OrderPyment",
-			"shipping" => "OrderShipping",
-			"discounts" => "UserDiscount",
-			"bills" => "OrderBill",
-			"jobs" => null,
-			"etc" => null
-		);
+		$models = ["books" => "UserBook", "lists" => "UserList", "roles" => "UserRole", "statuses" => "OrderStatus", "payment" => "OrderPyment", "shipping" => "OrderShipping", "discounts" => "UserDiscount", "bills" => "OrderBill", "jobs" => null, "etc" => null];
 		
 		if(!array_key_exists($t, $models)) return elements($t);
 		
@@ -98,17 +87,7 @@ class Search {
 	 */
 	protected function getSearchFields($t)
 	{
-		$fields = array(
-			"users" => array("email", "username", "firstname", "lastname", "phone"),
-			"books" => array("name", "country", "region", "city", "postcode", "address", "nearby_station", "b_bank", "b_bik", "b_others"),
-			"searches" => array("q"),
-			"comments" => array("author", "txt", "rate"),
-			"pages" => array("title", "small_txt", "txt"),
-			"products" => array("title", "descr", "production_code"),
-			"tags" => array("name"),
-			"orders" => array("id", "cluster_oid", "email", "phone"),
-			"bills" => array("id", "orders_id")	
-		);
+		$fields = ["users" => ["email", "username", "firstname", "lastname", "phone"], "books" => ["name", "country", "region", "city", "postcode", "address", "nearby_station", "b_bank", "b_bik", "b_others"], "searches" => ["q"], "comments" => ["author", "txt", "rate"], "pages" => ["title", "small_txt", "txt"], "products" => ["title", "descr", "production_code"], "tags" => ["name"], "orders" => ["id", "cluster_oid", "email", "phone"], "bills" => ["id", "orders_id"]];
 		
 		return isset($fields[$t]) ? $fields[$t] : null;
 	}
@@ -128,7 +107,7 @@ class Search {
 		
 		$model = $this->getModelName($model, $this->targetModel);
 				
-		if(!empty($id)) return \Redirect::route('admin.show', array($this->targetModel, $field => $id));
+		if(!empty($id)) return \Redirect::route('admin.show', [$this->targetModel, $field => $id]);
 		
 		$view = $this->targetModel;
 		
@@ -143,10 +122,7 @@ class Search {
 		
 		if(isset($items) && is_object($items))
 		{
-			return viewx(app('veer')->template.'.'.$view, array(
-				"items" => $items,
-				"template" => app('veer')->template
-			));
+			return viewx(app('veer')->template.'.'.$view, ["items" => $items, "template" => app('veer')->template]);
 		}
 			
 		return false;

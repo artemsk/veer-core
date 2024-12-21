@@ -66,7 +66,7 @@ class QueuedbServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('command.queue.qdb');
+		return ['command.queue.qdb'];
 	}
 
 }

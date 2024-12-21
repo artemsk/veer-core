@@ -51,7 +51,7 @@ class Site {
 	/**
 	 * 
 	 */
-	protected function getConfigurationOrComponent($type = 'configuration', $siteId = null, $orderBy = array('id', 'desc')) 
+	protected function getConfigurationOrComponent($type = 'configuration', $siteId = null, $orderBy = ['id', 'desc']) 
 	{	
 		$orderBy = $this->replaceSortingBy($orderBy);
 		
@@ -59,11 +59,11 @@ class Site {
 		
 		else $items = \Veer\Models\Site::where('id', '=', $siteId);
 		
-		$items = $items->with(array($type => function($query) use ($orderBy, $type) 
+		$items = $items->with([$type => function($query) use ($orderBy, $type) 
 		{
 			if($type == 'components') $query->orderBy('sites_id');
 			$query->orderBy('theme', 'asc')->orderBy($orderBy[0], $orderBy[1]);
-		}))->get();
+		}])->get();
        
 		return $items;
 	}	
@@ -71,7 +71,7 @@ class Site {
 	/**
 	 * Show Configurations
 	 */
-	public function getConfiguration($siteId = null, $orderBy = array('id', 'desc')) 
+	public function getConfiguration($siteId = null, $orderBy = ['id', 'desc']) 
 	{            
         return $this->getConfigurationOrComponent('configuration', $siteId, $orderBy);
 	}	
@@ -79,7 +79,7 @@ class Site {
 	/**
 	 * Show Components
 	 */
-	public function getComponents($siteId = null, $orderBy = array('id', 'desc')) 
+	public function getComponents($siteId = null, $orderBy = ['id', 'desc']) 
 	{	
 		return [
             'items' => $this->getConfigurationOrComponent('components', $siteId, $orderBy),
@@ -106,20 +106,9 @@ class Site {
 		
 		$items_failed = \DB::table("failed_jobs")->get();
 		
-		$statuses = array(
-			\Veer\Services\Queuedb\Job::STATUS_OPEN => "Open",
-			\Veer\Services\Queuedb\Job::STATUS_WAITING => "Waiting",
-			\Veer\Services\Queuedb\Job::STATUS_STARTED => "Started",
-			\Veer\Services\Queuedb\Job::STATUS_FINISHED => "Finished",
-			\Veer\Services\Queuedb\Job::STATUS_FAILED => "Failed"
-		);
+		$statuses = [\Veer\Services\Queuedb\Job::STATUS_OPEN => "Open", \Veer\Services\Queuedb\Job::STATUS_WAITING => "Waiting", \Veer\Services\Queuedb\Job::STATUS_STARTED => "Started", \Veer\Services\Queuedb\Job::STATUS_FINISHED => "Finished", \Veer\Services\Queuedb\Job::STATUS_FAILED => "Failed"];
 			
-		return array(
-			'jobs' => $items, 
-			'failed' => $items_failed, 
-			'statuses' => $statuses,
-            'availModules' => $this->getAvailModules('queues')
-		);
+		return ['jobs' => $items, 'failed' => $items_failed, 'statuses' => $statuses, 'availModules' => $this->getAvailModules('queues')];
 	}	
 
     /**
@@ -136,8 +125,7 @@ class Site {
 
         foreach ($sessions as $s) {
 
-            $lastmodified = filemtime(array_get(pathinfo($s), 'dirname').'/'.array_get(pathinfo($s),
-                    'basename'));
+            $lastmodified = filemtime(\Illuminate\Support\Arr::get(pathinfo($s), 'dirname').'/'.\Illuminate\Support\Arr::get(pathinfo($s), 'basename'));
 
             if ($lastmodified >= $fiveminutes) $counted++;
         }
@@ -154,7 +142,7 @@ class Site {
         $result = [];        
         foreach(!is_array($places) ? [$places] : $places as $place) {
             foreach(\File::allFiles($this->package_path . ucfirst($place)) as $c) {
-                $class = array_get(pathinfo($c), 'filename');
+                $class = \Illuminate\Support\Arr::get(pathinfo($c), 'filename');
                 $result[$place][$class] = $class;
             }
 
@@ -186,8 +174,7 @@ class Site {
 		if(config('database.default') == 'mysql') {
 			$trashed = $this->trashedElements(); }
 
-		return array('cache' => $cache, 'migrations' => $migrations, 
-			'reminders' => $reminders, 'trashed' => empty($trashed)? null : $trashed);
+		return ['cache' => $cache, 'migrations' => $migrations, 'reminders' => $reminders, 'trashed' => empty($trashed)? null : $trashed];
     }
     
     /**
@@ -199,7 +186,7 @@ class Site {
 	{
 		$tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
 		
-		$items = array();
+		$items = [];
 		
 		foreach($tables as $table) {
 			if (\Illuminate\Support\Facades\Schema::hasColumn(reset($table), 'deleted_at'))

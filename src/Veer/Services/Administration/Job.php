@@ -83,16 +83,16 @@ class Job {
     public function saveJob()
     {
         $q = $this->data;
-        $startc = \Carbon\Carbon::parse(array_get($q, 'jobs.new.start'));
-		$repeat = array_get($q, 'jobs.new.repeat');
-		$data =  (array)json_decode(array_get($q, 'jobs.new.data'), true);
-		$queue = array_get($q, 'jobs.new.classname');
+        $startc = \Carbon\Carbon::parse(\Illuminate\Support\Arr::get($q, 'jobs.new.start'));
+		$repeat = \Illuminate\Support\Arr::get($q, 'jobs.new.repeat');
+		$data =  (array)json_decode(\Illuminate\Support\Arr::get($q, 'jobs.new.data'), true);
+		$queue = \Illuminate\Support\Arr::get($q, 'jobs.new.classname');
 
 		if($repeat > 0) {
 			$data['repeatJob'] = $repeat;
 		}
 
-        $classFullName = starts_with($queue, "\\") ? $queue : "\Veer\Queues\\" . $queue;
+        $classFullName = \Illuminate\Support\Str::startsWith($queue, "\\") ? $queue : "\Veer\Queues\\" . $queue;
 
 		if (!class_exists($classFullName)) { 
 			//
@@ -110,7 +110,7 @@ class Job {
     public function runJob()
     {
         $jobid = head(array_keys($this->actionRun));
-        $payload = array_get($this->data, 'payload');
+        $payload = \Illuminate\Support\Arr::get($this->data, 'payload');
             
         $item = \Veer\Services\Queuedb\Job::where('id','=',$jobid)->first();	
 

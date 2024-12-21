@@ -11,9 +11,7 @@ class IndexController extends Controller {
 	 */
 	public function index()
 	{
-		$view = viewx($this->template.'.home', array(
-			"template" => $this->template
-			)); 
+		$view = viewx($this->template.'.home', ["template" => $this->template]); 
 
 		$this->view = $view; // to cache
 

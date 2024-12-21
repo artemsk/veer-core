@@ -36,7 +36,7 @@ class Order {
         self::request_actions();
         Bill::request();
 
-        if(Input::has('id')) {
+        if(\Illuminate\Support\Facades\Request::has('id')) {
             return (new static)->one();
         }
     }
@@ -70,7 +70,7 @@ class Order {
 
 			// we cannot update cluster ids if they already exist
 			if(is_object($existingOrders) || empty($fill['cluster_oid'])) {
-                array_forget($fill, ['cluster_oid', 'cluster']);
+                \Illuminate\Support\Arr::forget($fill, ['cluster_oid', 'cluster']);
 			}
 		}
 
@@ -238,12 +238,12 @@ class Order {
 
     protected function one()
     {
-        $this->id = Input::get('id');
-        $this->action = Input::get('action');
+        $this->id = \Illuminate\Support\Facades\Request::input('id');
+        $this->action = \Illuminate\Support\Facades\Request::input('action');
 		$this->order = \Veer\Models\Order::find($this->id);
 		if(!is_object($this->order)) { $this->order = new \Veer\Models\Order; }
 
-        $fill = Input::has('fill') ? $this->prepareData(Input::get('fill')) : null;
+        $fill = \Illuminate\Support\Facades\Request::has('fill') ? $this->prepareData(\Illuminate\Support\Facades\Request::input('fill')) : null;
         
 		if($this->action == "delete") {
             $this->delete();
@@ -257,7 +257,7 @@ class Order {
 		$this->order->fill($fill);
 
 		if($this->action == "add") {
-            $result = $this->addOrder($fill, Input::get('userbook.0', []), Input::get('attachContent'), [
+            $result = $this->addOrder($fill, \Illuminate\Support\Facades\Request::input('userbook.0', []), \Illuminate\Support\Facades\Request::input('attachContent'), [
                 '_skipObjectCreate' => true, '_skipPrepare' => true, '_allowSkipContent' => false
             ]);
             if($result === false) { return false; }            
@@ -276,26 +276,26 @@ class Order {
 			app('veershop')->changeUserDiscountStatus($this->discount);
 		}
 
-		if(Input::has('sendMessageToUser')) {
-			(new \Veer\Commands\CommunicationSendCommand(Input::get('communication')))->handle();
+		if(\Illuminate\Support\Facades\Request::has('sendMessageToUser')) {
+			(new \Veer\Commands\CommunicationSendCommand(\Illuminate\Support\Facades\Request::input('communication')))->handle();
 			event('veer.message.center', trans('veeradmin.user.page.sendmessage'));
 		}
 
 		if($this->action == "add") {
 			$this->sendEmail();
 			app('veer')->skipShow = true;
-			Input::replace(['id' => $this->order->id]);
+			\Illuminate\Support\Facades\Request::replace(['id' => $this->order->id]);
 			return \Redirect::route('admin.show', ['orders', 'id' => $this->order->id]);
 		}
     }
 
     protected function goThroughEverything()
     {
-		!($this->action == "addUserbook" || $this->action == "updateUserbook") ?: $this->userbook(Input::get('userbook', []), false);
-		!Input::has('editContent') ?: $this->content(
-                Input::get('ordersProducts.' . Input::get('editContent') . '.fill', []), Input::get('editContent'));
-		!Input::has('attachContent') ?: $this->content(Input::get('attachContent'));
-		!Input::has('deleteContent') ?: $this->deleteItem(Input::get('deleteContent'));
+		!($this->action == "addUserbook" || $this->action == "updateUserbook") ?: $this->userbook(\Illuminate\Support\Facades\Request::input('userbook', []), false);
+		!\Illuminate\Support\Facades\Request::has('editContent') ?: $this->content(
+                \Illuminate\Support\Facades\Request::input('ordersProducts.' . \Illuminate\Support\Facades\Request::input('editContent') . '.fill', []), \Illuminate\Support\Facades\Request::input('editContent'));
+		!\Illuminate\Support\Facades\Request::has('attachContent') ?: $this->content(\Illuminate\Support\Facades\Request::input('attachContent'));
+		!\Illuminate\Support\Facades\Request::has('deleteContent') ?: $this->deleteItem(\Illuminate\Support\Facades\Request::input('deleteContent'));
 		
 		// sums price & weight
 		$this->order = app('veershop')->sumOrderPricesAndWeight($this->order);
@@ -309,7 +309,7 @@ class Order {
         $this->order->price = ($this->order->delivery_free == true) ? $this->order->content_price :
                 ($this->order->content_price + $this->order->delivery_price);
 
-		!(Input::has('deleteHistory')) ?: $this->deleteHistory(Input::get('deleteHistory'), false);
+		!(\Illuminate\Support\Facades\Request::has('deleteHistory')) ?: $this->deleteHistory(\Illuminate\Support\Facades\Request::input('deleteHistory'), false);
     }
 
     /**
@@ -336,13 +336,13 @@ class Order {
         $class = new static;
 
         foreach($class->triggers as $trigger => $funcs) {
-            $class->id = head(Input::get($trigger, []));
-            key(Input::get($trigger, [])) == 1 ? $class->{$funcs[0]}() : $class->{$funcs[1]}();
+            $class->id = head(\Illuminate\Support\Facades\Request::input($trigger, []));
+            key(\Illuminate\Support\Facades\Request::input($trigger, [])) == 1 ? $class->{$funcs[0]}() : $class->{$funcs[1]}();
         }
 
-        if(Input::has('updateOrderStatus')) {
-            $class->id = Input::get('updateOrderStatus');
-            $class->status(Input::get('history.' . $class->id));
+        if(\Illuminate\Support\Facades\Request::has('updateOrderStatus')) {
+            $class->id = \Illuminate\Support\Facades\Request::input('updateOrderStatus');
+            $class->status(\Illuminate\Support\Facades\Request::input('history.' . $class->id));
         }
     }
 
@@ -443,18 +443,16 @@ class Order {
 
     public function status($history)
     {
-        array_set($history, 'orders_id', $this->id);
-        array_set($history, 'name',
-            \Veer\Models\OrderStatus::where('id','=', array_get($history, 'status_id'))
-                ->pluck('name')
-            );
+        \Illuminate\Support\Arr::set($history, 'orders_id', $this->id);
+        \Illuminate\Support\Arr::set($history, 'name', \Veer\Models\OrderStatus::where('id','=', \Illuminate\Support\Arr::get($history, 'status_id'))
+            ->pluck('name'));
         if(empty($history['name'])) { $history['name'] = '[?]'; }
         
-        $update = ['status_id' => array_get($history, 'status_id')];
-        $progress = array_pull($history, 'progress');
+        $update = ['status_id' => \Illuminate\Support\Arr::get($history, 'status_id')];
+        $progress = \Illuminate\Support\Arr::pull($history, 'progress');
         if(!empty($progress)) { $update['progress'] = $progress; }
 
-        $sendEmail = array_pull($history, 'send_to_customer');
+        $sendEmail = \Illuminate\Support\Arr::pull($history, 'send_to_customer');
 
         \Veer\Models\OrderHistory::create($history);
         \Veer\Models\Order::where('id' ,'=', $this->id)

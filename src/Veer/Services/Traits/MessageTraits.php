@@ -34,10 +34,7 @@ trait MessageTraits {
 		
 		$m = preg_replace("/(\\s+)/i", " ", $m);
 
-		return array( trim($m), 
-			$this->getEmailsCollection($matches_emails), 
-			$this->getUsernamesCollection($matches_usernames)
-		);
+		return [trim($m), $this->getEmailsCollection($matches_emails), $this->getUsernamesCollection($matches_usernames)];
 	}
 	
 	/**
@@ -77,7 +74,7 @@ trait MessageTraits {
 	 */
 	protected function getUserId($username)
 	{
-		if(starts_with($username, "@:")) return substr($username, 2); 
+		if(\Illuminate\Support\Str::startsWith($username, "@:")) return substr($username, 2); 
 			
 		return \Veer\Models\User::where('username','=', substr($username, 1))->pluck('id');
 	}

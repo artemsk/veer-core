@@ -20,10 +20,10 @@ class Payment {
     {
         $class = new static;
 
-        !Input::has('deletePaymentMethod') ?: $class->delete(Input::get('deletePaymentMethod'));
-        !Input::has('updatePaymentMethod') ?: $class->update(Input::get('updatePaymentMethod'))
-                ->with(Input::get('payment.fill'));
-        !Input::has('addPaymentMethod') ?: $class->add()->with(Input::get('payment.fill'));
+        !\Illuminate\Support\Facades\Request::has('deletePaymentMethod') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deletePaymentMethod'));
+        !\Illuminate\Support\Facades\Request::has('updatePaymentMethod') ?: $class->update(\Illuminate\Support\Facades\Request::input('updatePaymentMethod'))
+                ->with(\Illuminate\Support\Facades\Request::input('payment.fill'));
+        !\Illuminate\Support\Facades\Request::has('addPaymentMethod') ?: $class->add()->with(\Illuminate\Support\Facades\Request::input('payment.fill'));
     }
 
     public function delete($id)
@@ -69,16 +69,16 @@ class Payment {
     {
         if(!is_object($this->entity)) { return $this; }
         
-        $func_name = array_get($data, 'func_name');
-        $classFullName = starts_with($func_name, "\\") ? $func_name : "\\Veer\\Components\\Ecommerce\\" . $func_name;
+        $func_name = \Illuminate\Support\Arr::get($data, 'func_name');
+        $classFullName = \Illuminate\Support\Str::startsWith($func_name, "\\") ? $func_name : "\\Veer\\Components\\Ecommerce\\" . $func_name;
 
 		if(!empty($func_name) && !class_exists($classFullName)) {
 			event('veer.message.center', trans('veeradmin.payment.error'));
             return $this;
 		}
 
-		$data['commission'] = strtr(array_get($data, 'commission'), ["%" => ""]);
-		$data['discount_price'] = strtr(array_get($data, 'discount_price'), ["%" => ""]);
+		$data['commission'] = strtr(\Illuminate\Support\Arr::get($data, 'commission'), ["%" => ""]);
+		$data['discount_price'] = strtr(\Illuminate\Support\Arr::get($data, 'discount_price'), ["%" => ""]);
 		$data['enable'] = isset($data['enable']) ? true : false;
 		$data['discount_enable'] = isset($data['discount_enable']) ? true : false;
 

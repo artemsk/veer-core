@@ -7,15 +7,15 @@ use Veer\Services\Show\Category as ShowCategory;
 class CategoryController extends Controller {
 
 	protected $showCategory;
-	
+
 	public function __construct(ShowCategory $showCategory)
 	{
 		parent::__construct();
-		
+
 		$this->showCategory = $showCategory;
 	}
 
-	
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -26,7 +26,7 @@ class CategoryController extends Controller {
 		$categories = $this->showCategory->getTopCategoriesWithSite(
 			app('veer')->siteId
 		);
-				
+
 		return $this->viewIndex('categories', $categories);
 	}
 
@@ -42,23 +42,16 @@ class CategoryController extends Controller {
 		$category = $this->showCategory->getCategory($id, app('veer')->siteId);
 
 		if(!is_object($category)) { return Redirect::route('index'); }
-		
+
 		$category->increment('views');	
 
-        $category->load(array('images' => function($q) {
+        $category->load(['images' => function($q) {
 			return $q->orderBy('pivot_id', 'asc');
-		}));
-		
+		}]);
+
 		$paginator_and_sorting = get_paginator_and_sorting();
-		
-		$view = viewx($this->template.'.category', array(
-			"category" => $category,
-			"products" => $this->showCategory->withProducts($id, $paginator_and_sorting),
-			"pages" => $this->showCategory->withPages($id, $paginator_and_sorting),
-			"tags" => $this->showCategory->withTags($id),
-			"attributes" => $this->showCategory->withAttributes($id),
-			"template" => $this->template
-		)); 
+
+		$view = viewx($this->template.'.category', ["category" => $category, "products" => $this->showCategory->withProducts($id, $paginator_and_sorting), "pages" => $this->showCategory->withPages($id, $paginator_and_sorting), "tags" => $this->showCategory->withTags($id), "attributes" => $this->showCategory->withAttributes($id), "template" => $this->template]); 
 
 		$this->view = $view; 
 

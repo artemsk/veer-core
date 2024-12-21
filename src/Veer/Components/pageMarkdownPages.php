@@ -37,10 +37,7 @@ class pageMarkdownPages
 
         return $this->earlyResponse(
             viewx(app('veer')->template.'.page',
-                        array(
-                        "page" => $this->pageDb,
-                        "template" => app('veer')->template
-            ))
+                        ["page" => $this->pageDb, "template" => app('veer')->template])
         );
     }
 

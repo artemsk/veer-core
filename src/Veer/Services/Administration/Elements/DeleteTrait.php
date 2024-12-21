@@ -68,7 +68,7 @@ trait DeleteTrait {
 		\Veer\Models\CategoryConnect::where('categories_id','=',$cid)->forceDelete();
 		\Veer\Models\CategoryPivot::where('parent_id','=',$cid)->orWhere('child_id','=',$cid)->forceDelete();
 		\Veer\Models\ImageConnect::where('elements_id','=',$cid)
-		->where('elements_type','=','Veer\Models\Category')->forceDelete();
+		->where('elements_type','=',\Veer\Models\Category::class)->forceDelete();
 		// We do not delete communications for deleted items
         return true;
 	}
@@ -223,7 +223,7 @@ trait DeleteTrait {
      */
     protected function restore_link($type, $id)
 	{
-		return "<a href=". route('admin.update', array('restore', 'type' => $type, 'id' => $id)) .">".
+		return "<a href=". route('admin.update', ['restore', 'type' => $type, 'id' => $id]) .">".
 			\Lang::get('veeradmin.undo')."</a>";
 	}
     

@@ -9,16 +9,16 @@ class Attribute extends \Eloquent {
 	use \Illuminate\Database\Eloquent\SoftDeletes;
 	protected $dates = ['deleted_at'];
 
-    protected $fillable = array("type", "name", "val", "descr");
+    protected $fillable = ["type", "name", "val", "descr"];
     
     // Many Attributes Have Many (Pages & Products)
     
     public function pages() {
-        return $this->morphedByMany('\Veer\Models\Page', 'elements', 'attributes_connect', 'attributes_id', 'elements_id');
+        return $this->morphedByMany(\Veer\Models\Page::class, 'elements', 'attributes_connect', 'attributes_id', 'elements_id');
     }
 
     public function products() {
-        return $this->morphedByMany('\Veer\Models\Product', 'elements', 'attributes_connect', 'attributes_id', 'elements_id');
+        return $this->morphedByMany(\Veer\Models\Product::class, 'elements', 'attributes_connect', 'attributes_id', 'elements_id');
     }
     
 }

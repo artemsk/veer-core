@@ -11,6 +11,6 @@ class Job extends Model {
     const STATUS_FAILED = 4;
 
     protected $table = 'jobs';
-    protected $guarded = array('id', 'created_at', 'updated_at', 'available_at');
+    protected $guarded = ['id', 'created_at', 'updated_at', 'available_at'];
 	
 }

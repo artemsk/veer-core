@@ -23,7 +23,7 @@ class Component extends \Eloquent {
     // Many Components <- One
     
     public function site() {
-        return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+        return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
     }
     
 }

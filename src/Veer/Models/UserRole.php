@@ -12,13 +12,13 @@ class UserRole extends \Eloquent {
     // Many Roles <- One
     
     public function site() {
-        return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+        return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
     }
     
     // One Role -> Many
     
     public function users() {
-       return $this->hasMany('\Veer\Models\User', 'roles_id', 'id'); 
+       return $this->hasMany(\Veer\Models\User::class, 'roles_id', 'id'); 
     }
     
 }

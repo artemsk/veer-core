@@ -16,10 +16,10 @@ class Communication {
     public static function request()
     {
         $class = new static;
-        Input::get('action') != 'addMessage' ?: $class->add(Input::get('communication'));
-        !Input::has('hideMessage') ?: $class->hide(head(Input::get('hideMessage', [])));
-        !Input::has('unhideMessage') ?: $class->unhide(head(Input::get('unhideMessage', [])));
-        !Input::has('deleteMessage') ?: $class->delete(head(Input::get('deleteMessage', [])));
+        \Illuminate\Support\Facades\Request::input('action') != 'addMessage' ?: $class->add(\Illuminate\Support\Facades\Request::input('communication'));
+        !\Illuminate\Support\Facades\Request::has('hideMessage') ?: $class->hide(head(\Illuminate\Support\Facades\Request::input('hideMessage', [])));
+        !\Illuminate\Support\Facades\Request::has('unhideMessage') ?: $class->unhide(head(\Illuminate\Support\Facades\Request::input('unhideMessage', [])));
+        !\Illuminate\Support\Facades\Request::has('deleteMessage') ?: $class->delete(head(\Illuminate\Support\Facades\Request::input('deleteMessage', [])));
     }
 
     public function add($data)

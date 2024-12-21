@@ -56,9 +56,9 @@ class PageController extends Controller
 
         $page->increment('views');
 
-        $page->load(array('images' => function($q) {
+        $page->load(['images' => function($q) {
             return $q->orderBy('pivot_id', 'asc');
-        }, 'tags', 'attributes', 'downloads', 'userlists', 'user'));
+        }, 'tags', 'attributes', 'downloads', 'userlists', 'user']);
 
         $page->imagesIds = collect($page->images->getDictionary());
 
@@ -67,18 +67,11 @@ class PageController extends Controller
 
         $paginator_and_sorting = get_paginator_and_sorting();
 
-        $data = array(
-            "page" => $page,
-            "subpages" => $this->showPage->withChildPages(app('veer')->siteId,
-                $page->id, $paginator_and_sorting),
-            "parentpages" => $this->showPage->withParentPages(app('veer')->siteId,
-                $page->id, $paginator_and_sorting),
-            "products" => $this->showPage->withProducts(app('veer')->siteId,
-                $page->id, $paginator_and_sorting),
-            "categories" => $this->showPage->withCategories(app('veer')->siteId,
-                $page->id),
-            "template" => $this->template
-        );
+        $data = ["page" => $page, "subpages" => $this->showPage->withChildPages(app('veer')->siteId,
+            $page->id, $paginator_and_sorting), "parentpages" => $this->showPage->withParentPages(app('veer')->siteId,
+            $page->id, $paginator_and_sorting), "products" => $this->showPage->withProducts(app('veer')->siteId,
+            $page->id, $paginator_and_sorting), "categories" => $this->showPage->withCategories(app('veer')->siteId,
+            $page->id), "template" => $this->template];
 
         $blade_path = $this->template.'.pages.'.$id;
 

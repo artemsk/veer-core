@@ -87,59 +87,59 @@ class User extends \Eloquent implements AuthenticatableContract, CanResetPasswor
 	// Many Users <- One
 
 	public function site() {
-		return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+		return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
 	}
 
 	public function role() {
-		return $this->belongsTo('\Veer\Models\UserRole','roles_id','id');
+		return $this->belongsTo(\Veer\Models\UserRole::class,'roles_id','id');
 	}
 
 	// One User -> Many
 
 	public function comments() {
-		return $this->hasMany('\Veer\Models\Comment', 'users_id');
+		return $this->hasMany(\Veer\Models\Comment::class, 'users_id');
 	}
 
 	public function books() {
-		return $this->hasMany('\Veer\Models\UserBook', 'users_id');
+		return $this->hasMany(\Veer\Models\UserBook::class, 'users_id');
 	}
 
 	public function discounts() {
-		return $this->hasMany('\Veer\Models\UserDiscount', 'users_id');
+		return $this->hasMany(\Veer\Models\UserDiscount::class, 'users_id');
 	}
 
 	public function userlists() {
-		return $this->hasMany('\Veer\Models\UserList', 'users_id'); 
+		return $this->hasMany(\Veer\Models\UserList::class, 'users_id'); 
 	}
 
 	public function orders() {
-		return $this->hasMany('\Veer\Models\Order', 'users_id'); 
+		return $this->hasMany(\Veer\Models\Order::class, 'users_id'); 
 	}
 
 	public function bills() {
-		return $this->hasMany('\Veer\Models\OrderBill', 'users_id', 'id'); 
+		return $this->hasMany(\Veer\Models\OrderBill::class, 'users_id', 'id'); 
 	}        
 
 	public function communications() {
-		return $this->hasMany('\Veer\Models\Communication', 'users_id');
+		return $this->hasMany(\Veer\Models\Communication::class, 'users_id');
 	}
 
 	public function administrator() {
-		return $this->hasOne('\Veer\Models\UserAdmin', 'users_id');
+		return $this->hasOne(\Veer\Models\UserAdmin::class, 'users_id');
 	}
 
 	public function searches() {
-		return $this->belongsToMany('\Veer\Models\Search','searches_connect', 'users_id', 'searches_id');  
+		return $this->belongsToMany(\Veer\Models\Search::class,'searches_connect', 'users_id', 'searches_id');  
 	}    
 
 	public function pages() {
-		return $this->hasMany('\Veer\Models\Page', 'users_id');
+		return $this->hasMany(\Veer\Models\Page::class, 'users_id');
 	}       
 	
 	// Many-To-Many
 	
     public function images() {
-        return $this->morphToMany('\Veer\Models\Image', 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
+        return $this->morphToMany(\Veer\Models\Image::class, 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
     } 	
         
 }

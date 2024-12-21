@@ -19,10 +19,10 @@ class UserList {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        !Input::has('deleteList') ?: $class->delete(Input::get('deleteList'));
-        $class->action != 'addList' ?: $class->addList(Input::all());
+        !\Illuminate\Support\Facades\Request::has('deleteList') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteList'));
+        $class->action != 'addList' ?: $class->addList(\Illuminate\Support\Facades\Request::all());
     }
 
     public function delete($id)
@@ -49,7 +49,7 @@ class UserList {
 
         $model = '\\' . elements($to);
         $o = new \Veer\Models\UserList;
-        $o->fill(array_except($params, 'attrs'));
+        $o->fill(\Illuminate\Support\Arr::except($params, 'attrs'));
 
         if(is_array($params['attrs']) && !empty($params['attrs'])) {
             $o->attributes = json_encode($params['attrs']);
@@ -65,10 +65,10 @@ class UserList {
 
     public function addList($data)
     {
-        $products = trim(array_get($data, 'products'));
-        $pages = trim(array_get($data, 'pages'));
+        $products = trim(\Illuminate\Support\Arr::get($data, 'products'));
+        $pages = trim(\Illuminate\Support\Arr::get($data, 'pages'));
 
-        $fill = array_get($data, 'fill', []);
+        $fill = \Illuminate\Support\Arr::get($data, 'fill', []);
         $fill += [
             'users_id' => \Auth::id(),
             'session_id' => \Session::getId(),
@@ -98,9 +98,9 @@ class UserList {
 	{
 		foreach($p as $element) {            
 			$parseElements = explode(":", $element);
-			$id = array_get($parseElements, 0);
-			$qty = array_get($parseElements, 1, 1);
-			$attrStr = array_get($parseElements, 2);
+			$id = \Illuminate\Support\Arr::get($parseElements, 0);
+			$qty = \Illuminate\Support\Arr::get($parseElements, 1, 1);
+			$attrStr = \Illuminate\Support\Arr::get($parseElements, 2);
 			$attrs = explode(",", $attrStr);
 
             $this->add($id, !empty($qty) ? $qty : 1, $model, $fill['name'], $fill + ['attrs' => $attrs]);

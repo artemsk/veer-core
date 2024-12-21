@@ -24,9 +24,9 @@ class Category {
 	public function getTopCategoriesWithSite($siteId)
 	{
 		return \Veer\Models\Category::where('sites_id', '=', $siteId)->has('parentcategories', '<', 1)
-				->with(array('images' => function($query) {
+				->with(['images' => function($query) {
 					$query->orderBy('pivot_id', 'asc');
-				}))->get();
+				}])->get();
 	}
 	
 	/**
@@ -39,28 +39,23 @@ class Category {
 		if(!empty($siteId))
 		{
 			return \Veer\Models\Category::where('sites_id', '=', $siteId)->where('id', '=', $id)->
-				with(array(
-					'subcategories' => function($query) use ($siteId) {
+				with(['subcategories' => function($query) use ($siteId) {
 
 					$query->where('sites_id', '=', $siteId);
-				},
-					'parentcategories' => function($query) use ($siteId) 
+				}, 'parentcategories' => function($query) use ($siteId) 
 				{
 					$query->where('sites_id', '=', $siteId);
-				}
-				))->first(); 
+				}])->first(); 
 		}
 		
-		return \Veer\Models\Category::where('id','=',$id)->with(array(
-			'parentcategories' => function ($query) 
+		return \Veer\Models\Category::where('id','=',$id)->with(['parentcategories' => function ($query) 
 			{ 
 				$query->orderBy('manual_sort','asc'); 
-			},
-			'subcategories' => function ($query) 
+			}, 'subcategories' => function ($query) 
 			{ 
 				$query->orderBy('manual_sort','asc')
 					->with('pages', 'products', 'subcategories'); 
-			}))
+			}])
 				->first();
 	}
 	
@@ -91,7 +86,7 @@ class Category {
 	 */	
 	public function withTags($id)
 	{
-		return $this->withModels('\Veer\Models\Tag', 'categories', $id);
+		return $this->withModels(\Veer\Models\Tag::class, 'categories', $id);
 	}	
 	
 	/**
@@ -101,7 +96,7 @@ class Category {
 	 */	
 	public function withAttributes($id)
 	{
-		return $this->withModels('\Veer\Models\Attribute', 'categories', $id);	
+		return $this->withModels(\Veer\Models\Attribute::class, 'categories', $id);	
 	}
 	
 	/**
@@ -137,12 +132,12 @@ class Category {
 
 		else 
 		{
-			$items = \Veer\Models\Site::with(array('categories' => function($query) use ($withRelations) 
+			$items = \Veer\Models\Site::with(['categories' => function($query) use ($withRelations) 
             {
                 $query->has('parentcategories', '<', 1)
                     ->orderBy('manual_sort','asc');
                 if(!empty($withRelations)) $query->with($withRelations);
-            }));
+            }]);
 		}
 				
 		return $items->orderBy('manual_sort','asc')->get();
@@ -155,7 +150,7 @@ class Category {
 	 */
 	protected function filterCategoryByImage($imageFilter = null, $withRelations = ['pages', 'products', 'subcategories'])
 	{
-		return \Veer\Models\Site::with(array('categories' => function($query) use ($imageFilter, $withRelations) 
+		return \Veer\Models\Site::with(['categories' => function($query) use ($imageFilter, $withRelations) 
 		{
 			$query->whereHas('images',function($q) use ($imageFilter) 
 			{
@@ -163,7 +158,7 @@ class Category {
 			});
             
             if(!empty($withRelations)) $query->with($withRelations);
-		}));	
+		}]);	
 	}
 	
 	/**
@@ -171,7 +166,7 @@ class Category {
 	 * 
 	 * 
 	 */
-	public function getCategoryAdvanced($category, $options = array()) 
+	public function getCategoryAdvanced($category, $options = []) 
 	{
 		$items = $this->getCategory($category, null);
 
@@ -179,14 +174,13 @@ class Category {
 		{
 			$items->load('communications');
 
-			$this->loadImagesWithElements($items, array_get($options, 'skipWith', false));
+			$this->loadImagesWithElements($items, \Illuminate\Support\Arr::get($options, 'skipWith', false));
 			
-			$items->load(array('pages' => function($q) {
+			$items->load(['pages' => function($q) {
 				$q->with('user', 'subpages', 'categories', 'comments', 'images')->orderBy('manual_order', 'asc');
-			},
-                'products' => function($q) {
-                    $q->with('categories', 'images');
-            }));
+			}, 'products' => function($q) {
+                $q->with('categories', 'images');
+        }]);
 
 			$items->site_title = db_parameter('SITE_TITLE', null, $items->sites_id);
 		}	

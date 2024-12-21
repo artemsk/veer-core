@@ -16,10 +16,10 @@ class Comment {
     public static function request()
     {
         $class = new static;
-        Input::get('action') != 'addComment' ?: $class->add(Input::all());
-        !Input::has('hideComment') ?: $class->hide(head(Input::get('hideComment', [])));
-        !Input::has('unhideComment') ?: $class->unhide(head(Input::get('unhideComment', [])));
-        !Input::has('deleteComment') ?: $class->delete(head(Input::get('deleteComment', [])));
+        \Illuminate\Support\Facades\Request::input('action') != 'addComment' ?: $class->add(\Illuminate\Support\Facades\Request::all());
+        !\Illuminate\Support\Facades\Request::has('hideComment') ?: $class->hide(head(\Illuminate\Support\Facades\Request::input('hideComment', [])));
+        !\Illuminate\Support\Facades\Request::has('unhideComment') ?: $class->unhide(head(\Illuminate\Support\Facades\Request::input('unhideComment', [])));
+        !\Illuminate\Support\Facades\Request::has('deleteComment') ?: $class->delete(head(\Illuminate\Support\Facades\Request::input('deleteComment', [])));
     }
 
     public function add($data)

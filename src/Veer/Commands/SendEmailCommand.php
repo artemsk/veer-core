@@ -4,25 +4,19 @@ use Veer\Commands\Command;
 
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class SendEmailCommand extends Command implements SelfHandling {
-
-	protected $view;
-	
-	protected $data;
-	
-	protected $from;
-	
-	protected $to;
-	
-	protected $subject;
-	
-	//public $queued = true; // @todo queued and not queued sending?
-	
-	/**
-	 * Create a new command instance.
-	 *
-	 */
-	public function __construct($view, $data, $subject = null, $to = null, $from = null, $siteId = null )
+class SendEmailCommand extends Command
+{
+    protected $view;
+    protected $data;
+    protected $from;
+    protected $to;
+    protected $subject;
+    //public $queued = true; // @todo queued and not queued sending?
+    /**
+     * Create a new command instance.
+     *
+     */
+    public function __construct($view, $data, $subject = null, $to = null, $from = null, $siteId = null )
 	{
 		$this->view = $view;
 		
@@ -34,12 +28,11 @@ class SendEmailCommand extends Command implements SelfHandling {
 		
 		$this->subject = $subject;
 	}
-
-	/**
-	 * Execute the command.
-	 *
-	 */
-	public function handle()
+    /**
+     * Execute the command.
+     *
+     */
+    public function handle()
 	{
 		if(empty($this->to)) return false;
 		
@@ -47,22 +40,17 @@ class SendEmailCommand extends Command implements SelfHandling {
 		
 		foreach($this->to as $to) $this->sendEmail($to);
 	}
-
-	/**
-	 * Get 'From' field values for specific site
-	 */
-	protected function getEmailFrom($siteId = null)
+    /**
+     * Get 'From' field values for specific site
+     */
+    protected function getEmailFrom($siteId = null)
 	{
-		return array(
-			"address" => db_parameter("EMAIL_ADDRESS", config("mail.from.address"), $siteId),
-			"name" => db_parameter("EMAIL_NAME", config("mail.from.name"), $siteId)
-		);
+		return ["address" => db_parameter("EMAIL_ADDRESS", config("mail.from.address"), $siteId), "name" => db_parameter("EMAIL_NAME", config("mail.from.name"), $siteId)];
 	}
-	
-	/**
-	 * Basic Email Send Queue
-	 */
-	public function sendEmail($to)
+    /**
+     * Basic Email Send Queue
+     */
+    public function sendEmail($to)
 	{
 		return \Mail::queue($this->view, $this->data, function($message) use ($to) {
 			
@@ -74,5 +62,4 @@ class SendEmailCommand extends Command implements SelfHandling {
 			
 		});
 	}
-	
 }

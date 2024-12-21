@@ -9,16 +9,16 @@ class Tag extends \Eloquent {
     use \Illuminate\Database\Eloquent\SoftDeletes; 	
 	protected $dates = ['deleted_at'];
 	
-    protected $fillable = array("name");
+    protected $fillable = ["name"];
     
     // Many Tags <-> Many
     
     public function pages() {
-        return $this->morphedByMany('\Veer\Models\Page', 'elements', 'tags_connect', 'tags_id', 'elements_id');
+        return $this->morphedByMany(\Veer\Models\Page::class, 'elements', 'tags_connect', 'tags_id', 'elements_id');
     }
 
     public function products() {
-        return $this->morphedByMany('\Veer\Models\Product', 'elements', 'tags_connect', 'tags_id', 'elements_id');
+        return $this->morphedByMany(\Veer\Models\Product::class, 'elements', 'tags_connect', 'tags_id', 'elements_id');
     }
     
 }

@@ -40,7 +40,7 @@ class InstallThemeCommand extends Command {
 	 *
 	 * @return mixed
 	 */
-	public function fire()
+	public function handle()
 	{
 		$this->info('Installing theme');
                 
@@ -143,19 +143,19 @@ class InstallThemeCommand extends Command {
 
         \Eloquent::unguard();
 
-        $this->setThemeConfiguration(data_get($settingsFile, 'config', array()), $siteId, $theme);
+        $this->setThemeConfiguration(data_get($settingsFile, 'config', []), $siteId, $theme);
 
         $this->info('* Components cards.');
 
-        $this->setThemeComponents(data_get($settingsFile, 'components', array()), $siteId, $theme);
+        $this->setThemeComponents(data_get($settingsFile, 'components', []), $siteId, $theme);
 
         $this->info('* Events cards.');
 
-        $this->setThemeEvents(data_get($settingsFile, 'events', array()), $siteId, $theme);
+        $this->setThemeEvents(data_get($settingsFile, 'events', []), $siteId, $theme);
 
         $this->info('* Jobs.');
 
-        $this->setThemeJobs(data_get($settingsFile, 'queues', array()));
+        $this->setThemeJobs(data_get($settingsFile, 'queues', []));
 
         $this->actually_did_it = true;
     }
@@ -179,7 +179,7 @@ class InstallThemeCommand extends Command {
     {
         foreach($components as $key => $component)
         {
-            foreach(is_array($component)? $component : array($component) as $oneComponent) {
+            foreach(is_array($component)? $component : [$component] as $oneComponent) {
                 $c = \Veer\Models\Component::firstOrCreate(["route_name" => $oneComponent,
                     "components_type" => "functions", "components_src" => $key, "sites_id" => $siteId]);
 
@@ -193,7 +193,7 @@ class InstallThemeCommand extends Command {
     {
         foreach($events as $key => $event)
         {
-            foreach(is_array($event)? $event : array($event) as $oneEvent) {
+            foreach(is_array($event)? $event : [$event] as $oneEvent) {
                 $c = \Veer\Models\Component::firstOrCreate(["route_name" => $oneEvent,
                     "components_type" => "events", "components_src" => $key, "sites_id" => $siteId]);
 
@@ -209,9 +209,9 @@ class InstallThemeCommand extends Command {
         foreach($queues as $key => $job)
         {
             $jobService->setParams([
-                "jobs.new.start" => array_get($job, 2),
-                "jobs.new.repeat" => array_get($job, 1),
-                "jobs.new.data" => json_encode(array_get($job, 0)),
+                "jobs.new.start" => \Illuminate\Support\Arr::get($job, 2),
+                "jobs.new.repeat" => \Illuminate\Support\Arr::get($job, 1),
+                "jobs.new.data" => json_encode(\Illuminate\Support\Arr::get($job, 0)),
                 "jobs.new.classname" => $key
             ])->saveJob();
         }

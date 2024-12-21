@@ -29,7 +29,7 @@ class adminLock extends Event {
         $this->getData();              
 	}
 
-    public function handle($event = array())
+    public function handle($event = [])
     {
         if(!empty($event)) $this->setData($event);
 
@@ -62,13 +62,13 @@ class adminLock extends Event {
 
     protected function setData($event)
     {
-        $this->userId = array_get($event, 0);
+        $this->userId = \Illuminate\Support\Arr::get($event, 0);
 
-        $this->routeRoot = array_get($event, 1);
+        $this->routeRoot = \Illuminate\Support\Arr::get($event, 1);
 
-        $this->routeEntity = array_get($event, 2);
+        $this->routeEntity = \Illuminate\Support\Arr::get($event, 2);
 
-        $this->id = array_get($event, 3);
+        $this->id = \Illuminate\Support\Arr::get($event, 3);
     }
 
     protected function checkLock()

@@ -18,7 +18,7 @@ class pageImages
     /**
      * Handle user login events.
      */
-    public function getImages($event = array())
+    public function getImages($event = [])
     {
         if (count($event[0]) <= 0) return false;
 
@@ -28,15 +28,14 @@ class pageImages
 
         $this->checkAttributes();
 
-        if (count(array_get($this->data, 'featured')) > 0) {
+        if (count(\Illuminate\Support\Arr::get($this->data, 'featured')) > 0) {
 
-            $head = count($this->images) > 0 && count(array_get($this->data,
-                        'featured')) > 1 ? $this->images->shift() : null;
+            $head = count($this->images) > 0 && count(\Illuminate\Support\Arr::get($this->data, 'featured')) > 1 ? $this->images->shift() : null;
 
             $this->images = collect($this->data['featured'])->merge($this->images);
 
             if (!empty($head))
-                    $this->images = $this->images->merge(array($head));
+                    $this->images = $this->images->merge([$head]);
         }
 
         app('veer')->loadedComponents['event']['images'] = $this->images;
@@ -44,7 +43,7 @@ class pageImages
 
     protected function checkAttributes()
     {
-        foreach (array('imagePostFirst', 'imagePostSecond') as $type) {
+        foreach (['imagePostFirst', 'imagePostSecond'] as $type) {
             if (isset($this->attributes[$type]))
                     $this->setImage($this->attributes[$type]);
         }
@@ -58,7 +57,7 @@ class pageImages
 
         $hidden = json_decode('['.$this->attributes['imagePostHidden'].']');
 
-        foreach(is_array($hidden) ? $hidden : array() as $hiddenId)
+        foreach(is_array($hidden) ? $hidden : [] as $hiddenId)
         {
             $this->images->forget($hiddenId);
         }

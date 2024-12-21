@@ -12,17 +12,17 @@ class OrderPayment extends \Eloquent {
     // Many Payments Methods <- One
     
     public function site() {
-        return $this->belongsTo('\Veer\Models\Site','sites_id','id');
+        return $this->belongsTo(\Veer\Models\Site::class,'sites_id','id');
     }
     
     // One Payment Method -> Many
     
     public function orders() {
-       return $this->hasMany('\Veer\Models\Order', 'payment_method_id', 'id'); 
+       return $this->hasMany(\Veer\Models\Order::class, 'payment_method_id', 'id'); 
     }
     
     public function bills() {
-       return $this->hasMany('\Veer\Models\OrderBill', 'payment_method_id', 'id'); 
+       return $this->hasMany(\Veer\Models\OrderBill::class, 'payment_method_id', 'id'); 
     }
     
 }

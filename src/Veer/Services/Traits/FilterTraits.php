@@ -29,17 +29,17 @@ trait FilterTraits {
 	
 	public function withTags($products, $pages)
 	{
-		return $this->withModels('\Veer\Models\Tag', $products, $pages);
+		return $this->withModels(\Veer\Models\Tag::class, $products, $pages);
 	}
 	
 	public function withAttributes($products, $pages)
 	{
-		return $this->withModels('\Veer\Models\Attribute', $products, $pages);
+		return $this->withModels(\Veer\Models\Attribute::class, $products, $pages);
 	}
 	
 	public function withCategories($products, $pages)
 	{
-		return $this->withModels('\Veer\Models\Category', $products, $pages);
+		return $this->withModels(\Veer\Models\Category::class, $products, $pages);
 	}		
 	
 }

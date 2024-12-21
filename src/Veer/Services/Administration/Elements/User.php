@@ -62,17 +62,17 @@ class User {
         //\Event::fire('router.filter: csrf');
 
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        if (Input::has('id')) {
+        if (\Illuminate\Support\Facades\Request::has('id')) {
             return $class->one();
         }
 
-        $class->updateRestrictions(Input::get('changeRestrictUser'));
-        $class->updateBan(Input::get('changeStatusUser'));
-        $class->delete(Input::get('deleteUser'));
+        $class->updateRestrictions(\Illuminate\Support\Facades\Request::input('changeRestrictUser'));
+        $class->updateBan(\Illuminate\Support\Facades\Request::input('changeStatusUser'));
+        $class->delete(\Illuminate\Support\Facades\Request::input('deleteUser'));
         $class->add(
-                $class->action == 'Add' ? Input::all() : null
+                $class->action == 'Add' ? \Illuminate\Support\Facades\Request::all() : null
         );
     }
 
@@ -82,9 +82,9 @@ class User {
      */
     protected function one()
     {
-        $this->id = Input::get('id');
+        $this->id = \Illuminate\Support\Facades\Request::input('id');
 
-        $fill = Input::has('fill') ? $this->prepareData(Input::get('fill')) : null;
+        $fill = \Illuminate\Support\Facades\Request::has('fill') ? $this->prepareData(\Illuminate\Support\Facades\Request::input('fill')) : null;
 
         if ($this->action == "add") { // @todo test
             $user = $this->validateAndCreate($fill);
@@ -108,7 +108,7 @@ class User {
 
         if ($this->action == "add") {
             app('veer')->skipShow = true;
-            Input::replace(['id' => $this->id]);
+            \Illuminate\Support\Facades\Request::replace(['id' => $this->id]);
             return \Redirect::route('admin.show', ['users', 'id' => $this->id]);
         }
     }
@@ -118,18 +118,18 @@ class User {
      */
     protected function goThroughEverything()
     {
-        $addAsAdministrator = Input::get('addAsAdministrator');
-        $administrator = Input::get('administrator');
-        $attachImages = Input::get('attachImages');
-        $removeImageAction = starts_with($this->action, 'removeImage') ? substr($this->action, 12) : null;
-        $attachPages = Input::get('attachPages');
-        $removePage = starts_with($this->action, 'removePage') ? substr($this->action, 11) : null;
-        $deletePage = starts_with($this->action, 'deletePage') ? substr($this->action, 11) : null;
-        $addOrUpdateUserBook = ($this->action == "addUserbook" || $this->action == "updateUserbook") ? Input::get('userbook') : null;
-        $deleteUserBook = Input::get('deleteUserbook');
-        $cancelDiscount = Input::get('cancelDiscount');
-        $attachDiscounts = Input::get('attachDiscounts');
-        $sendMessage = Input::has('sendMessageToUser') ? Input::get('communication') : null;
+        $addAsAdministrator = \Illuminate\Support\Facades\Request::input('addAsAdministrator');
+        $administrator = \Illuminate\Support\Facades\Request::input('administrator');
+        $attachImages = \Illuminate\Support\Facades\Request::input('attachImages');
+        $removeImageAction = \Illuminate\Support\Str::startsWith($this->action, 'removeImage') ? substr($this->action, 12) : null;
+        $attachPages = \Illuminate\Support\Facades\Request::input('attachPages');
+        $removePage = \Illuminate\Support\Str::startsWith($this->action, 'removePage') ? substr($this->action, 11) : null;
+        $deletePage = \Illuminate\Support\Str::startsWith($this->action, 'deletePage') ? substr($this->action, 11) : null;
+        $addOrUpdateUserBook = ($this->action == "addUserbook" || $this->action == "updateUserbook") ? \Illuminate\Support\Facades\Request::input('userbook') : null;
+        $deleteUserBook = \Illuminate\Support\Facades\Request::input('deleteUserbook');
+        $cancelDiscount = \Illuminate\Support\Facades\Request::input('cancelDiscount');
+        $attachDiscounts = \Illuminate\Support\Facades\Request::input('attachDiscounts');
+        $sendMessage = \Illuminate\Support\Facades\Request::has('sendMessageToUser') ? \Illuminate\Support\Facades\Request::input('communication') : null;
 
         !$addAsAdministrator ?: $this->mkadmin();
         // user id or user object is needed:
@@ -217,7 +217,7 @@ class User {
         }
 
         $data += [
-            'sites_id' => array_pull($data, 'siteId', app('veer')->siteId)
+            'sites_id' => \Illuminate\Support\Arr::pull($data, 'siteId', app('veer')->siteId)
         ];
 
         $user = $this->validateAndCreate($data);
@@ -291,7 +291,7 @@ class User {
 
         $fill['restrict_orders'] = isset($fill['restrict_orders']) ? true : false;
         $fill['newsletter'] = isset($fill['newsletter']) ? true : false;
-        $fill['birth'] = parse_form_date(array_get($fill, 'birth', 0));
+        $fill['birth'] = parse_form_date(\Illuminate\Support\Arr::get($fill, 'birth', 0));
 
         return $fill;
     }

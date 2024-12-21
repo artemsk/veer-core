@@ -18,11 +18,11 @@ class Tag {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        !starts_with($class->action, "deleteTag") ?: $class->delete(substr($class->action, 10));
-        !Input::has('renameTag') ?: $class->renameTags(Input::get('renameTag'));
-        !Input::has('newTag') ?: $class->newTags(Input::get('newTag'));
+        !\Illuminate\Support\Str::startsWith($class->action, "deleteTag") ?: $class->delete(substr($class->action, 10));
+        !\Illuminate\Support\Facades\Request::has('renameTag') ?: $class->renameTags(\Illuminate\Support\Facades\Request::input('renameTag'));
+        !\Illuminate\Support\Facades\Request::has('newTag') ?: $class->newTags(\Illuminate\Support\Facades\Request::input('newTag'));
 
         event('veer.message.center', trans('veeradmin.tag.update'));
     }

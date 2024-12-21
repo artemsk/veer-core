@@ -6,13 +6,13 @@ trait HomeTraits {
 	public function getHomeEntities($model, $siteId, $homeId)
 	{
 		$items = $model::homepages($siteId, $homeId)->with(
-				array('categories' => function($query) use ($siteId, $homeId) {
+				['categories' => function($query) use ($siteId, $homeId) {
 					$query->where('sites_id', '=', $siteId)->where('categories.id', '!=', $homeId);
-				}))->with(array('images' => function($query) {
+				}])->with(['images' => function($query) {
 			$query->orderBy('pivot_id', 'asc');
-		}));
+		}]);
 
-		if ($model == "\Veer\Models\Page") {
+		if ($model == \Veer\Models\Page::class) {
 			$items->excludeHidden();
 		} else {
 			$items->checked();

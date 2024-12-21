@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../../../config/veer.php', 'veer'
         );
-        
+
         //\Blade::setRawTags('{{', '}}');
         //\Blade::setContentTags('{{{', '}}}');
         //\Blade::setEscapedContentTags('{{{', '}}}');

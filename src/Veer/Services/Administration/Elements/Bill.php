@@ -20,18 +20,18 @@ class Bill {
     {
         $class = new static;
 
-        !Input::has('updateBillStatus') ?: $class->setId(Input::get('updateBillStatus'))
-                ->status(Input::get('billUpdate.' . Input::get('updateBillStatus') . '.status_id'))
-                ->comment(Input::get('billUpdate.' . Input::get('updateBillStatus')));
-        !Input::has('updateBillSend') ?: $class->setId(head(Input::get('updateBillSend', [])))->markAsSent();
-        !Input::has('updateBillPaid') ?: $class->setId(head(Input::get('updateBillPaid', [])))
-                ->markAsPaid(key(Input::get('updateBillPaid', [])));
-        !Input::has('updateBillCancel') ?: $class->setId(head(Input::get('updateBillCancel', [])))
-                ->markAsCancel(key(Input::get('updateBillCancel', [])));
-        !Input::has('deleteBill') ?: $class->setId(Input::get('deleteBill'))->delete();
+        !\Illuminate\Support\Facades\Request::has('updateBillStatus') ?: $class->setId(\Illuminate\Support\Facades\Request::input('updateBillStatus'))
+                ->status(\Illuminate\Support\Facades\Request::input('billUpdate.' . \Illuminate\Support\Facades\Request::input('updateBillStatus') . '.status_id'))
+                ->comment(\Illuminate\Support\Facades\Request::input('billUpdate.' . \Illuminate\Support\Facades\Request::input('updateBillStatus')));
+        !\Illuminate\Support\Facades\Request::has('updateBillSend') ?: $class->setId(head(\Illuminate\Support\Facades\Request::input('updateBillSend', [])))->markAsSent();
+        !\Illuminate\Support\Facades\Request::has('updateBillPaid') ?: $class->setId(head(\Illuminate\Support\Facades\Request::input('updateBillPaid', [])))
+                ->markAsPaid(key(\Illuminate\Support\Facades\Request::input('updateBillPaid', [])));
+        !\Illuminate\Support\Facades\Request::has('updateBillCancel') ?: $class->setId(head(\Illuminate\Support\Facades\Request::input('updateBillCancel', [])))
+                ->markAsCancel(key(\Illuminate\Support\Facades\Request::input('updateBillCancel', [])));
+        !\Illuminate\Support\Facades\Request::has('deleteBill') ?: $class->setId(\Illuminate\Support\Facades\Request::input('deleteBill'))->delete();
 
-        if(Input::has('addNewBill') && Input::has('billCreate.fill.orders_id')) {
-            $class->add(Input::get('billCreate.fill'), Input::get('billCreate.template'));
+        if(\Illuminate\Support\Facades\Request::has('addNewBill') && \Illuminate\Support\Facades\Request::has('billCreate.fill.orders_id')) {
+            $class->add(\Illuminate\Support\Facades\Request::input('billCreate.fill'), \Illuminate\Support\Facades\Request::input('billCreate.template'));
         }
     }
 
@@ -56,17 +56,15 @@ class Bill {
     {
         if(!empty($params['comments'])) {
 
-            $sendEmail = array_pull($params, 'send_to_customer');
+            $sendEmail = \Illuminate\Support\Arr::pull($params, 'send_to_customer');
 
-            array_set($params, 'name',
-                \Veer\Models\OrderStatus::where('id','=', array_get($params, 'status_id'))
-                    ->pluck('name')
-            );
+            \Illuminate\Support\Arr::set($params, 'name', \Veer\Models\OrderStatus::where('id','=', \Illuminate\Support\Arr::get($params, 'status_id'))
+                ->pluck('name'));
 
             \Veer\Models\OrderHistory::create($params + ['order_cache' => '']);
 
             if(!empty($sendEmail)) { 
-                $this->sendEmailOrdersStatus(array_get($params, 'orders_id'), [
+                $this->sendEmailOrdersStatus(\Illuminate\Support\Arr::get($params, 'orders_id'), [
                     "history" => $params
                 ]);
             }
@@ -105,7 +103,7 @@ class Bill {
     public function markAsPaid($status = true)
     {
         \Veer\Models\OrderBill::where('id', '=', $this->id)
-                ->update(array('paid' => $status));
+                ->update(['paid' => $status]);
 
         return $this;
     }
@@ -113,7 +111,7 @@ class Bill {
     public function markAsCancel($status = true)
     {
         \Veer\Models\OrderBill::where('id','=',$this->id)
-                ->update(array('canceled' => $status));
+                ->update(['canceled' => $status]);
 
         return $this;
     }
@@ -127,13 +125,13 @@ class Bill {
 
     public function add($params, $template = null)
     {
-        $order = \Veer\Models\Order::find(array_get($params, 'orders_id'));
-        $status = \Veer\Models\OrderStatus::find(array_get($params, 'status_id'));
-        $payment = $payment_method = array_get($params, 'payment_method');
-        $sendEmail = array_pull($params, 'sendTo', null);
+        $order = \Veer\Models\Order::find(\Illuminate\Support\Arr::get($params, 'orders_id'));
+        $status = \Veer\Models\OrderStatus::find(\Illuminate\Support\Arr::get($params, 'status_id'));
+        $payment = $payment_method = \Illuminate\Support\Arr::get($params, 'payment_method');
+        $sendEmail = \Illuminate\Support\Arr::pull($params, 'sendTo', null);
 
 		if(empty($payment)) {
-            $payment = \Veer\Models\OrderPayment::find(array_get($params, 'payment_method_id'));
+            $payment = \Veer\Models\OrderPayment::find(\Illuminate\Support\Arr::get($params, 'payment_method_id'));
             $payment_method = isset($payment->name) ? $payment->name : $payment_method;
         }
 
@@ -144,7 +142,7 @@ class Bill {
                 "order" => $order,
                 "status" => $status,
                 "payment" => $payment,
-                "price" => array_get($params, 'price')
+                "price" => \Illuminate\Support\Arr::get($params, 'price')
             ])->render();
         }
 

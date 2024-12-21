@@ -65,7 +65,7 @@ class VeerShop {
 			$price = number_format((double)$price, 2);
 		}
 		
-		$price = strtr($this->currency_symbol, array("[price]" => $price));
+		$price = strtr($this->currency_symbol, ["[price]" => $price]);
 				
 		return $price;
 	}
@@ -133,11 +133,11 @@ class VeerShop {
 		
 		if(!empty($custom))
 		{
-			$siteId = array_get($custom, 'sites_id', $siteId);
-			$userId = array_get($custom, 'users_id', $userId);
-			if(array_get($custom, 'discount_id') > 0)
+			$siteId = \Illuminate\Support\Arr::get($custom, 'sites_id', $siteId);
+			$userId = \Illuminate\Support\Arr::get($custom, 'users_id', $userId);
+			if(\Illuminate\Support\Arr::get($custom, 'discount_id') > 0)
 			{
-				$whereraw = "id = ".array_get($custom, 'discount_id');
+				$whereraw = "id = ".\Illuminate\Support\Arr::get($custom, 'discount_id');
 			}
 		}
 
@@ -166,7 +166,7 @@ class VeerShop {
 			$discount = true;
 		}	
 	 
-		return array('discount' => $discount, 'price' => $price);		
+		return ['discount' => $discount, 'price' => $price];		
 	}
 	
 	
@@ -181,8 +181,8 @@ class VeerShop {
 		
 		if(!empty($custom))
 		{
-			$roleId = array_get($custom, 'roles_id', $roleId);
-			$siteId = array_get($custom, 'sites_id', $siteId);
+			$roleId = \Illuminate\Support\Arr::get($custom, 'roles_id', $roleId);
+			$siteId = \Illuminate\Support\Arr::get($custom, 'sites_id', $siteId);
 		}
 		
 		if(empty($this->current_user_role)) {
@@ -219,7 +219,7 @@ class VeerShop {
 			$discount = true;
 		}	
 	 
-		return array('discount' => $discount, 'price' => $price);			
+		return ['discount' => $discount, 'price' => $price];			
 	}
 	
 	
@@ -238,7 +238,7 @@ class VeerShop {
 	{		
 		if($itemCurrency > 0 && $itemCurrency != 1) { return ($price * $itemCurrency);  }
 		
-		$shopCurrency = array_get($custom, 'forced_currency', db_parameter('SHOP_CURRENCY', 1));
+		$shopCurrency = \Illuminate\Support\Arr::get($custom, 'forced_currency', db_parameter('SHOP_CURRENCY', 1));
 		
 		if($shopCurrency > 0 && $shopCurrency != 1) {
 			return ($price * $shopCurrency);
@@ -280,7 +280,7 @@ class VeerShop {
 		\Eloquent::unguard();
 		
 		if(isset(app('veer')->administrator_credentials)) {
-			$usersId = array_get($book, 'fill.users_id', \Auth::id());
+			$usersId = \Illuminate\Support\Arr::get($book, 'fill.users_id', \Auth::id());
 			if(empty($usersId)) { $usersId = \Auth::id(); }
 		}
 
@@ -293,8 +293,8 @@ class VeerShop {
 		if(empty($book['fill']['address'])) { return false; }
 		
 		if(isset($book['fill'])) { $b->fill($book['fill']); }
-		$b->primary = array_get($book, 'checkboxes.primary', false) ? true : false;
-		$b->office_address = array_get($book, 'checkboxes.office_address', false) ? true : false;
+		$b->primary = \Illuminate\Support\Arr::get($book, 'checkboxes.primary', false) ? true : false;
+		$b->office_address = \Illuminate\Support\Arr::get($book, 'checkboxes.office_address', false) ? true : false;
 		if($pretend == false) $b->save();
 		
 		return $b;
@@ -313,7 +313,7 @@ class VeerShop {
 	 * @param $usersId
 	 * @return array
 	 */
-	public function addNewOrder($order, $usersId, $book = array(), $pretend = false)
+	public function addNewOrder($order, $usersId, $book = [], $pretend = false)
 	{
 		$order->pin = false;
 		$order->close_time = null;
@@ -347,7 +347,7 @@ class VeerShop {
 				$newUser->email = $order->email;
 				$newUser->phone = $order->phone;
 
-				$password2Email = str_random(16);
+				$password2Email = \Illuminate\Support\Str::random(16);
 				$newUser->password = $password2Email;
 				$newUser->save();
 
@@ -411,7 +411,7 @@ class VeerShop {
 			$order->address = trim($newBook->postcode . " " . $newBook->address);
 		}
 
-		$order->hash = bcrypt($order->cluster . $order->cluster_oid . $order->users_id . $order->sites_id . str_random(16));
+		$order->hash = bcrypt($order->cluster . $order->cluster_oid . $order->users_id . $order->sites_id . \Illuminate\Support\Str::random(16));
 		
 		if($pretend == false) 
 		{
@@ -419,11 +419,11 @@ class VeerShop {
 			
 			$this->incrementOrdersCount($order->users_id);
 			
-			$secret = new \Veer\Models\Secret(array("secret" => str_random(64)));
+			$secret = new \Veer\Models\Secret(["secret" => \Illuminate\Support\Str::random(64)]);
 			$order->secrets()->save($secret);
 		}
 		
-		return array($order, isset($checkDiscount) ? $checkDiscount : null);
+		return [$order, isset($checkDiscount) ? $checkDiscount : null];
 	}
 	
 	
@@ -447,17 +447,12 @@ class VeerShop {
 	 */
 	public function attachOrderContent($newContent, $order)
 	{
-		if (starts_with($newContent, ":")) {
+		if (\Illuminate\Support\Str::startsWith($newContent, ":")) {
 			$parseContent = explode(":", substr($newContent, 1));
 			foreach ($parseContent as $product) {
 				$p = explode(",", $product);
-				if (array_get($p, 0) != null) {
-					$content = $this->editOrderContent(new \Veer\Models\OrderProduct, array(
-						"product" => 1,
-						"products_id" => array_get($p, 0),
-						"quantity" => array_get($p, 1, 1),
-						"attributes" => array_get($p, 2)
-					), $order);
+				if (\Illuminate\Support\Arr::get($p, 0) != null) {
+					$content = $this->editOrderContent(new \Veer\Models\OrderProduct, ["product" => 1, "products_id" => \Illuminate\Support\Arr::get($p, 0), "quantity" => \Illuminate\Support\Arr::get($p, 1, 1), "attributes" => \Illuminate\Support\Arr::get($p, 2)], $order);
 
 					$content->save();
 				}
@@ -469,9 +464,9 @@ class VeerShop {
 			$content->orders_id = $order->id;
 			$content->product = 0;
 			$content->products_id = 0;
-			$content->name = array_get($parseContent, 0, '[?]');
-			$content->original_price = $content->price_per_one = array_get($parseContent, 1, 0);
-			$content->quantity = array_get($parseContent, 2, 1);
+			$content->name = \Illuminate\Support\Arr::get($parseContent, 0, '[?]');
+			$content->original_price = $content->price_per_one = \Illuminate\Support\Arr::get($parseContent, 1, 0);
+			$content->quantity = \Illuminate\Support\Arr::get($parseContent, 2, 1);
 			$content->price = $content->price_per_one * $content->quantity;
 			$content->save();
 		}
@@ -485,8 +480,8 @@ class VeerShop {
 	 */
 	public function editOrderContent($content, $ordersProducts, $order, $jsonSkip = false)
 	{
-		$productsId = array_get($ordersProducts, 'products_id');
-		$attributes = array_pull($ordersProducts, 'attributes');
+		$productsId = \Illuminate\Support\Arr::get($ordersProducts, 'products_id');
+		$attributes = \Illuminate\Support\Arr::pull($ordersProducts, 'attributes');
 			
 		$oldQuantity = isset($content->quantity) ? $content->quantity : 1;
 		
@@ -494,7 +489,7 @@ class VeerShop {
 		
 		$content->attributes = ($jsonSkip == true) ? $attributes : json_encode(explode(",", $attributes));
 			
-		$content->quantity = array_pull($ordersProducts, 'quantity', 1);
+		$content->quantity = \Illuminate\Support\Arr::pull($ordersProducts, 'quantity', 1);
 		if($content->quantity < 1) $content->quantity = 1;
 		
 		\Eloquent::unguard();
@@ -508,23 +503,23 @@ class VeerShop {
 		}
 
 		$content->product = 1;
-		$content->name = array_get($ordersProducts, 'name');
-		$content->original_price = array_get($ordersProducts, 'original_price');
-		$content->price_per_one =  array_get($ordersProducts, 'price_per_one');
+		$content->name = \Illuminate\Support\Arr::get($ordersProducts, 'name');
+		$content->original_price = \Illuminate\Support\Arr::get($ordersProducts, 'original_price');
+		$content->price_per_one =  \Illuminate\Support\Arr::get($ordersProducts, 'price_per_one');
 		
 		if($content->quantity != $oldQuantity) 
 		{
-			$content->weight = (array_get($ordersProducts, 'weight') / $oldQuantity) * $content->quantity;
+			$content->weight = (\Illuminate\Support\Arr::get($ordersProducts, 'weight') / $oldQuantity) * $content->quantity;
 		} 
 		
 		else 
 		{
-			$content->weight = array_get($ordersProducts, 'weight');
+			$content->weight = \Illuminate\Support\Arr::get($ordersProducts, 'weight');
 		}
 		
-		if($content->products_id != array_get($ordersProducts, 'products_id') || !empty($content->attributes))
+		if($content->products_id != \Illuminate\Support\Arr::get($ordersProducts, 'products_id') || !empty($content->attributes))
 		{
-			$product = \Veer\Models\Product::find(array_get($ordersProducts, 'products_id'));
+			$product = \Veer\Models\Product::find(\Illuminate\Support\Arr::get($ordersProducts, 'products_id'));
 			
 			$shopCurrency = \Cache::remember('shopcurrency'.$order->sites_id, .5, function() use ($order) {
 					return \Veer\Models\Configuration::where('sites_id','=',$order->sites_id)
@@ -543,17 +538,17 @@ class VeerShop {
 							$this->currency(
 								$attr['pivot']['product_new_price'], 
 								$product['currency'], 
-								array("forced_currency" => $shopCurrency)) : 
+								["forced_currency" => $shopCurrency]) : 
 							$content->price_per_one;
 				}
 			}
 		}
 		
-		if($content->products_id != array_get($ordersProducts, 'products_id') && is_object($product))
+		if($content->products_id != \Illuminate\Support\Arr::get($ordersProducts, 'products_id') && is_object($product))
 		{
 			$content->products_id = $product->id;
 			$content->original_price = empty($content->original_price) ? 
-				$this->currency($product->price, $product->currency, array("forced_currency" => $shopCurrency)) : $content->original_price;
+				$this->currency($product->price, $product->currency, ["forced_currency" => $shopCurrency]) : $content->original_price;
 			$content->name = $product->title;
 			$content->weight = $product->weight * $content->quantity;
 
@@ -561,13 +556,7 @@ class VeerShop {
 			{
 				$this->flushRememberedDiscounts();
 
-				$pricePerOne = $this->calculator($product, false, array(
-					"sites_id" => $order->sites_id,
-					"users_id" => $order->users_id,
-					"roles_id" => \Veer\Models\UserRole::where('role','=', $order->user_type)->pluck('id'),
-					"discount_id" => $order->userdiscount_id,
-					"forced_currency" => $shopCurrency 
-				));
+				$pricePerOne = $this->calculator($product, false, ["sites_id" => $order->sites_id, "users_id" => $order->users_id, "roles_id" => \Veer\Models\UserRole::where('role','=', $order->user_type)->pluck('id'), "discount_id" => $order->userdiscount_id, "forced_currency" => $shopCurrency]);
 
 				$content->price_per_one = $pricePerOne;
 			}
@@ -575,7 +564,7 @@ class VeerShop {
 
 		$content->price = $content->quantity * $content->price_per_one;
 
-		$content->comments = array_get($ordersProducts, 'comments', '');
+		$content->comments = \Illuminate\Support\Arr::get($ordersProducts, 'comments', '');
 		
 		return $content;
 	}
@@ -593,9 +582,9 @@ class VeerShop {
 	{
 		$a = json_decode($attributes);
 
-		$attributesParsed = array();
+		$attributesParsed = [];
 
-		foreach( is_array($a) ? $a : array() as $value)
+		foreach( is_array($a) ? $a : [] as $value)
 		{
 			$attribute = $product->attributes->filter(function($attr) use ($value)
 			{
@@ -629,9 +618,9 @@ class VeerShop {
 			// now it's just one address!
 			$parseAddresses = json_decode($delivery->address);
 
-			$order->country = array_get(head($parseAddresses), 0);
-			$order->city = array_get(head($parseAddresses), 1);
-			$order->address = array_get(head($parseAddresses), 2);
+			$order->country = \Illuminate\Support\Arr::get(head($parseAddresses), 0);
+			$order->city = \Illuminate\Support\Arr::get(head($parseAddresses), 1);
+			$order->address = \Illuminate\Support\Arr::get(head($parseAddresses), 2);
 			$order->userbook_id = 0;
 		}
 
@@ -652,7 +641,7 @@ class VeerShop {
 		}
 		
 		// 3 calculator
-        $class = starts_with($delivery->func_name, "\\") ? $delivery->func_name : "\\Veer\\Components\\Ecommerce\\" . $delivery->func_name;
+        $class = \Illuminate\Support\Str::startsWith($delivery->func_name, "\\") ? $delivery->func_name : "\\Veer\\Components\\Ecommerce\\" . $delivery->func_name;
 		if (!empty($delivery->func_name) && class_exists($class)) 
 		{
 			$deliveryFunc = new $class;
@@ -673,9 +662,9 @@ class VeerShop {
 		{
 			$checkConditions = $this->checkDisountConditions($delivery->discount_conditions, $order);
 
-			if (array_get($checkConditions, 'activate') == true || array_get($checkConditions, 'conditions') == false) 
+			if (\Illuminate\Support\Arr::get($checkConditions, 'activate') == true || \Illuminate\Support\Arr::get($checkConditions, 'conditions') == false) 
 			{
-				if (array_get($checkConditions, 'price') == "total") 
+				if (\Illuminate\Support\Arr::get($checkConditions, 'price') == "total") 
 				{
 					$content = new \Veer\Models\OrderProduct;
 					$content->orders_id = $order->id;
@@ -732,8 +721,8 @@ class VeerShop {
 				
 				$parseCondition = explode(":", $c);
 				
-				$condition = array_get($parseCondition, 0);
-				$value = array_get($parseCondition, 1);
+				$condition = \Illuminate\Support\Arr::get($parseCondition, 0);
+				$value = \Illuminate\Support\Arr::get($parseCondition, 1);
 				$value = trim($value);
 				
 				switch ($condition) 
@@ -774,10 +763,7 @@ class VeerShop {
 			}
 		}
 
-		return array(
-			"conditions" => $conditions_exist, 
-			"activate" => $activate_discount, 
-			"price" => $price_to_discount);
+		return ["conditions" => $conditions_exist, "activate" => $activate_discount, "price" => $price_to_discount];
 	}
 	
 	
@@ -808,7 +794,7 @@ class VeerShop {
 		}
 		
 		// 2 calculator
-        $class = starts_with($payment->func_name, "\\") ? $payment->func_name : "\\Veer\\Components\\Ecommerce\\" . $payment->func_name;
+        $class = \Illuminate\Support\Str::startsWith($payment->func_name, "\\") ? $payment->func_name : "\\Veer\\Components\\Ecommerce\\" . $payment->func_name;
 		if (!empty($payment->func_name) && class_exists($class)) 
 		{
 			$paymentFunc = new $class;
@@ -848,9 +834,9 @@ class VeerShop {
 		{
 			$checkConditions = $this->checkDisountConditions($payment->discount_conditions, $order, "total");
 
-			if (array_get($checkConditions, 'activate') == true || array_get($checkConditions, 'conditions') == false) 
+			if (\Illuminate\Support\Arr::get($checkConditions, 'activate') == true || \Illuminate\Support\Arr::get($checkConditions, 'conditions') == false) 
 			{
-				if (array_get($checkConditions, 'price') == "total") 
+				if (\Illuminate\Support\Arr::get($checkConditions, 'price') == "total") 
 				{
 					$content = new \Veer\Models\OrderProduct;
 					$content->orders_id = $order->id;
@@ -978,7 +964,7 @@ class VeerShop {
 	 */
 	public function regroupShoppingCart($cart)
 	{
-		$grouped = array();
+		$grouped = [];
 		
 		foreach($cart as $entity)
 		{
@@ -1019,7 +1005,7 @@ class VeerShop {
 	{
 		$saveContentPrice = $order->content_price;
 		$saveDeliveryPirce = $order->delivery_price;
-		$calculations = array();
+		$calculations = [];
 		
 		foreach(shipping(app('veer')->siteId) as $method)
 		{
@@ -1027,13 +1013,7 @@ class VeerShop {
 			
 			$order = $this->recalculateOrderDelivery($order, $method, $pretend);	
 			
-			$calculations[$method->id] = array(
-				"method" => $method->toArray(),
-				"delivery_price" => $order->delivery_price,
-				"delivery_hold" => $order->delivery_hold,
-				"delivery_free" => $order->delivery_free,
-				"content_price_change" => ($order->content_price-$saveContentPrice)
-			);
+			$calculations[$method->id] = ["method" => $method->toArray(), "delivery_price" => $order->delivery_price, "delivery_hold" => $order->delivery_hold, "delivery_free" => $order->delivery_free, "content_price_change" => ($order->content_price-$saveContentPrice)];
 			
 			$order->content_price = $saveContentPrice;
 			$order->delivery_price = $saveDeliveryPirce;
@@ -1051,7 +1031,7 @@ class VeerShop {
 	{
 		$saveContentPrice = $order->content_price;
 		$saveDeliveryPirce = $order->delivery_price;
-		$calculations = array();
+		$calculations = [];
 		
 		// payments
 		foreach(payments(app('veer')->siteId) as $method)
@@ -1060,13 +1040,7 @@ class VeerShop {
 			
 			$order = $this->recalculateOrderPayment($order, $method, $pretend);
 			
-			$calculations[$method->id] = array(
-				"method" => $method->toArray(),
-				"payment_hold" => $order->payment_hold,
-				"payment_free" => $order->payment_free,
-				"delivery_price_change" => ($order->delivery_price-$saveDeliveryPirce),
-				"content_price_change" => ($order->content_price-$saveContentPrice)
-			);
+			$calculations[$method->id] = ["method" => $method->toArray(), "payment_hold" => $order->payment_hold, "payment_free" => $order->payment_free, "delivery_price_change" => ($order->delivery_price-$saveDeliveryPirce), "content_price_change" => ($order->content_price-$saveContentPrice)];
 			
 			$order->content_price = $saveContentPrice;
 			$order->delivery_price = $saveDeliveryPirce;
@@ -1103,12 +1077,7 @@ class VeerShop {
 		
 		foreach($cart as $entity)
 		{
-			$content = $this->editOrderContent(new \Veer\Models\OrderProduct, array(
-				"product" => 1,
-				"products_id" => $entity->elements_id,
-				"quantity" => $entity->quantity,
-				"attributes" => $entity->attributes
-			), $order, true);
+			$content = $this->editOrderContent(new \Veer\Models\OrderProduct, ["product" => 1, "products_id" => $entity->elements_id, "quantity" => $entity->quantity, "attributes" => $entity->attributes], $order, true);
 			
 			$order->orderContent->push($content);
 			
@@ -1117,7 +1086,7 @@ class VeerShop {
 		
 		$this->sumOrderPricesAndWeight($order);
 		
-		$calculations = array();
+		$calculations = [];
 		
 		if(!empty($chosen_shipping)) 
 		{
@@ -1141,7 +1110,7 @@ class VeerShop {
 		if($order->delivery_free == true) {	$order->price = $order->content_price; }
 		else { $order->price = $order->content_price + $order->delivery_price; }
 		
-		return array($order,$checkDiscount,$calculations);
+		return [$order, $checkDiscount, $calculations];
 	}
 	
 }

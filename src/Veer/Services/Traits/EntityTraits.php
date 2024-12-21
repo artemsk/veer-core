@@ -9,10 +9,9 @@ trait EntityTraits {
 				$q->where('elements_id', '=', $id);
 			})
 			->where('sites_id', '=', $siteId)
-			->with(array('images' => function($query) {
+			->with(['images' => function($query) {
 				$query->orderBy('pivot_id', 'asc');
-			}
-			))->orderBy('created_at', 'desc')->get();	
+			}])->orderBy('created_at', 'desc')->get();	
 	}
 			
 	
@@ -21,7 +20,7 @@ trait EntityTraits {
 	{
 		if(db_parameter('COMMENTS_SYSTEM') == "disqus") 
 		{ 
-			app('veer')->loadedComponents['comments_disqus'] = viewx('components.disqus', array("identifier" => $type.$object->id));
+			app('veer')->loadedComponents['comments_disqus'] = viewx('components.disqus', ["identifier" => $type.$object->id]);
 		} 
 		
 		else 
@@ -36,7 +35,7 @@ trait EntityTraits {
 	/**
 	 * get all pages|products
 	 */
-	public function getAllEntities($model, $filters = array(), $paginateItems = 24, $sort = array('id' => 'desc'))
+	public function getAllEntities($model, $filters = [], $paginateItems = 24, $sort = ['id' => 'desc'])
 	{			
 		$type = key($filters);		
 		$filter_id = head($filters);
@@ -47,11 +46,11 @@ trait EntityTraits {
 		
 		if(!isset($items)) $items = $model::select();
 		
-		$items->with(array('images' => function($q) {
+		$items->with(['images' => function($q) {
 			$q->orderBy('pivot_id', 'asc');
-		}, 'categories'));
+		}, 'categories']);
 		
-		if($model == "\Veer\Models\Page") $items->with('user', 'subpages', 'comments');
+		if($model == \Veer\Models\Page::class) $items->with('user', 'subpages', 'comments');
 		 
 		if(!empty($type)) app('veer')->loadedComponents['filtered'] = $type; 
 						
@@ -64,7 +63,7 @@ trait EntityTraits {
     {
         if(empty(key($sort))) return $items->orderBy('id', 'desc');
 
-        return $items->orderBy(key($sort), array_get($sort, key($sort), 'desc'));
+        return $items->orderBy(key($sort), \Illuminate\Support\Arr::get($sort, key($sort), 'desc'));
     }
 
     /* filter pages */
@@ -79,7 +78,7 @@ trait EntityTraits {
 
 		return $model::whereHas($type, function($query) use ($filter_id, $type_field) 
 		{
-			$query->where( str_plural($type_field) . '_id', '=', $filter_id );
+			$query->where( \Illuminate\Support\Str::plural($type_field) . '_id', '=', $filter_id );
 		});
 	}
 	

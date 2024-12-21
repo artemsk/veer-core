@@ -20,7 +20,7 @@ class Comment extends \Eloquent {
     }
 
     public function user() {
-        return $this->belongsTo('\Veer\Models\User','users_id','id');
+        return $this->belongsTo(\Veer\Models\User::class,'users_id','id');
     }
     
 }

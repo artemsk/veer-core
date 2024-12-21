@@ -46,7 +46,7 @@ class Order {
 	/**
 	 * show Orders
 	 */
-	public function getAllOrders( $filters = array(), $orderBy = array('created_at', 'desc'), $paginateItems = 35 )
+	public function getAllOrders( $filters = [], $orderBy = ['created_at', 'desc'], $paginateItems = 35 )
 	{		
 		$orderBy = $this->replaceSortingBy($orderBy);
 				
@@ -63,25 +63,18 @@ class Order {
 		return $items->orderBy($orderBy[0], $orderBy[1])
 			->with('user', 'userbook', 'userdiscount', 'status', 'delivery', 'payment')
 			->with($this->loadSiteTitle())
-			->with(array('bills' => function($q) { $q->with('status'); }))
+			->with(['bills' => function($q) { $q->with('status'); }])
 			->paginate($paginateItems);	
 	}
 	
 	protected function filterOrders($type, $filters)
 	{
-		$fields = array("userbook" => "userbook_id", 
-			"userdiscount" => "userdiscount_id", 
-			"status" => "status_id",
-			"delivery" => "delivery_method_id",
-			"payment" => "payment_method_id",
-			"status_history" => "status_id",
-			"site" => null,
-			"user" => null);
+		$fields = ["userbook" => "userbook_id", "userdiscount" => "userdiscount_id", "status" => "status_id", "delivery" => "delivery_method_id", "payment" => "payment_method_id", "status_history" => "status_id", "site" => null, "user" => null];
 		
 		if(array_key_exists($type, $fields) || empty($type)) 
 		{
-			return $this->buildFilterWithElementsQuery($filters, "\Veer\Models\Order", 
-				$this->getPluralizeValue($type), array_get($fields, $type));
+			return $this->buildFilterWithElementsQuery($filters, \Veer\Models\Order::class, 
+				$this->getPluralizeValue($type), \Illuminate\Support\Arr::get($fields, $type));
 		}
 				
 		if($type == "products") return $this->filterOrderByProducts(head($filters));
@@ -99,7 +92,7 @@ class Order {
 	
 	protected function getPluralizeValue($type = null)
 	{
-		if(in_array($type, array("site", "user")) || empty($type)) return true;
+		if(in_array($type, ["site", "user"]) || empty($type)) return true;
 		
 		return false;		
 	}
@@ -153,11 +146,11 @@ class Order {
 	/**
 	 * regrouped order products by pivot-id
 	 */
-	protected function regroupOrderProducts($products = array())
+	protected function regroupOrderProducts($products = [])
 	{
-		$regrouped = array();
+		$regrouped = [];
 		
-		foreach($products as $p) { array_set($regrouped, $p->pivot->id, $p); }
+		foreach($products as $p) { \Illuminate\Support\Arr::set($regrouped, $p->pivot->id, $p); }
 		
 		return $regrouped;
 	}
@@ -169,18 +162,18 @@ class Order {
 	{
 		foreach($content as $key => $p)
 		{
-			if( array_get($products, $p->id) != null)
+			if( \Illuminate\Support\Arr::get($products, $p->id) != null)
 			{
 				if(!empty($p->attributes)) $p->attributesParsed = app('veershop')->parseAttributes($p->attributes, $p->id, $products[$p->id]);
 
-				foreach(!empty($products[$p->id]->downloads) ? $products[$p->id]->downloads : array() as $c)
+				foreach(!empty($products[$p->id]->downloads) ? $products[$p->id]->downloads : [] as $c)
 				{
 						$downloads[] = $c;
 				}	
 
-				foreach(array("categories", "tags", "attributes") as $cloudType)
+				foreach(["categories", "tags", "attributes"] as $cloudType)
 				{
-					foreach(!empty($products[$p->id]->{$cloudType}) ? $products[$p->id]->{$cloudType} : array() as $c)
+					foreach(!empty($products[$p->id]->{$cloudType}) ? $products[$p->id]->{$cloudType} : [] as $c)
 					{
 						$bigCloud[$cloudType]['t'][$c->id] = $c->title;
 						//$bigCloud['q'][$c->id] = isset($categoriesCloud['q'][$c->id]) ? ($categoriesCloud['q'][$c->id] + 1) : 1; 
@@ -189,8 +182,7 @@ class Order {
 			} 
 		}
 		
-		return array('content' => $content, 'downloads' => isset($downloads) ? $downloads : array(), 
-											'statistics' => isset($bigCloud) ? $bigCloud : array());
+		return ['content' => $content, 'downloads' => isset($downloads) ? $downloads : [], 'statistics' => isset($bigCloud) ? $bigCloud : []];
 	}
 	
 }

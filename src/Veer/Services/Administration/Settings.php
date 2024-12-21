@@ -58,7 +58,7 @@ class Settings {
 
     protected function isSiteSet()
     {
-        if (!empty($this->siteid) || array_get($this->data, 7) === true) return true;
+        if (!empty($this->siteid) || \Illuminate\Support\Arr::get($this->data, 7) === true) return true;
 
         \Event::fire('veer.message.center', \Lang::get('veeradmin.error.reload'));
 
@@ -76,8 +76,7 @@ class Settings {
 
             if (!empty($this->actionDelete)) $this->delete();
 
-            if (!empty($this->actionSave) && null != array_get($this->confs,
-                    $this->cardid.'.'.$this->data[2])) $this->update();
+            if (!empty($this->actionSave) && null != \Illuminate\Support\Arr::get($this->confs, $this->cardid.'.'.$this->data[2])) $this->update();
 
             \Illuminate\Support\Facades\Artisan::call('cache:clear');
 
@@ -88,14 +87,11 @@ class Settings {
     protected function ajaxRequest()
     {
         $items = (new \Veer\Services\Show\Site)->{$this->data[5]}($this->siteid,
-            array('id', 'desc'));
+            ['id', 'desc']);
 
         /* for admin we always use 'view' instead of 'viewx' */
         return view(app('veer')->template.'.lists.'.$this->data[6],
-            array(
-            $this->data[1] => $items[0]->{$this->data[1]},
-            "siteid" => $this->siteid,
-        ));
+            [$this->data[1] => $items[0]->{$this->data[1]}, "siteid" => $this->siteid]);
     }
 
     protected function update()
@@ -106,7 +102,7 @@ class Settings {
         
         foreach($this->data[3] as $db_field => $input_field) {
             $params[$db_field] = $db_field == 'sites_id' ? $this->siteid : 
-                array_get($this->confs, $this->cardid.'.'.$input_field);
+                \Illuminate\Support\Arr::get($this->confs, $this->cardid.'.'.$input_field);
         }
 
         $newc = (count($params) == 1 && isset($params['id']) && empty($params['id'])) ? 
@@ -114,7 +110,7 @@ class Settings {
         unset($params['id']);
         
         foreach($params as $key => $value) { $newc->{$key} = $value; }
-        foreach($this->data[4] as $key => $value) { $newc->{$key} = array_get($this->confs, $this->cardid.'.'.$value); }
+        foreach($this->data[4] as $key => $value) { $newc->{$key} = \Illuminate\Support\Arr::get($this->confs, $this->cardid.'.'.$value); }
         $newc->save();
 
         $this->cardid = $newc->id;

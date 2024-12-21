@@ -26,22 +26,22 @@ class Product extends Entity {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        if (Input::has('id')) {
+        if (\Illuminate\Support\Facades\Request::has('id')) {
             return $class->one();
         }
 
-        $changeStatusProduct = starts_with($class->action, "changeStatusProduct") ? substr($class->action, 20) : null;
-        $deleteProduct = starts_with($class->action, "deleteProduct") ? substr($class->action, 14) : null;
-        $showEarlyProduct = starts_with($class->action, "showEarlyProduct") ? substr($class->action, 17) : false;
-        $quickAddPage = Input::has('fill.title') ? Input::all() : null;
+        $changeStatusProduct = \Illuminate\Support\Str::startsWith($class->action, "changeStatusProduct") ? substr($class->action, 20) : null;
+        $deleteProduct = \Illuminate\Support\Str::startsWith($class->action, "deleteProduct") ? substr($class->action, 14) : null;
+        $showEarlyProduct = \Illuminate\Support\Str::startsWith($class->action, "showEarlyProduct") ? substr($class->action, 17) : false;
+        $quickAddPage = \Illuminate\Support\Facades\Request::has('fill.title') ? \Illuminate\Support\Facades\Request::all() : null;
 
         $class->toggleStatus($changeStatusProduct)
             ->delete($deleteProduct)
             ->available($showEarlyProduct)
             ->add($quickAddPage)
-            ->quickFreeForm(Input::get('freeForm'));
+            ->quickFreeForm(\Illuminate\Support\Facades\Request::input('freeForm'));
     }
 
     /**
@@ -137,8 +137,8 @@ class Product extends Entity {
         $prices = explode(":", $data['prices']);
         $options = explode(":", $data['options']);
         $fill = [
-            'title' => array_get($data, 'fill.title', array_get($data, 'title', '')),
-            'url' => array_get($data, 'fill.url', array_get($data, 'url', '')),
+            'title' => \Illuminate\Support\Arr::get($data, 'fill.title', \Illuminate\Support\Arr::get($data, 'title', '')),
+            'url' => \Illuminate\Support\Arr::get($data, 'fill.url', \Illuminate\Support\Arr::get($data, 'url', '')),
         ];
 
         foreach(['price', 'price_sales', 'price_opt', 'price_base', 'currency'] as $i => $type) {
@@ -149,7 +149,7 @@ class Product extends Entity {
             $fill[$type] = !empty($options[$type]) ? $options[$i] : (!empty($data[$type]) ? $data[$type] : 0);
         }
 
-        $fill['production_code'] = !empty($options[4]) ? $options[4] : array_get($data, 'production_code', '');
+        $fill['production_code'] = !empty($options[4]) ? $options[4] : \Illuminate\Support\Arr::get($data, 'production_code', '');
         $fill['status'] = 'hide';
 
         return $this->prepareData($fill);
@@ -179,8 +179,8 @@ class Product extends Entity {
         $this->id = $product->id;
         $this->entity = $product;
 
-        $this->image(array_get($data, 'uploadImage'));
-        $this->file(array_get($data, 'uploadFiles'));
+        $this->image(\Illuminate\Support\Arr::get($data, 'uploadImage'));
+        $this->file(\Illuminate\Support\Arr::get($data, 'uploadFiles'));
 
         return $this;
     }
@@ -213,20 +213,20 @@ class Product extends Entity {
                 
                 switch($type) {
                     case 'categories':
-                        $categories = explode(",", array_get($fields, $i, ''));
+                        $categories = explode(",", \Illuminate\Support\Arr::get($fields, $i, ''));
                         break;
                     case 'image':
                     case 'file':
-                        ${$type} = array_get($fields, $i); // $image, $file
+                        ${$type} = \Illuminate\Support\Arr::get($fields, $i); // $image, $file
                         break;
                     case 'descr':
-                        $fill[$type] = substr(array_get($fields, $i, ''), 2, -2);
+                        $fill[$type] = substr(\Illuminate\Support\Arr::get($fields, $i, ''), 2, -2);
                         break;
                     case 'status':
-                        $fill[$type] = array_get($fields, $i, 'hide');
+                        $fill[$type] = \Illuminate\Support\Arr::get($fields, $i, 'hide');
                         break;
                     default:
-                        $fill[$type] = array_get($fields, $i, 0);
+                        $fill[$type] = \Illuminate\Support\Arr::get($fields, $i, 0);
                         break;
                 }   
             }
@@ -290,12 +290,12 @@ class Product extends Entity {
         $fill['star'] = isset($fill['star']) ? 1 : 0;
         $fill['download'] = isset($fill['download']) ? 1 : 0;
         $fill['url'] = isset($fill['url']) ? trim($fill['url']) : '';
-        $fill['price_sales_on'] = parse_form_date(array_get($fill, 'price_sales_on', 0));
-        $fill['price_sales_off'] = parse_form_date(array_get($fill, 'price_sales_off', 0));
+        $fill['price_sales_on'] = parse_form_date(\Illuminate\Support\Arr::get($fill, 'price_sales_on', 0));
+        $fill['price_sales_off'] = parse_form_date(\Illuminate\Support\Arr::get($fill, 'price_sales_off', 0));
 
-        $toShow = parse_form_date(array_get($fill, 'to_show', 0));
-        $toShow->hour((int) array_get($fill, 'to_show_hour', 0));
-        $toShow->minute((int) array_get($fill, 'to_show_minute', 0));
+        $toShow = parse_form_date(\Illuminate\Support\Arr::get($fill, 'to_show', 0));
+        $toShow->hour((int) \Illuminate\Support\Arr::get($fill, 'to_show_hour', 0));
+        $toShow->minute((int) \Illuminate\Support\Arr::get($fill, 'to_show_minute', 0));
 
         $fill['to_show'] = $toShow;
         return $fill;

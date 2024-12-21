@@ -6,7 +6,7 @@ class queueHelloWorld {
     {
         //
 		app('files')->append(storage_path() . "/hello.txt", "Hello world! " .
-			$data['message'] . " " . array_get(app('veer')->statistics, 'memory') . "\r\n");
+			$data['message'] . " " . \Illuminate\Support\Arr::get(app('veer')->statistics, 'memory') . "\r\n");
 		
 		if(isset($data['repeatJob']) && $data['repeatJob'] > 0) {
 			

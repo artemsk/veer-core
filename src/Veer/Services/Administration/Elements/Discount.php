@@ -20,13 +20,13 @@ class Discount {
     {
         $class = new static;
 
-        !Input::has('updateGlobalDiscounts') ?: $class->add(Input::get('discount', []));
-        !Input::has('deleteDiscount') ?: $class->delete(Input::get('deleteDiscount'));
+        !\Illuminate\Support\Facades\Request::has('updateGlobalDiscounts') ?: $class->add(\Illuminate\Support\Facades\Request::input('discount', []));
+        !\Illuminate\Support\Facades\Request::has('deleteDiscount') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteDiscount'));
     }
 
     public function generateCode()
     {
-        return $this->setCode(str_random(18));
+        return $this->setCode(\Illuminate\Support\Str::random(18));
     }
 
     public function setCode($code)
@@ -45,10 +45,10 @@ class Discount {
     {
         foreach($discounts as $key => $discount) {            
             $fill = isset($discount['fill']) ? $discount['fill'] : $discount;
-            $fill['discount'] = strtr(array_get($fill, 'discount'), ['%' => '']);
+            $fill['discount'] = strtr(\Illuminate\Support\Arr::get($fill, 'discount'), ['%' => '']);
             $fill['expires'] = isset($fill['expires']) ? true : false;
 
-            if(($key == "new" || !is_numeric($key)) && $fill['discount'] > 0 && array_get($fill, 'sites_id') > 0) {
+            if(($key == "new" || !is_numeric($key)) && $fill['discount'] > 0 && \Illuminate\Support\Arr::get($fill, 'sites_id') > 0) {
                 $d = new \Veer\Models\UserDiscount;
             } else { 
                 $d = \Veer\Models\UserDiscount::find($key);

@@ -75,7 +75,7 @@ class Handler extends ExceptionHandler
 
             $cachedPage = \Cache::get($cache_url);
 
-            return response()->view('dummy', array('cachedPage' => $cachedPage));
+            return response()->view('dummy', ['cachedPage' => $cachedPage]);
         } else {
             return response("Error connecting to database. Please come back later. ", 503);
         }

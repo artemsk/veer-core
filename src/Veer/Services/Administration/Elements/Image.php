@@ -18,17 +18,17 @@ class Image {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        foreach(array_keys(Input::all()) as $k) {
-            if (Input::hasFile($k)) { // @todo attention
+        foreach(array_keys(\Illuminate\Support\Facades\Request::all()) as $k) {
+            if (\Illuminate\Support\Facades\Request::hasFile($k)) { // @todo attention
                 $class->uploadedIds = array_merge($class->uploadedIds, $class->upload('image', $k, null, null, '', null, true));
                 event('veer.message.center', trans('veeradmin.image.upload'));
             }
         }
 
-        !Input::has('attachImages') ?: $class->attachImages(Input::get('attachImages'));
-        !starts_with($class->action, 'deleteImage') ?: $class->delete(substr($class->action, 12));
+        !\Illuminate\Support\Facades\Request::has('attachImages') ?: $class->attachImages(\Illuminate\Support\Facades\Request::input('attachImages'));
+        !\Illuminate\Support\Str::startsWith($class->action, 'deleteImage') ?: $class->delete(substr($class->action, 12));
     }
 
     public function add($data, $relation = null, $attach_id = null, $returnId = true)

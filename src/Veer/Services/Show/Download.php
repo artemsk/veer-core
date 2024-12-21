@@ -45,6 +45,6 @@ class Download {
 			$items_regrouped[$item->fname][$item->original][$key]=$key;
 		}
 		
-		return isset($items_regrouped) ? $items_regrouped : array();
+		return isset($items_regrouped) ? $items_regrouped : [];
 	}
 }

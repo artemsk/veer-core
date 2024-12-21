@@ -11,18 +11,17 @@ class Page {
 	 * - with: Images
 	 * - to whom: make() | page/{blank}
 	 */
-	public function getPagesWithSite($siteId, $queryParams = array())
+	public function getPagesWithSite($siteId, $queryParams = [])
 	{
 		return \Veer\Models\Page::whereHas('categories', function($q) use($siteId) {
 				$q->where('sites_id', '=', $siteId);
 			})->excludeHidden()
-			->orderBy(array_get($queryParams, 'sort', 'created_at'), array_get($queryParams, 'direction', 'desc'))
-			->take(array_get($queryParams, 'take_pages', 15))
-			->skip(array_get($queryParams, 'skip_pages', 0))
-			->with(array('images' => function($query) {
+			->orderBy(\Illuminate\Support\Arr::get($queryParams, 'sort', 'created_at'), \Illuminate\Support\Arr::get($queryParams, 'direction', 'desc'))
+			->take(\Illuminate\Support\Arr::get($queryParams, 'take_pages', 15))
+			->skip(\Illuminate\Support\Arr::get($queryParams, 'skip_pages', 0))
+			->with(['images' => function($query) {
 				$query->orderBy('pivot_id', 'asc');
-			}
-			), 'categories')->get();
+			}], 'categories')->get();
 	}
 	
 	/**
@@ -90,7 +89,7 @@ class Page {
 	 */
 	public function withChildPages($siteId, $id, $queryParams = null)
 	{
-		return $this->getElementsWhereHasModel('pages', array('parentpages', 'parent'), $id, $siteId, $queryParams);
+		return $this->getElementsWhereHasModel('pages', ['parentpages', 'parent'], $id, $siteId, $queryParams);
 	}
 
 	/**
@@ -102,7 +101,7 @@ class Page {
 	 */
 	public function withParentPages($siteId, $id, $queryParams = null)
 	{
-		return $this->getElementsWhereHasModel('pages', array('subpages', 'child'), $id, $siteId, $queryParams);
+		return $this->getElementsWhereHasModel('pages', ['subpages', 'child'], $id, $siteId, $queryParams);
 	}
 
 	/**
@@ -118,7 +117,7 @@ class Page {
 	}
 
 	/* get page advanced */
-	public function getPageAdvanced($page, $options = array())
+	public function getPageAdvanced($page, $options = [])
 	{
 		if($page == "new") return new \stdClass(); 
 			
@@ -130,7 +129,7 @@ class Page {
 				'user', 'subpages', 'parentpages', 'products', 'categories', 
 				'tags', 'attributes', 'downloads');
 			
-			$this->loadImagesWithElements($items, array_get($options, 'skipWith', false));
+			$this->loadImagesWithElements($items, \Illuminate\Support\Arr::get($options, 'skipWith', false));
 			
 			$items['lists'] = 
 				$items->userlists()->count(\Illuminate\Support\Facades\DB::raw(
@@ -144,9 +143,9 @@ class Page {
 	/**
 	 * Show Pages
 	 */
-	public function getAllPages($filters = array(), $paginateItems = 24)
+	public function getAllPages($filters = [], $paginateItems = 24)
 	{
-		return $this->getAllEntities('\Veer\Models\Page', array_get($filters, 0, []), $paginateItems, array_get($filters, 1, []));
+		return $this->getAllEntities(\Veer\Models\Page::class, \Illuminate\Support\Arr::get($filters, 0, []), $paginateItems, \Illuminate\Support\Arr::get($filters, 1, []));
 	}	
 	
 }

@@ -34,11 +34,7 @@ if ( ! function_exists('sanitize_url'))
 	function sanitize_url($url = '')
 	{
                 return strtr( $url, 
-                array( "http://" => "",
-					   ":" => "_",
-                       "/" => "_",
-                       "." => "_"
-                    ));
+                ["http://" => "", ":" => "_", "/" => "_", "." => "_"]);
 	}
 }
 
@@ -54,16 +50,7 @@ if ( ! function_exists('get_paginator_and_sorting'))
 	 */
 	function get_paginator_and_sorting()
 	{
-                $defaultParams = array(
-                "sort" => "created_at",
-                "direction" => "desc",
-                "skip" => 0,
-                "take" => 25,
-                "skip_pages" => 0,
-                "take_pages" => 25,
-                "search_field_product" => "title",
-                "search_field_page" => "title"
-                );
+                $defaultParams = ["sort" => "created_at", "direction" => "desc", "skip" => 0, "take" => 25, "skip_pages" => 0, "take_pages" => 25, "search_field_product" => "title", "search_field_page" => "title"];
                 
                 $g = Input::all();
 
@@ -231,7 +218,7 @@ if (!function_exists('elements')) {
 	 */
 	function elements($type = "page")
 	{
-		return "Veer\Models\\" . ucfirst( str_singular($type) );
+		return "Veer\Models\\" . ucfirst( \Illuminate\Support\Str::singular($type) );
 	}
 
 }
@@ -325,7 +312,7 @@ if (!function_exists('parse_form_date')) {
 		
 		$parseDate = explode("/", $d);
 		
-		return ((int)array_get($parseDate, 2, 0) <= 0) ? now() : \Carbon\Carbon::parse($d);	
+		return ((int)\Illuminate\Support\Arr::get($parseDate, 2, 0) <= 0) ? now() : \Carbon\Carbon::parse($d);	
 	}
 }
 
@@ -353,9 +340,9 @@ if (!function_exists('array_set_empty')) {
 	 */
 	function array_set_empty(&$array, $key, $default = null)
 	{ 
-		$value = array_get($array, $key);
+		$value = \Illuminate\Support\Arr::get($array, $key);
 		
-		return !empty($value) ?: array_set($array, $key, $default);
+		return !empty($value) ?: \Illuminate\Support\Arr::set($array, $key, $default);
 	}
 }
 
@@ -368,9 +355,9 @@ if (!function_exists('array_set_if')) {
 	 */
 	function array_set_if($condition, &$array, $key, $default = null)
 	{ 
-		$value = array_get($array, $key);
+		$value = \Illuminate\Support\Arr::get($array, $key);
 		
-		return $value != $condition ?: array_set($array, $key, $default);
+		return $value != $condition ?: \Illuminate\Support\Arr::set($array, $key, $default);
 	}
 }
 
@@ -385,8 +372,7 @@ if (!function_exists('paragraphs')) {
 	{ 	
 		if(!empty($delimiter)) return explode($delimiter, $text);
 		
-		else $paragraphs = preg_split('#<p([^>])*>#',strtr( $text, array(
-			"</p>" => ""))); // @todo fix with ? (non greedy)
+		else $paragraphs = preg_split('#<p([^>])*>#',strtr( $text, ["</p>" => ""])); // @todo fix with ? (non greedy)
 
 		return array_filter($paragraphs, 'strlen');
 	}
@@ -405,9 +391,9 @@ if ( ! function_exists('viewx'))
 	 * @param  array   $mergeData
 	 * @return \Illuminate\View\View
 	 */
-	function viewx($view = null, $data = array(), $mergeData = array())
+	function viewx($view = null, $data = [], $mergeData = [])
 	{
-		$factory = app('Illuminate\Contracts\View\Factory');
+		$factory = app(\Illuminate\Contracts\View\Factory::class);
 
 		if (func_num_args() === 0)
 		{

@@ -22,55 +22,55 @@ class Page extends \Eloquent {
     // Many Pages <- One
      
     public function user() {
-        return $this->belongsTo('\Veer\Models\User','users_id','id');
+        return $this->belongsTo(\Veer\Models\User::class,'users_id','id');
     }
     
     // Many Pages <-> Many
     
     public function subpages() {
-        return $this->belongsToMany('\Veer\Models\Page','pages_pivot', 'parent_id', 'child_id');
+        return $this->belongsToMany(\Veer\Models\Page::class,'pages_pivot', 'parent_id', 'child_id');
     }
     
     public function parentpages() {
-        return $this->belongsToMany('\Veer\Models\Page','pages_pivot', 'child_id', 'parent_id');
+        return $this->belongsToMany(\Veer\Models\Page::class,'pages_pivot', 'child_id', 'parent_id');
     }
     
     public function products() {
-        return $this->belongsToMany('\Veer\Models\Product','pages_products', 'pages_id', 'products_id');        
+        return $this->belongsToMany(\Veer\Models\Product::class,'pages_products', 'pages_id', 'products_id');        
     }
     
     public function categories() {
-        return $this->morphToMany('\Veer\Models\Category', 'elements', 'categories_connect', 'elements_id', 'categories_id');
+        return $this->morphToMany(\Veer\Models\Category::class, 'elements', 'categories_connect', 'elements_id', 'categories_id');
     }
     
     public function tags() {
-        return $this->morphToMany('\Veer\Models\Tag', 'elements', 'tags_connect', 'elements_id', 'tags_id');
+        return $this->morphToMany(\Veer\Models\Tag::class, 'elements', 'tags_connect', 'elements_id', 'tags_id');
     } 
     
     public function attributes() {
-        return $this->morphToMany('\Veer\Models\Attribute', 'elements', 'attributes_connect', 'elements_id', 'attributes_id');
+        return $this->morphToMany(\Veer\Models\Attribute::class, 'elements', 'attributes_connect', 'elements_id', 'attributes_id');
     } 
     
     public function images() {
-        return $this->morphToMany('\Veer\Models\Image', 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
+        return $this->morphToMany(\Veer\Models\Image::class, 'elements', 'images_connect', 'elements_id', 'images_id')->withPivot('id');
     } 
     
     // One Page -> Many
     
     public function comments() {
-        return $this->morphMany('\Veer\Models\Comment', 'elements');
+        return $this->morphMany(\Veer\Models\Comment::class, 'elements');
     }   
  
     public function downloads() {
-        return $this->morphMany('\Veer\Models\Download', 'elements');
+        return $this->morphMany(\Veer\Models\Download::class, 'elements');
     }  
     
     public function userlists() {
-        return $this->morphMany('\Veer\Models\UserList', 'elements');
+        return $this->morphMany(\Veer\Models\UserList::class, 'elements');
     }
     
     public function communications() {
-        return $this->morphMany('\Veer\Models\Communication', 'elements');
+        return $this->morphMany(\Veer\Models\Communication::class, 'elements');
     }   
     
     // news

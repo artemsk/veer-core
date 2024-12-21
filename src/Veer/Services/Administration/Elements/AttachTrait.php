@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Input;
 
 trait AttachTrait {
-       
+
     /**
      * Attach Elements
      * 
@@ -14,10 +14,10 @@ trait AttachTrait {
 
         if(is_array($elements)) {         
             $method = $replace == true ? 'sync' : 'attach';
-            
+
             $object->{$relation}()->{$method}($elements);
 
-            if(!empty($message)) { event('veer.message.center', trans(array_get($message, 'language', 'veeradmin.empty'))); }
+            if(!empty($message)) { event('veer.message.center', trans(\Illuminate\Support\Arr::get($message, 'language', 'veeradmin.empty'))); }
             return true;
         }
     }
@@ -49,11 +49,11 @@ trait AttachTrait {
                 $attr->name = $a['name'];
                 $attr->val = $a['val'];
                 $attr->type = $a['type'];
-                $attr->descr = array_get($a, 'descr', '');
+                $attr->descr = \Illuminate\Support\Arr::get($a, 'descr', '');
                 $attr->save();
             }
-            
-            $attrArr[$attr->id] = ["product_new_price" => array_get($a, 'price', '')];
+
+            $attrArr[$attr->id] = ["product_new_price" => \Illuminate\Support\Arr::get($a, 'price', '')];
         }
 
         $this->attachElements($attrArr, $object, 'attributes', null, ",", ":", $replace);
@@ -67,7 +67,7 @@ trait AttachTrait {
     {
         \Eloquent::unguard();
         $tagArr = [];
-        
+
         if(is_array($tags)) {
             $matches[1] = $tags;
         } elseif(!empty($separator)) {
@@ -100,12 +100,12 @@ trait AttachTrait {
     {
         $new = $this->parseForm($form);
         if(!is_array($new['target'])) { return null; }
-        
+
         foreach($new['target'] as $a) {
             $a = trim($a);            
             if(empty($a)) { continue; }
-            
-            if(starts_with($a, ":")) {
+
+            if(\Illuminate\Support\Str::startsWith($a, ":")) {
                 // id
                 $aDb = \Veer\Models\Attribute::find(substr($a, 1));
                 if(!is_object($aDb)) { continue; }
@@ -119,10 +119,10 @@ trait AttachTrait {
                 $aDb->descr = empty($aDb->descr) ? '' : $aDb->descr;
                 $aDb->save();
             }            
-            
+
             $attributes[] = $aDb->id;
         }
-        
+
         if(isset($attributes)) { $this->attachFromForm($new['elements'], $attributes, 'attributes'); }
     }
 
@@ -135,13 +135,13 @@ trait AttachTrait {
     {
         $small = '';
         preg_match("/\[(?s).*\]/", $textarea, $small);
-        $parseTypes = explode(":", substr(array_get($small, 0, ''), 2, -1));
+        $parseTypes = explode(":", substr(\Illuminate\Support\Arr::get($small, 0, ''), 2, -1));
         $parseAttach = explode("[", $textarea);
-        $attach = explode(",", trim(array_get($parseAttach, 0)));
+        $attach = explode(",", trim(\Illuminate\Support\Arr::get($parseAttach, 0)));
 
         return ['target' => $attach, 'elements' => $parseTypes];
     }
-    
+
     /**
      * Attach Based on Form Input
      * @todo Test
@@ -150,15 +150,15 @@ trait AttachTrait {
     protected function attachFromForm($str, $attach, $type)
     {
         $models = ['Product', 'Page', 'Category', 'User'];
-        
+
         foreach(is_array($str) ? $str : [] as $k => $v) {
             if($k > 3) continue;
             $p = explode(",", $v);
-            
+
             foreach($p as $id) {
                 $class = "\\Veer\\Models\\".$models[$k];
                 $object = $class::find($id);
-                                
+
                 if(is_object($object)) { $this->attachElements($attach, $object, $type, null); }
             }
         }
@@ -193,12 +193,12 @@ trait AttachTrait {
 	 */
 	protected function associate($relation, $childs, $parentId, $parentField, $childsField = "id", $raw = null)
 	{
-		$relation = "\\" . elements(str_singular($relation));
+		$relation = "\\" . elements(\Illuminate\Support\Str::singular($relation));
 		$r = $relation::whereIn($childsField, $childs);
 		if(!empty($raw)) { $r->whereRaw($raw); }
 		$r->update([$parentField => $parentId]);
 	}
-    
+
     /*
     abstract protected function parseIds($ids, $separator = ",", $start = ":");
      */

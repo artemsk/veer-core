@@ -40,7 +40,7 @@ class ProductController extends Controller {
 	 */
 	public function show($id)
 	{
-		if(in_array($id, array('new', 'ordered', 'viewed'))) return $this->showProductLists($id);
+		if(in_array($id, ['new', 'ordered', 'viewed'])) return $this->showProductLists($id);
 		
 		// @todo queryParams -> filter?
 
@@ -50,22 +50,15 @@ class ProductController extends Controller {
 		
 		$product->increment('viewed');	
 		
-		$product->load(array('images' => function($q) {
+		$product->load(['images' => function($q) {
 			return $q->orderBy('pivot_id', 'asc');
-		}, 'tags', 'attributes', 'downloads', 'userlists'));
+		}, 'tags', 'attributes', 'downloads', 'userlists']);
 		
 		$this->showProduct->loadComments($product, 'product');
 		
 		$paginator_and_sorting = get_paginator_and_sorting();
 
-		$data = array(
-			"product" => $product,
-			"subproducts" => $this->showProduct->withChildProducts(app('veer')->siteId, $product->id, $paginator_and_sorting),
-			"parentproducts" => $this->showProduct->withParentProducts(app('veer')->siteId, $product->id, $paginator_and_sorting),
-			"pages" => $this->showProduct->withPages(app('veer')->siteId, $product->id, $paginator_and_sorting),
-			"categories" => $this->showProduct->withCategories(app('veer')->siteId, $product->id),
-			"template" => $this->template
-		);
+		$data = ["product" => $product, "subproducts" => $this->showProduct->withChildProducts(app('veer')->siteId, $product->id, $paginator_and_sorting), "parentproducts" => $this->showProduct->withParentProducts(app('veer')->siteId, $product->id, $paginator_and_sorting), "pages" => $this->showProduct->withPages(app('veer')->siteId, $product->id, $paginator_and_sorting), "categories" => $this->showProduct->withCategories(app('veer')->siteId, $product->id), "template" => $this->template];
 	
 		$view = viewx($this->template.'.product', $data);
 

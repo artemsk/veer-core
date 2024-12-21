@@ -4,34 +4,30 @@ use Veer\Commands\Command;
 
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class HttpQueueWorkerCommand extends Command implements SelfHandling {
-
-	protected $driverMethod;
-	
-	protected $activeJob;
-	
-	/**
-	 * Create a new command instance.
-	 *
-	 */
-	public function __construct($driver)
+class HttpQueueWorkerCommand extends Command
+{
+    protected $driverMethod;
+    protected $activeJob;
+    /**
+     * Create a new command instance.
+     *
+     */
+    public function __construct($driver)
 	{
 		$this->driverMethod = 'runQueue'.ucfirst($driver);
 	}
-
-	/**
-	 * Execute the command.
-	 *
-	 */
-	public function handle()
+    /**
+     * Execute the command.
+     *
+     */
+    public function handle()
 	{
 		if(method_exists($this, $this->driverMethod)) return $this->{$this->driverMethod}();
 	}
-	
-	/*
-	 * Queue with Qdb driver 
-	 */
-	protected function runQueueQdb()
+    /*
+     * Queue with Qdb driver 
+     */
+    protected function runQueueQdb()
 	{		
 		if(!$this->isAllowed()) return false;
 		
@@ -42,27 +38,24 @@ class HttpQueueWorkerCommand extends Command implements SelfHandling {
 		
 		$this->setChecked(config('veer.repeatjob'));
 	}
-	
-	/*
-	 * Is Allowed to work?
-	 */
-	protected function isAllowed()
+    /*
+     * Is Allowed to work?
+     */
+    protected function isAllowed()
 	{
 		if(!\Cache::has('queue_checked')) return true;
 	}
-	
-	/*
-	 * Set checked mark to cache
-	 */
-	protected function setChecked($period = 5)
+    /*
+     * Set checked mark to cache
+     */
+    protected function setChecked($period = 5)
 	{
 		\Cache::put('queue_checked', true, $period);
 	}
-	
-	/*
-	 * Get Qdb Job from database
-	 */
-	protected function getQdbJob()
+    /*
+     * Get Qdb Job from database
+     */
+    protected function getQdbJob()
 	{
 		$this->activeJob = \Veer\Services\Queuedb\Job::where('status','<=','1')
 			->where('available_at','<=',date('Y-m-d H:i:00', time()))
@@ -71,5 +64,4 @@ class HttpQueueWorkerCommand extends Command implements SelfHandling {
 		
 		return $this->activeJob;
 	}
-
 }

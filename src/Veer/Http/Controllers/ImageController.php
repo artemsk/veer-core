@@ -32,13 +32,7 @@ class ImageController extends Controller {
 		
 		$paginator_and_sorting = get_paginator_and_sorting();
 		
-		$view = viewx($this->template.'.image', array(
-			"image" => $image,
-			"products" => $this->showImage->withProducts(app('veer')->siteId, $filename, $paginator_and_sorting),
-			"pages" => $this->showImage->withPages(app('veer')->siteId, $filename, $paginator_and_sorting),
-			"categories" => $this->showImage->withCategories(app('veer')->siteId, $filename),
-			"template" => $this->template
-		)); 
+		$view = viewx($this->template.'.image', ["image" => $image, "products" => $this->showImage->withProducts(app('veer')->siteId, $filename, $paginator_and_sorting), "pages" => $this->showImage->withPages(app('veer')->siteId, $filename, $paginator_and_sorting), "categories" => $this->showImage->withCategories(app('veer')->siteId, $filename), "template" => $this->template]); 
 
 		$this->view = $view; 
 
@@ -76,7 +70,7 @@ class ImageController extends Controller {
 
                 $img = $image->make($image_path);
 
-                return $img->{array_get($params, 0, 'fit')}(array_get($params, 1), array_get($params,2), function ($constraint) {
+                return $img->{\Illuminate\Support\Arr::get($params, 0, 'fit')}(\Illuminate\Support\Arr::get($params, 1), \Illuminate\Support\Arr::get($params, 2), function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 })->encode(null,100);
@@ -90,10 +84,6 @@ class ImageController extends Controller {
 
         $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
 
-        return response($content, 200, array(
-            'Content-Type' => $mime,
-            'Cache-Control' => 'max-age='.(config('veer.image_lifetime')*60).', public',
-            'Etag' => md5($content)
-        ));
+        return response($content, 200, ['Content-Type' => $mime, 'Cache-Control' => 'max-age='.(config('veer.image_lifetime')*60).', public', 'Etag' => md5($content)]);
     }
 }

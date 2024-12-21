@@ -7,12 +7,12 @@ trait HelperTraits {
 	 */
 	protected function loadSiteTitle($items = null)
 	{
-		$siteWithTitle = array('site' => function($q) { 
-            $q->with(array('configuration' => function($query) 
+		$siteWithTitle = ['site' => function($q) { 
+            $q->with(['configuration' => function($query) 
             {
                 $query->where('conf_key','=','SITE_TITLE'); 
-            }));
-        }); // @todo remember 5
+            }]);
+        }]; // @todo remember 5
 					
 		if(!empty($items)) {	
 			return \Cache::remember(app('veer')->cachingQueries->generateCacheKeyExternal($items), 1, 
@@ -35,7 +35,7 @@ trait HelperTraits {
         $customBillTypes = \File::isDirectory($customPath) ? \File::allFiles($customPath) : [];
 		
 		foreach(array_merge($billsTypes, $customBillTypes) as $billFile) {
-			app('veer')->loadedComponents['billsTypes'][ array_get(pathinfo($billFile), 'filename') ] = array_get(pathinfo($billFile), 'filename');
+			app('veer')->loadedComponents['billsTypes'][ \Illuminate\Support\Arr::get(pathinfo($billFile), 'filename') ] = \Illuminate\Support\Arr::get(pathinfo($billFile), 'filename');
 		}	
 	}
 	
@@ -43,9 +43,9 @@ trait HelperTraits {
 	 * only downloads for order
 	 * (will take only products)
 	 */
-	protected function getOrderDownloads($orders = array())
+	protected function getOrderDownloads($orders = [])
 	{
-		$files = array();
+		$files = [];
 		
 		foreach($orders as $o) {
 			foreach($o->downloads as $file)
@@ -75,7 +75,7 @@ trait HelperTraits {
 		
 		$filter_id = head($filters);
 		
-		$special_types = array("pages", "products", "categories");
+		$special_types = ["pages", "products", "categories"];
 		
 		if(in_array($type, $special_types)) {
 			return $model::where('elements_type', '=', elements($type))->where('elements_id','=', $filter_id);
@@ -85,7 +85,7 @@ trait HelperTraits {
 			{			
 				if (!empty($field)) $query->where($field, '=', $filter_id); 
 				
-				else $query->where(($pluralize) ? str_plural($type) . '_id' : $type . '_id', '=', $filter_id); 
+				else $query->where(($pluralize) ? \Illuminate\Support\Str::plural($type) . '_id' : $type . '_id', '=', $filter_id); 
 			});
 	}
 }

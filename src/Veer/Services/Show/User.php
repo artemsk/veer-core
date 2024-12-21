@@ -41,7 +41,7 @@ class User {
 				}
 			})->where('name','=', $name);
 					
-		if($name == "[basket]")	$items->where('elements_type','=','Veer\Models\Product');
+		if($name == "[basket]")	$items->where('elements_type','=',\Veer\Models\Product::class);
 		
 		return ($onlySum == true) ? $items->sum('quantity') : $items;
 	}
@@ -61,15 +61,15 @@ class User {
 	/**
 	 * show Users
 	 */
-	public function getAllUsers($filters = array(), $orderBy = array('created_at', 'desc'), $paginateItems = 25)
+	public function getAllUsers($filters = [], $orderBy = ['created_at', 'desc'], $paginateItems = 25)
 	{
 		$orderBy = $this->replaceSortingBy($orderBy);
 		
 		return $this->isUsersFiltered($filters, $orderBy)->with(
 			'role', 'comments', 'communications',
-			'administrator', 'pages')->with(array('images' => function($q) {
+			'administrator', 'pages')->with(['images' => function($q) {
 				return $q->orderBy('pivot_id', 'asc');
-			}))
+			}])
 			->with($this->loadSiteTitle())
 			->paginate($paginateItems);	
 	}
@@ -81,7 +81,7 @@ class User {
 	{
 		return \Veer\Models\User::whereHas($type, function($query) use ($filter_id, $type) 
 		{
-			$query->where( str_plural($type).'_id', '=', $filter_id );
+			$query->where( \Illuminate\Support\Str::plural($type).'_id', '=', $filter_id );
 		});
 	}
 	
@@ -103,7 +103,7 @@ class User {
 	/*
 	 * get one user
 	 */
-	public function getUserAdvanced($user, $options = array())
+	public function getUserAdvanced($user, $options = [])
 	{
 		if($user == "new") return new \stdClass(); 
 			
@@ -115,7 +115,7 @@ class User {
 			
 			$this->loadSiteTitle($items);
 					
-			$this->loadImagesWithElements($items, array_get($options, 'skipWith', false));
+			$this->loadImagesWithElements($items, \Illuminate\Support\Arr::get($options, 'skipWith', false));
 			
 			$items['files'] = $this->getOrderDownloads($items->orders);
 					
@@ -134,17 +134,10 @@ class User {
 	{
 		$items->load('role', 'administrator', 'pages');
 		
-		$items->load(array(
-		'books' => function($q) { $q->with('orders'); },
-
-		'orders' => function($q) { $q->with('userbook', 'userdiscount', 'status', 'delivery', 'payment', 'downloads')
+		$items->load(['books' => function($q) { $q->with('orders'); }, 'orders' => function($q) { $q->with('userbook', 'userdiscount', 'status', 'delivery', 'payment', 'downloads')
 			->with($this->loadSiteTitle())
-			->with(array('bills' => function($query) { $query->with('status'); }));
-		},
-
-		'discounts' => function($q) { $q->with('orders')->with($this->loadSiteTitle()); },
-
-		'bills' => function($q) { $q->with('status', 'payment'); }));
+			->with(['bills' => function($query) { $query->with('status'); }]);
+		}, 'discounts' => function($q) { $q->with('orders')->with($this->loadSiteTitle()); }, 'bills' => function($q) { $q->with('status', 'payment'); }]);
 	}
 	
 }

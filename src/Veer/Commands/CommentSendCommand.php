@@ -5,13 +5,11 @@ namespace Veer\Commands;
 use Veer\Commands\Command;
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class CommentSendCommand extends Command implements SelfHandling
+class CommentSendCommand extends Command
 {
-
     use \Veer\Services\Traits\MessageTraits;
     protected $data;
     protected $options;
-
     /**
      * Create a new command instance.
      *
@@ -24,7 +22,6 @@ class CommentSendCommand extends Command implements SelfHandling
 
         $this->options = $options;
     }
-
     /**
      * Execute the command.
      *
@@ -33,12 +30,11 @@ class CommentSendCommand extends Command implements SelfHandling
     {
         \Event::fire('router.filter: csrf');
 
-        if (array_get($this->data, 'fill.txt') == null) return false;
+        if (\Illuminate\Support\Arr::get($this->data, 'fill.txt') == null) return false;
 
         $comment = $this->saveComment();
 
-        list(, $emails, $recipients) = $this->parseMessage(array_get($this->data,
-                'fill.txt'));
+        list(, $emails, $recipients) = $this->parseMessage(\Illuminate\Support\Arr::get($this->data, 'fill.txt'));
 
         (new \Veer\Commands\PrepareMailMessageCommand([
             "object" => $comment,
@@ -49,7 +45,6 @@ class CommentSendCommand extends Command implements SelfHandling
 
         return $comment->id;
     }
-
     /**
      * save comment to db
      * 
@@ -62,11 +57,11 @@ class CommentSendCommand extends Command implements SelfHandling
 
         $this->setParameters();
 
-        $comment->fill(array_get($this->data, 'fill'));
+        $comment->fill(\Illuminate\Support\Arr::get($this->data, 'fill'));
 
-        $comment->hidden = array_get($this->options, 'checkboxes.hidden', false);
+        $comment->hidden = \Illuminate\Support\Arr::get($this->options, 'checkboxes.hidden', false);
 
-        $this->setMessagingSource($comment, array_get($this->data, 'connected'));
+        $this->setMessagingSource($comment, \Illuminate\Support\Arr::get($this->data, 'connected'));
 
         $comment->save();
 
@@ -76,19 +71,17 @@ class CommentSendCommand extends Command implements SelfHandling
      * set parameters
      *
      */
-
     protected function setParameters()
     {
         array_set_empty($this->data, 'fill.users_id', \Auth::id());
 
-        $this->setAuthorName(array_get($this->data, 'fill.users_id'));
+        $this->setAuthorName(\Illuminate\Support\Arr::get($this->data, 'fill.users_id'));
 
         $this->setVotes();
     }
     /*
      * set author name
      */
-
     protected function setAuthorName($userId)
     {
         if (!empty($userId)) {
@@ -98,13 +91,12 @@ class CommentSendCommand extends Command implements SelfHandling
     /*
      * set votes
      */
-
     protected function setVotes()
     {
-        if (array_get($this->data, 'vote') == "Yes")
-                array_set($this->data, 'fill.vote_y', true);
+        if (\Illuminate\Support\Arr::get($this->data, 'vote') == "Yes")
+                \Illuminate\Support\Arr::set($this->data, 'fill.vote_y', true);
 
-        if (array_get($this->data, 'vote') == "No")
-                array_set($this->data, 'fill.vote_n', true);
+        if (\Illuminate\Support\Arr::get($this->data, 'vote') == "No")
+                \Illuminate\Support\Arr::set($this->data, 'fill.vote_n', true);
     }
 }

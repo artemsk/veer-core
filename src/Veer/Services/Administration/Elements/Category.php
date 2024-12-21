@@ -30,16 +30,16 @@ class Category extends Entity {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        $class->action != 'delete' ?: $class->delete(Input::get('deletecategoryid'));
+        $class->action != 'delete' ?: $class->delete(\Illuminate\Support\Facades\Request::input('deletecategoryid'));
 
-        if (Input::has('category')) {
+        if (\Illuminate\Support\Facades\Request::has('category')) {
             return $class->one();
         }
 
-        $addCategory = $class->action == 'add' ? Input::all() : null;
-        $sortCategory = $class->action == 'sort' ? Input::all() : null;
+        $addCategory = $class->action == 'add' ? \Illuminate\Support\Facades\Request::all() : null;
+        $sortCategory = $class->action == 'sort' ? \Illuminate\Support\Facades\Request::all() : null;
 
         $class->sort($sortCategory)
             ->addCategory($addCategory);
@@ -101,10 +101,10 @@ class Category extends Entity {
 
         $c = new \Veer\Models\Category;
         $c->title = $title;
-        $c->description = array_get($options, 'description', '');
-        $c->remote_url = array_get($options, 'remote_url', '');
-        $c->manual_sort = array_get($options, 'sort', 999999);
-        $c->views = array_get($options, 'views', 0);
+        $c->description = \Illuminate\Support\Arr::get($options, 'description', '');
+        $c->remote_url = \Illuminate\Support\Arr::get($options, 'remote_url', '');
+        $c->manual_sort = \Illuminate\Support\Arr::get($options, 'sort', 999999);
+        $c->views = \Illuminate\Support\Arr::get($options, 'views', 0);
         $c->sites_id = empty($siteid) ? app('veer')->siteId : $siteid;
         $c->save();
 
@@ -132,7 +132,7 @@ class Category extends Entity {
         $categoryObj = new \Veer\Services\Show\Category;
 
         $oldsorting = $data['relationship'] == 'categories' ?
-            $categoryObj->getAllCategories(array_get($data, 'image'), []) :
+            $categoryObj->getAllCategories(\Illuminate\Support\Arr::get($data, 'image'), []) :
             [$categoryObj->getCategoryAdvanced($data['parentid'])];
 
         if (is_object($oldsorting) || is_object($oldsorting[0])) {
@@ -157,12 +157,12 @@ class Category extends Entity {
         $items = \Veer\Models\Site::with(['categories' => function($query) {
                     $query->has('parentcategories', '<', 1)->orderBy('manual_sort', 'asc');
                 }])->orderBy('manual_sort', 'asc')
-                        ->where('id', '=', Input::get('siteid', app('veer')->siteId))->get();
+                        ->where('id', '=', \Illuminate\Support\Facades\Request::input('siteid', app('veer')->siteId))->get();
 
         /* for admin we always use 'view' instead of 'viewx' */        
         return view(app('veer')->template . '.lists.categories-category', [
             "categories" => $items[0]->categories,
-            "siteid" => Input::get('siteid', app('veer')->siteId)
+            "siteid" => \Illuminate\Support\Facades\Request::input('siteid', app('veer')->siteId)
         ]);
     }
 
@@ -289,7 +289,7 @@ class Category extends Entity {
      */
 	protected function one()
 	{
-        $this->id = Input::get('category');        
+        $this->id = \Illuminate\Support\Facades\Request::input('category');        
         $category = \Veer\Models\Category::find($this->id);
 
         if(!is_object($category)) {
@@ -302,7 +302,7 @@ class Category extends Entity {
         $this->goThroughEverything();
 
         if($this->action == 'deleteCurrent') {
-            Input::replace(['category' => null]);
+            \Illuminate\Support\Facades\Request::replace(['category' => null]);
             app('veer')->skipShow = true;
             event('veer.message.center', trans('veeradmin.category.delete'));
             return \Redirect::route('admin.show', ['categories']);
@@ -319,40 +319,40 @@ class Category extends Entity {
                 $this->deleteCategory($this->id);
                 break;
             case 'saveParent':
-                !Input::has('parentId') ?: $this->attachParent(Input::get('parentId'));
+                !\Illuminate\Support\Facades\Request::has('parentId') ?: $this->attachParent(\Illuminate\Support\Facades\Request::input('parentId'));
                 break;
             case 'updateParent':
-                if(Input::has('parentId') && Input::has('lastCategoryId') &&
-                        Input::get('lastCategoryId') != Input::get('parentId')) {
-                    $this->attachParent(Input::get('parentId'));
+                if(\Illuminate\Support\Facades\Request::has('parentId') && \Illuminate\Support\Facades\Request::has('lastCategoryId') &&
+                        \Illuminate\Support\Facades\Request::input('lastCategoryId') != \Illuminate\Support\Facades\Request::input('parentId')) {
+                    $this->attachParent(\Illuminate\Support\Facades\Request::input('parentId'));
                 }
                 break;
             case 'removeParent':
-                !Input::has('parentId') ?: $this->detachParent(Input::get('parentId'));
+                !\Illuminate\Support\Facades\Request::has('parentId') ?: $this->detachParent(\Illuminate\Support\Facades\Request::input('parentId'));
                 break;
             case 'updateCurrent':
-                $this->update(array_intersect_key(Input::all(), array_keys(['title', 'remoteUrl', 'description'])));
+                $this->update(array_intersect_key(\Illuminate\Support\Facades\Request::all(), array_keys(['title', 'remoteUrl', 'description'])));
                 break;
             case 'addChild':
-                !Input::has('child') ?: $this->attachChild(Input::get('child'));
+                !\Illuminate\Support\Facades\Request::has('child') ?: $this->attachChild(\Illuminate\Support\Facades\Request::input('child'));
                 break;
             case 'removeInChild':
-                !Input::has('currentChildId') ?: $this->detachChild(Input::get('currentChildId'));
+                !\Illuminate\Support\Facades\Request::has('currentChildId') ?: $this->detachChild(\Illuminate\Support\Facades\Request::input('currentChildId'));
                 break;
             case 'updateInChild':
-                if(Input::has('currentChildId') && Input::has('parentId') && Input::has('lastCategoryId') &&
-                        Input::get('lastCategoryId') != Input::get('parentId')) {
+                if(\Illuminate\Support\Facades\Request::has('currentChildId') && \Illuminate\Support\Facades\Request::has('parentId') && \Illuminate\Support\Facades\Request::has('lastCategoryId') &&
+                        \Illuminate\Support\Facades\Request::input('lastCategoryId') != \Illuminate\Support\Facades\Request::input('parentId')) {
                     $this->updateChildParent(
-                        Input::get('currentChildId'), Input::get('parentId'), Input::get('lastCategoryId')
+                        \Illuminate\Support\Facades\Request::input('currentChildId'), \Illuminate\Support\Facades\Request::input('parentId'), \Illuminate\Support\Facades\Request::input('lastCategoryId')
                     );
                 }
                 break;
             case 'sort':
-                $this->sortChilds(Input::all());
+                $this->sortChilds(\Illuminate\Support\Facades\Request::all());
                 break;
             case 'updateImages':
-                if(Input::hasFile('uploadImage')) {
-                    $this->image(Input::get('uploadImage'));
+                if(\Illuminate\Support\Facades\Request::hasFile('uploadImage')) {
+                    $this->image(\Illuminate\Support\Facades\Request::input('uploadImage'));
                 }
             case 'updateProducts':
             case 'updatePages':
@@ -369,11 +369,11 @@ class Category extends Entity {
      */
     protected function productsOrPagesActions()
     {
-        $changeStatusPage = starts_with($this->action, "changeStatusPage") ? substr($this->action, 17) : null;
-        $deletePage = starts_with($this->action, "deletePage") ? substr($this->action, 11) : null;
-        $changeStatusProduct = starts_with($this->action, "changeStatusProduct") ? substr($this->action, 20) : null;
-        $deleteProduct = starts_with($this->action, "deleteProduct") ? substr($this->action, 14) : null;
-        $showEarlyProduct = starts_with($this->action, "showEarlyProduct") ? substr($this->action, 17) : false;
+        $changeStatusPage = \Illuminate\Support\Str::startsWith($this->action, "changeStatusPage") ? substr($this->action, 17) : null;
+        $deletePage = \Illuminate\Support\Str::startsWith($this->action, "deletePage") ? substr($this->action, 11) : null;
+        $changeStatusProduct = \Illuminate\Support\Str::startsWith($this->action, "changeStatusProduct") ? substr($this->action, 20) : null;
+        $deleteProduct = \Illuminate\Support\Str::startsWith($this->action, "deleteProduct") ? substr($this->action, 14) : null;
+        $showEarlyProduct = \Illuminate\Support\Str::startsWith($this->action, "showEarlyProduct") ? substr($this->action, 17) : false;
 
         (new Product)->toggleStatus($changeStatusProduct)
             ->delete($deleteProduct)

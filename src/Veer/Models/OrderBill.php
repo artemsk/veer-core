@@ -12,19 +12,19 @@ class OrderBill extends \Eloquent {
     // Many Bills <- One
     
     public function order() {
-        return $this->belongsTo('\Veer\Models\Order','orders_id','id');
+        return $this->belongsTo(\Veer\Models\Order::class,'orders_id','id');
     }
 
     public function user() {
-        return $this->belongsTo('\Veer\Models\User','users_id','id');
+        return $this->belongsTo(\Veer\Models\User::class,'users_id','id');
     }
     
     public function status() {
-        return $this->belongsTo('\Veer\Models\OrderStatus','status_id','id');
+        return $this->belongsTo(\Veer\Models\OrderStatus::class,'status_id','id');
     }
     
     public function payment() {
-        return $this->belongsTo('\Veer\Models\OrderPayment','payment_method_id','id');
+        return $this->belongsTo(\Veer\Models\OrderPayment::class,'payment_method_id','id');
     }
     
 }

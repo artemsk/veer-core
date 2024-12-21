@@ -6,9 +6,8 @@ use Veer\Commands\Command;
 use Illuminate\Contracts\Bus\SelfHandling;
 use Symfony\Component\Security\Core\Util\StringUtils; 
 
-class CsrfTokenMatchCommand extends Command implements SelfHandling
+class CsrfTokenMatchCommand extends Command
 {
-
     public function handle() {
 
         $token = app('request')->input('_token') ?: app('request')->header('X-CSRF-TOKEN');

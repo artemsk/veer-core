@@ -15,9 +15,9 @@ class Site {
     public static function request()
     {
         $class = new static;
-        $data = Input::get('site');
-		$siteToTurnOff = Input::get('turnoff');
-		$siteToTurnOn = Input::get('turnon');
+        $data = \Illuminate\Support\Facades\Request::input('site');
+		$siteToTurnOff = \Illuminate\Support\Facades\Request::input('turnoff');
+		$siteToTurnOn = \Illuminate\Support\Facades\Request::input('turnon');
         $currentSiteId = app('veer')->siteId;
 
         if(empty($data) && (!empty($siteToTurnOff) || !empty($siteToTurnOn))) {
@@ -25,7 +25,7 @@ class Site {
         }
 
         if(!empty($data)) {
-            $class->iterateThroughSites($data, $siteToTurnOff, $siteToTurnOn, $currentSiteId, Input::has('snapshots'));
+            $class->iterateThroughSites($data, $siteToTurnOff, $siteToTurnOn, $currentSiteId, \Illuminate\Support\Facades\Request::has('snapshots'));
         }
     }
     
@@ -59,7 +59,7 @@ class Site {
     
     public function add($url)
     {
-        $ids = $this->iterateThroughSites([str_random(64) => [
+        $ids = $this->iterateThroughSites([\Illuminate\Support\Str::random(64) => [
             'url' => $url,
         ]]);
 

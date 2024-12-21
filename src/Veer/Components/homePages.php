@@ -20,7 +20,7 @@ class homePages {
     
     public function __construct() {
         
-        $this->data = $this->getHomeEntities('\Veer\Models\Page', app('veer')->siteId, db_parameter('CATEGORY_HOME'))->get();                                    
+        $this->data = $this->getHomeEntities(\Veer\Models\Page::class, app('veer')->siteId, db_parameter('CATEGORY_HOME'))->get();                                    
     }  
                  
 }

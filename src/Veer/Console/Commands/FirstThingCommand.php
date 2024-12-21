@@ -35,7 +35,7 @@ class FirstThingCommand extends Command {
 	 *
 	 * @return mixed
 	 */
-	public function fire()
+	public function handle()
 	{
 		$this->info('');
 		$this->info('Veer is starting up...');
@@ -97,11 +97,7 @@ class FirstThingCommand extends Command {
 	 */
 	protected function getArguments()
 	{
-		return array(
-			array('url', InputArgument::REQUIRED, 'Installation url to start things up. with http://'),
-            array('email', InputArgument::OPTIONAL, 'Administrator email.'),
-            array('password', InputArgument::OPTIONAL, 'Administrator password.'),
-		);
+		return [['url', InputArgument::REQUIRED, 'Installation url to start things up. with http://'], ['email', InputArgument::OPTIONAL, 'Administrator email.'], ['password', InputArgument::OPTIONAL, 'Administrator password.']];
 	}
 
 	/**
@@ -111,9 +107,7 @@ class FirstThingCommand extends Command {
 	 */
 	protected function getOptions()
 	{
-		return array(
-			array('migrate', null, InputOption::VALUE_NONE, 'Run migrations if you have not already done it.', null),
-		);
+		return [['migrate', null, InputOption::VALUE_NONE, 'Run migrations if you have not already done it.', null]];
 	}
 
 }

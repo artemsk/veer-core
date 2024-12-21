@@ -19,10 +19,10 @@ class Status {
     {
         $class = new static;
 
-        !Input::has('deleteStatus') ?: $class->delete(Input::get('deleteStatus'));
+        !\Illuminate\Support\Facades\Request::has('deleteStatus') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteStatus'));
 
-        if(Input::has('addStatus')) {
-            foreach(Input::get('InName') as $key => $value) {
+        if(\Illuminate\Support\Facades\Request::has('addStatus')) {
+            foreach(\Illuminate\Support\Facades\Request::input('InName') as $key => $value) {
                 if(!empty($value)) {
                     $class->addOrUpdateFromRequest(new \Veer\Models\OrderStatus, $key, null, $key, '#000');
                     $_added = true;
@@ -31,8 +31,8 @@ class Status {
             !isset($_added) ?: event('veer.message.center', trans('veeradmin.status.new'));
         }
 
-        if(Input::has('updateGlobalStatus')) {
-            $o = \Veer\Models\OrderStatus::find(Input::get('updateGlobalStatus'));
+        if(\Illuminate\Support\Facades\Request::has('updateGlobalStatus')) {
+            $o = \Veer\Models\OrderStatus::find(\Illuminate\Support\Facades\Request::input('updateGlobalStatus'));
             if(is_object($o)) {
                 $class->addOrUpdateFromRequest($o, $o->id, $o->name, $o->manual_order, $o->color);
                 event('veer.message.center', trans('veeradmin.status.update'));
@@ -43,10 +43,10 @@ class Status {
     protected function addOrUpdateFromRequest($o, $id, $name, $manual_order, $color)
     {
         $this->addOrUpdateGlobalStatus($o, [
-            'name' => Input::get('InName.' . $id, $name),
-            'manual_order' => Input::get('InOrder.' . $id, $manual_order),
-            'color' => Input::get('InColor.' . $id, $color),
-            'flag' => Input::get('InFlag.' . $id)
+            'name' => \Illuminate\Support\Facades\Request::input('InName.' . $id, $name),
+            'manual_order' => \Illuminate\Support\Facades\Request::input('InOrder.' . $id, $manual_order),
+            'color' => \Illuminate\Support\Facades\Request::input('InColor.' . $id, $color),
+            'flag' => \Illuminate\Support\Facades\Request::input('InFlag.' . $id)
         ]);
     }
     
@@ -113,9 +113,7 @@ class Status {
 		$o->manual_order = $data['manual_order'];
 		$o->color = $data['color'];
 
-		$flags = array('flag_first' => 0,'flag_unreg' => 0, 'flag_error' => 0,
-				'flag_payment' => 0, 'flag_delivery' => 0, 'flag_close' => 0,
-				'secret' => 0);
+		$flags = ['flag_first' => 0, 'flag_unreg' => 0, 'flag_error' => 0, 'flag_payment' => 0, 'flag_delivery' => 0, 'flag_close' => 0, 'secret' => 0];
 
         if(!empty($data['flag'])) { $flags[$data['flag']] = 1; }
 

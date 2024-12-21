@@ -12,13 +12,13 @@ class UserBook extends \Eloquent {
     // Many User Books <- One
     
     public function user() {
-        return $this->belongsTo('\Veer\Models\User','users_id','id');
+        return $this->belongsTo(\Veer\Models\User::class,'users_id','id');
     }
     
     // One User Book -> Many
     
     public function orders() {
-       return $this->hasMany('\Veer\Models\Order', 'userbook_id', 'id'); 
+       return $this->hasMany(\Veer\Models\Order::class, 'userbook_id', 'id'); 
     }
     
 }

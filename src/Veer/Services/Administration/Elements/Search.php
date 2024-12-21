@@ -15,10 +15,10 @@ class Search {
     public static function request()
     {
         $class = new static;
-        $class->acton = Input::get('action');
+        $class->acton = \Illuminate\Support\Facades\Request::input('action');
 
-        !Input::has('deleteSearch') ?: $class->delete(Input::get('deleteSearch'));
-        $class->action != 'addSearch' ?: $class->add(Input::get('search'), Input::get('users'));
+        !\Illuminate\Support\Facades\Request::has('deleteSearch') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteSearch'));
+        $class->action != 'addSearch' ?: $class->add(\Illuminate\Support\Facades\Request::input('search'), \Illuminate\Support\Facades\Request::input('users'));
     }
 
     public function delete($id)

@@ -5,25 +5,20 @@ namespace Veer\Commands;
 use Veer\Commands\Command;
 use Illuminate\Contracts\Bus\SelfHandling;
 
-class PrepareMailMessageCommand extends Command implements SelfHandling
+class PrepareMailMessageCommand extends Command
 {
     protected $object;
     protected $emails;
     protected $recipients;
     protected $type = "communication";
-
     /* title of sending place */
     protected $place;
-
     /* subject */
     protected $subject;
-
     /* link of sending place */
     protected $link;
-
     /* site url of sending place */
     protected $url;
-
     /**
      * Create a new command instance.
      *
@@ -35,7 +30,6 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
             $this->{$keys} = $values;
         });
     }
-
     protected function isAllowed()
     {
         if (empty($this->emails) && empty($this->recipients)) return false;
@@ -44,7 +38,6 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
 
         return true;
     }
-
     /**
      * Execute the command.
      *
@@ -60,7 +53,7 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
         $this->getRecipientsEmails();
 
         if (is_array($this->emails)) {
-            (new \Veer\Commands\SendEmailCommand('emails.'.str_plural($this->type),
+            (new \Veer\Commands\SendEmailCommand('emails.'.\Illuminate\Support\Str::plural($this->type),
             $this->getDataReady(), $this->subject, array_unique($this->emails),
             null, $this->object->sites_id))->handle();
         }
@@ -68,45 +61,39 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
     /*
      * get subject & theme, sending url for communication
      */
-
     protected function getCommunicationAttributes()
     {
         $this->url = $this->object->site->url;
 
         if (!empty($this->object->theme)) {
             $this->subject = \Lang::get('veeradmin.emails.communication.subjectTheme',
-                    array(
-                    'url' => $this->url, 'theme' => $this->object->theme
-            ));
+                    ['url' => $this->url, 'theme' => $this->object->theme]);
         } else {
             $this->subject = \Lang::get('veeradmin.emails.communication.subject',
-                    array('url' => $this->url));
+                    ['url' => $this->url]);
         }
     }
     /*
      * get subject & sending url for comment
      */
-
     protected function getCommentAttributes()
     {
         $this->url = app('veer')->siteUrl;
 
         $this->subject = Lang::get('veeradmin.emails.comment.subject',
-                array('url' => $this->url));
+                ['url' => $this->url]);
     }
-
     protected function getEntityInfo()
     {
         $elementsType = mb_strtolower(strtr($this->object->elements_type,
-                array("\Veer\Models\\" => "")));
+                ["\Veer\Models\\" => ""]));
 
         if (in_array($elementsType,
-                array("order", "page", "product", "category")))
+                ["order", "page", "product", "category"]))
                 $this->getEntityTitle($elementsType);
 
         $this->link = $this->getEntityLink($elementsType);
     }
-
     protected function getEntityTitle($elementsType)
     {
         if ($elementsType != "order") {
@@ -120,17 +107,15 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
                     $this->object->elements->cluster_oid);
         }
     }
-
     protected function getEntityLink($elementsType)
     {
         if ($elementsType == "order") return $this->url."/user/";
 
-        if (in_array($elementsType, array("page", "product", "category")))
+        if (in_array($elementsType, ["page", "product", "category"]))
                 return $this->url."/".$elementsType."/".$this->object->elements_id;
 
         return isset($this->object->url) ? $this->object->url : null;
     }
-
     protected function getRecipientsEmails()
     {
         if (is_array($this->recipients)) {
@@ -140,14 +125,8 @@ class PrepareMailMessageCommand extends Command implements SelfHandling
             }
         }
     }
-
     protected function getDataReady()
     {
-        return array(
-            "sender" => isset($this->object->author) ? $this->object->author : $this->object->sender,
-            "txt" => isset($this->object->txt) ? $this->object->txt : $this->object->message,
-            "place" => empty($this->place) ? $this->link : $this->place,
-            "link" => $this->link
-        );
+        return ["sender" => isset($this->object->author) ? $this->object->author : $this->object->sender, "txt" => isset($this->object->txt) ? $this->object->txt : $this->object->message, "place" => empty($this->place) ? $this->link : $this->place, "link" => $this->link];
     }
 }

@@ -70,9 +70,9 @@ class Attribute {
 		
 		$iteratedItems = $this->iterateAttributes($items);
 		
-		$items['grouped'] = array_get($iteratedItems, 'grouped');
+		$items['grouped'] = \Illuminate\Support\Arr::get($iteratedItems, 'grouped');
 			
-		$items['counted'] = array_get($iteratedItems, 'counted');			
+		$items['counted'] = \Illuminate\Support\Arr::get($iteratedItems, 'counted');			
 		
 		return $items;
 	}
@@ -84,7 +84,7 @@ class Attribute {
 	 */
 	public function iterateAttributes($items)
 	{
-		$iterated = array();
+		$iterated = [];
 		
 		foreach($items as $key => $item) 
 		{
@@ -191,7 +191,7 @@ class Attribute {
 	 */
 	public function withTags($attributeName, $attributeVal, $siteId)
 	{
-		return $this->getModelWithAttribute("\Veer\Models\Tag", $attributeName, $attributeVal, $siteId);		
+		return $this->getModelWithAttribute(\Veer\Models\Tag::class, $attributeName, $attributeVal, $siteId);		
 	}	
 	
 	/**
@@ -201,7 +201,7 @@ class Attribute {
 	 */	
 	public function withCategories($attributeName, $attributeVal, $siteId)
 	{
-		return $this->getModelWithAttribute("\Veer\Models\Category", $attributeName, $attributeVal, $siteId);	
+		return $this->getModelWithAttribute(\Veer\Models\Category::class, $attributeName, $attributeVal, $siteId);	
 	}
 	
 }

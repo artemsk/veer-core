@@ -11,24 +11,20 @@ class Product {
 	 * - with: Images
 	 * - to whom: ?
 	 */
-	public function getProductLists($type, $siteId = null, $queryParams = array())
+	public function getProductLists($type, $siteId = null, $queryParams = [])
 	{
 		$items = \Veer\Models\Product::select();
 		
 		if(!empty($siteId)) $items->sitevalidation($siteId)->checked();
 		
-		$typeSorting = array(
-			"new" => "created_at",
-			"ordered" => "ordered",
-			"viewed" => "viewed"
-		);
+		$typeSorting = ["new" => "created_at", "ordered" => "ordered", "viewed" => "viewed"];
 		
-		$items->with(array('images' => function($query) {
+		$items->with(['images' => function($query) {
 			$query->orderBy('pivot_id', 'asc');
-		}))->orderBy( array_get($typeSorting, $type, 'created_at'), 'desc');
+		}])->orderBy( \Illuminate\Support\Arr::get($typeSorting, $type, 'created_at'), 'desc');
 		
-		return $items->take(array_get($queryParams, 'take', 15))
-			->skip(array_get($queryParams, 'skip', 0))
+		return $items->take(\Illuminate\Support\Arr::get($queryParams, 'take', 15))
+			->skip(\Illuminate\Support\Arr::get($queryParams, 'skip', 0))
 			->get();
 	}
 	
@@ -47,9 +43,9 @@ class Product {
 		
 		if(!empty($siteId)) { 
 			$product = $product->checked()->sitevalidation($siteId)
-			->with(array('categories' => function($query) use ($siteId) {
+			->with(['categories' => function($query) use ($siteId) {
 				$query->where('sites_id', '=', $siteId);
-			})); 
+			}]); 
 		}
 		
 		return $product->first();
@@ -76,7 +72,7 @@ class Product {
 	 */
 	public function withChildProducts($siteId, $id, $queryParams = null)
 	{
-		return $this->getElementsWhereHasModel('products', array('parentproducts', 'parent'), $id, $siteId, $queryParams);
+		return $this->getElementsWhereHasModel('products', ['parentproducts', 'parent'], $id, $siteId, $queryParams);
 	}
 
 	/**
@@ -88,7 +84,7 @@ class Product {
 	 */
 	public function withParentProducts($siteId, $id, $queryParams = null)
 	{
-		return $this->getElementsWhereHasModel('products', array('subproducts', 'child'), $id, $siteId, $queryParams);
+		return $this->getElementsWhereHasModel('products', ['subproducts', 'child'], $id, $siteId, $queryParams);
 	}
 	
 	/**
@@ -105,7 +101,7 @@ class Product {
 	
 	
 	/* get product advanced */
-	public function getProductAdvanced($product, $options = array())
+	public function getProductAdvanced($product, $options = [])
 	{
 		if($product == "new") return new \stdClass(); 
 
@@ -117,7 +113,7 @@ class Product {
 				'subproducts', 'parentproducts', 'pages', 'categories', 
 				'tags', 'attributes', 'downloads' );		
 
-			$this->loadImagesWithElements($items, array_get($options, 'skipWith', false));
+			$this->loadImagesWithElements($items, \Illuminate\Support\Arr::get($options, 'skipWith', false));
 			
 			$items['basket'] = $items->userlists()->where('name','=','[basket]')->count();
 			
@@ -130,9 +126,9 @@ class Product {
 	/**
 	 * Show Products
 	 */
-	public function getAllProducts($filters = array(), $paginateItems = 24)
+	public function getAllProducts($filters = [], $paginateItems = 24)
 	{			
-		return $this->getAllEntities('\Veer\Models\Product', array_get($filters, 0, []), $paginateItems, array_get($filters, 1, []));
+		return $this->getAllEntities(\Veer\Models\Product::class, \Illuminate\Support\Arr::get($filters, 0, []), $paginateItems, \Illuminate\Support\Arr::get($filters, 1, []));
 	}	
 	
 	
@@ -146,9 +142,9 @@ class Product {
 	public function getConnectedProducts($id, $siteId = null)
 	{
 		$p = \Veer\Models\Product::whereIn('id', $id)
-			->with(array('images' => function($query) {
+			->with(['images' => function($query) {
 				$query->orderBy('pivot_id', 'asc');
-			}))
+			}])
 			->checked();
 
 		if(!empty($siteId)) $p->sitevalidation($siteId);	

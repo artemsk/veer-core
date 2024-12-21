@@ -9,7 +9,7 @@ class Image {
 	 */
 	public function handle($paginateItems = 25)
 	{
-		return $this->getImages(array(), $paginateItems);
+		return $this->getImages([], $paginateItems);
 	}
 	
 	/**
@@ -90,7 +90,7 @@ class Image {
 	 */
 	public function withCategories($siteId, $id)
 	{
-		return $this->whereHasImageCustom('\Veer\Models\Category', $id, $siteId);
+		return $this->whereHasImageCustom(\Veer\Models\Category::class, $id, $siteId);
 	}
 	
 	/**
@@ -102,13 +102,13 @@ class Image {
 	 */
 	public function withUsers($siteId, $id)
 	{
-		return $this->whereHasImageCustom('\Veer\Models\User', $id, $siteId);
+		return $this->whereHasImageCustom(\Veer\Models\User::class, $id, $siteId);
 	}	
 	
 	/**
 	 * Show Images
 	 */
-	public function getImages( $filters = array(), $paginateItems = 25 ) 
+	public function getImages( $filters = [], $paginateItems = 25 ) 
 	{			
 		$items = key($filters) == "unused" ? $this->getUnusedImages() : $this->getAllImages();
 

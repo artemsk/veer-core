@@ -12,17 +12,17 @@ class OrderStatus extends \Eloquent {
     // One Order Status -> Many
     
     public function orders() {
-       return $this->hasMany('\Veer\Models\Order', 'status_id', 'id'); 
+       return $this->hasMany(\Veer\Models\Order::class, 'status_id', 'id'); 
     }
 
     public function bills() {
-       return $this->hasMany('\Veer\Models\OrderBill', 'status_id', 'id'); 
+       return $this->hasMany(\Veer\Models\OrderBill::class, 'status_id', 'id'); 
     }
     
     // Many Order Statuses <-> Many
     
     public function orders_with_history() {
-        return $this->belongsToMany('\Veer\Models\Order','orders_history', 'status_id', 'orders_id');        
+        return $this->belongsToMany(\Veer\Models\Order::class,'orders_history', 'status_id', 'orders_id');        
     }
     
     // CORE    

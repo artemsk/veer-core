@@ -25,9 +25,7 @@ class OrderController extends Controller {
 	public function index()
 	{
 		/* do not cache: $this->view = $view; */		
-		return viewx($this->template.'.secret-order', array(
-			"template" => $this->template
-		));
+		return viewx($this->template.'.secret-order', ["template" => $this->template]);
 	}
 	
 	/**
@@ -78,14 +76,14 @@ class OrderController extends Controller {
 	protected function showingOrder($orders) 
 	{		
 		if(!is_object($orders)) { return Redirect::route('index'); }
-		 
+
 		$orders->load(
 			'user', 'userbook', 'userdiscount', 'status', 'delivery', 
 			'payment', 'status_history', 'products', 'bills', 'secrets',
 			'orderContent');
-				
+
 		return $this->viewIndex('order', $orders, false);
-		
+
 		// @todo разбить на отдельные страницы
 		// @todo вместе с products загружать images & downloads	[доступно после оплаты]	
 		// @todo если просмотр по коду, то ничего делать нельзя без логина
@@ -145,10 +143,7 @@ class OrderController extends Controller {
 				// @todo downloads for digital products
 
 				/* do not cache */
-				return viewx($this->template.'.success-order', array(
-					"order" => $orders,
-					"template" => $this->template
-				));
+				return viewx($this->template.'.success-order', ["order" => $orders, "template" => $this->template]);
 			}
 		}
 		

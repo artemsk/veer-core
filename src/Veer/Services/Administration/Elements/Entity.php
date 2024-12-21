@@ -200,12 +200,12 @@ abstract class Entity {
     protected function addImageOrFile($file_type, $data = null)
     {        
         if(!empty($this->id)) {
-            $relation = str_plural($this->type);
+            $relation = \Illuminate\Support\Str::plural($this->type);
             $prefix = $relation == 'pages' ? 'pg' : ($relation == 'products' ? 'prd' : 'ct');
             $key = $file_type == 'image' ? 'uploadImage' : 'uploadFiles';
 
             $this->upload($file_type, $key, $this->id, ($file_type == 'image' ? $relation : $this->entity), $prefix, [
-                "language" => "veeradmin." . $this->type . "." . str_plural($file_type) . ".new"
+                "language" => "veeradmin." . $this->type . "." . \Illuminate\Support\Str::plural($file_type) . ".new"
             ], false, $data);
         }
     }
@@ -295,9 +295,9 @@ abstract class Entity {
      */
     protected function one()
     {
-        $this->id = Input::get('id');
+        $this->id = \Illuminate\Support\Facades\Request::input('id');
 
-        $fill = Input::has('fill') ? $this->prepareData(Input::get('fill')) : null;
+        $fill = \Illuminate\Support\Facades\Request::has('fill') ? $this->prepareData(\Illuminate\Support\Facades\Request::input('fill')) : null;
         
         if($this->action == 'add' || $this->action == 'saveAs') {            
             if($this->type == 'page') {
@@ -314,7 +314,7 @@ abstract class Entity {
         
 		if(!is_object($entity)) {
             event('veer.message.center', trans('veeradmin.error.model.not.found'));
-            return \Redirect::route('admin.show', [str_plural($this->type)]);
+            return \Redirect::route('admin.show', [\Illuminate\Support\Str::plural($this->type)]);
         }
 
         $this->id = $entity->id;
@@ -324,8 +324,8 @@ abstract class Entity {
 
 		if($this->action == 'add' || $this->action == 'saveAs') {
             app('veer')->skipShow = true;
-            Input::replace(['id' => $this->id]);
-            return \Redirect::route('admin.show', [str_plural($this->type), 'id' => $this->id]);
+            \Illuminate\Support\Facades\Request::replace(['id' => $this->id]);
+            return \Redirect::route('admin.show', [\Illuminate\Support\Str::plural($this->type), 'id' => $this->id]);
         }
     }
 
@@ -336,14 +336,14 @@ abstract class Entity {
     protected function goThroughEverything($fill = null)
     {
         $this->action != 'update' ?: $this->update($fill);
-        !starts_with($this->action, "changeStatusPage") ?: $this->toggleStatus(substr($this->action, 17));
-        !starts_with($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // @todo change to changeStatusProduct
+        !\Illuminate\Support\Str::startsWith($this->action, "changeStatusPage") ?: $this->toggleStatus(substr($this->action, 17));
+        !\Illuminate\Support\Str::startsWith($this->action, "updateStatus") ?: $this->toggleStatus(substr($this->action, 13)); // @todo change to changeStatusProduct
         
         $this->attachmentActions();
         $this->detachmentActions();
-        $this->image(Input::get('uploadImage'));
-        $this->file(Input::get('uploadFiles'));        
-		$this->freeForm(Input::get('freeForm'));
+        $this->image(\Illuminate\Support\Facades\Request::input('uploadImage'));
+        $this->file(\Illuminate\Support\Facades\Request::input('uploadFiles'));        
+		$this->freeForm(\Illuminate\Support\Facades\Request::input('freeForm'));
     }
 
     /**
@@ -363,7 +363,7 @@ abstract class Entity {
             'attachParentCategories'
         ];
         
-        foreach(Input::all() as $key => $value) {
+        foreach(\Illuminate\Support\Facades\Request::all() as $key => $value) {
             if(in_array($key, $attachmentTriggers) && !empty($value)) {
                 $relation = $this->relationAliases($key);
                 if($this->isAllowedRelation($relation)) {
@@ -386,13 +386,13 @@ abstract class Entity {
         ];
 
         foreach($detachTriggers as $trigger) {
-            if(starts_with($this->action, $trigger)) {
+            if(\Illuminate\Support\Str::startsWith($this->action, $trigger)) {
                 $parse = explode('.', $this->action);
                 empty($parse[1]) ?: $this->detach($trigger, $parse[1], true);
             }
         }
 
-        if(starts_with($this->action, 'removeAllImages')) {
+        if(\Illuminate\Support\Str::startsWith($this->action, 'removeAllImages')) {
             $this->detach('images');
         }
     }
@@ -415,7 +415,7 @@ abstract class Entity {
         }
         
         foreach($ff[1] as $freeForm) {
-            if(starts_with($freeForm, 'Tag:')) {
+            if(\Illuminate\Support\Str::startsWith($freeForm, 'Tag:')) {
                 $this->attachElements($freeForm, $this->entity, 'tags', null, ",", "Tag:");
             } else {
                 $this->attachElements($freeForm, $this->entity, 'attributes', null, ",", "Attribute:");

@@ -7,12 +7,12 @@ trait CommonTraits {
 	 */
 	public function loadImagesWithElements($items, $skipWith = false)
 	{
-		return $items->load(array('images' => function($q) use ($skipWith)
+		return $items->load(['images' => function($q) use ($skipWith)
 			{
 				if($skipWith === false) $q->with('pages', 'products', 'categories', 'users');
 				
 				$q->orderBy('pivot_id', 'asc');
-			}));
+			}]);
 	}
 	
 	/**
@@ -24,8 +24,8 @@ trait CommonTraits {
 	 */
 	public function getElementsWhereHasModel($type, $table, $id, $siteId = null, $queryParams = null, $returnBuilder = false)
 	{
-		if($type == "products") $model = '\Veer\Models\Product';
-		else $model = '\Veer\Models\Page';
+		if($type == "products") $model = \Veer\Models\Product::class;
+		else $model = \Veer\Models\Page::class;
 		
 		$table_field = $table;
 		
@@ -36,9 +36,9 @@ trait CommonTraits {
 				});
 				
 		if($table != "images") {
-			$items = $items->with(array('images' => function($query) {
+			$items = $items->with(['images' => function($query) {
 					$query->orderBy('pivot_id', 'asc');
-			}));
+			}]);
 		}
 		
 		if(!empty($siteId)) $items = $items->sitevalidation($siteId);
@@ -63,9 +63,9 @@ trait CommonTraits {
         app('veer')->loadedComponents['totalElements'][$type][$table][$id][$siteId] = app('veer')->cachingQueries->makeAndRemember(
             $items, 'count', 5);
 
-        return $items->orderBy( array_get($queryParams, 'sort' . $postfix, 'created_at'),
-                array_get($queryParams, 'direction' . $postfix, 'desc'))
-                ->take(array_get($queryParams, 'take' . $postfix, 25))->skip(array_get($queryParams, 'skip' . $postfix, 0));
+        return $items->orderBy( \Illuminate\Support\Arr::get($queryParams, 'sort' . $postfix, 'created_at'),
+                \Illuminate\Support\Arr::get($queryParams, 'direction' . $postfix, 'desc'))
+                ->take(\Illuminate\Support\Arr::get($queryParams, 'take' . $postfix, 25))->skip(\Illuminate\Support\Arr::get($queryParams, 'skip' . $postfix, 0));
     }
 
 	/* with models */

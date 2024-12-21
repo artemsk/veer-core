@@ -19,11 +19,11 @@ class UserBook {
     public static function request()
     {
         $class = new static;
-        $class->action = Input::get('action');
+        $class->action = \Illuminate\Support\Facades\Request::input('action');
 
-        !Input::has('deleteUserbook') ?: $class->delete(Input::get('deleteUserbook'));
+        !\Illuminate\Support\Facades\Request::has('deleteUserbook') ?: $class->delete(\Illuminate\Support\Facades\Request::input('deleteUserbook'));
         if($class->action == 'addUserbook' || $class->action == 'updateUserbook') {
-            $class->update(head(Input::get('userbook', [])));
+            $class->update(head(\Illuminate\Support\Facades\Request::input('userbook', [])));
         }
     }
 

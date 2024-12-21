@@ -52,10 +52,7 @@ abstract class Controller extends BaseController
 	{		
 		if(!is_object($object) && $check) { return \Redirect::route('index'); }
                 
-		$view = viewx($this->template . '.' . $type, array(
-			$type => $object,
-			"template" => $this->template
-		)); 
+		$view = viewx($this->template . '.' . $type, [$type => $object, "template" => $this->template]); 
 
 		$this->view = $view; 
 

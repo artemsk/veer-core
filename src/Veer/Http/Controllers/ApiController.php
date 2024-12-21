@@ -36,7 +36,7 @@ class ApiController extends Controller
         $data = $this->additionalConditions($model, $data, $params[0]);
 
         return view( config('veer.template-admin') . '.lists.suggestions',
-            array('data' => $data->lists($params[1], $params[2]), 'model' => $model));
+            ['data' => $data->lists($params[1], $params[2]), 'model' => $model]);
     }
 
 
@@ -49,18 +49,9 @@ class ApiController extends Controller
 
     protected function paramModels($model)
     {
-        $params = array(
-            "attribute" => ["name", "name", "id"],
-            "category" => ["title", "title", "id"],
-            "download" => ["id", "fname", "id"],
-            "image" => ["id", "img", "id"],
-            "page" => ["title", "title", "id"],
-            "product" => ["title", "title", "id"],
-            "site" => ["url", "url", "id"],
-            "tag" => ["name", "name", "id"]
-        );
+        $params = ["attribute" => ["name", "name", "id"], "category" => ["title", "title", "id"], "download" => ["id", "fname", "id"], "image" => ["id", "img", "id"], "page" => ["title", "title", "id"], "product" => ["title", "title", "id"], "site" => ["url", "url", "id"], "tag" => ["name", "name", "id"]];
 
-        return array_get($params, $model);
+        return \Illuminate\Support\Arr::get($params, $model);
     }
 
     protected function additionalConditions($model, $data, $field)

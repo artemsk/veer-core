@@ -11,7 +11,7 @@ class queueUnhidePages {
 	
     public function fire($job, $data)
     {
-        $ids = array_get($data, 'ids', null);
+        $ids = \Illuminate\Support\Arr::get($data, 'ids', null);
 		
 		if(empty($ids) || !is_array($ids)) {
 			return $job->fail();

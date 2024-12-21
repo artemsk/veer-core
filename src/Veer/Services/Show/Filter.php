@@ -13,13 +13,13 @@ class Filter {
 	 * 
 	 * @todo FILTER_ATTRS key|value ?
 	 */
-	public function getFilter($siteId, $id, $queryParams = array())
+	public function getFilter($siteId, $id, $queryParams = [])
 	{
-		$p = array('products' => array(), 'pages' => array());
+		$p = ['products' => [], 'pages' => []];
 		
 		$id = explode('-', $id);
 
-		$category_id = $id[0] ? $id[0] : 0;
+		$category_id = $id[0] ?: 0;
 
 		// If the value of first key of array is "null", we will change
 		// condition operator from "=" to ">" (0) to include all categories in our
@@ -35,12 +35,12 @@ class Filter {
 		// Queries for products model. First, we check if category is filtered,
 		// then we're going through attributes filters. Then we collect
 		// images, checking hidden and future products, and limits.
-		$p['products'] = $this->collectEntities('\Veer\Models\Product', $category_id, $siteId, $c, $a, $queryParams);
+		$p['products'] = $this->collectEntities(\Veer\Models\Product::class, $category_id, $siteId, $c, $a, $queryParams);
 
 		// Queries for pages model. First, we check if category is filtered,
 		// then we're going through attributes filters. Then we collect
 		// images, checking hidden, and limits.               
-		$p['pages'] = $this->collectEntities('\Veer\Models\Page', $category_id, $siteId, $c, $a, $queryParams);
+		$p['pages'] = $this->collectEntities(\Veer\Models\Page::class, $category_id, $siteId, $c, $a, $queryParams);
 
 		//
 		return $p;
@@ -49,7 +49,7 @@ class Filter {
 	/* collect attributes */
 	protected function collectFilteredAttributes($id)
 	{
-		$a = array();
+		$a = [];
 		
 		if (count($id) > 1) 
 		{
@@ -64,7 +64,7 @@ class Filter {
 		return $a;
 	}
 	
-	protected function collectEntities($model, $category_id, $siteId, $condition, $attributes, $queryParams = array())
+	protected function collectEntities($model, $category_id, $siteId, $condition, $attributes, $queryParams = [])
 	{
 		$entity = $model::whereHas('categories', function($q) use ($category_id, $siteId, $condition) {
 				$q->where('categories_id', $condition, $category_id)->where('sites_id', '=', $siteId);
@@ -72,15 +72,15 @@ class Filter {
 	
 		$this->collectWithAttributes($entity, $attributes);
 	
-		$entity->with(array('images' => function($query) { $query->orderBy('pivot_id', 'asc'); }));
+		$entity->with(['images' => function($query) { $query->orderBy('pivot_id', 'asc'); }]);
 	
-		if($model == '\Veer\Models\Product') $entity->checked();
+		if($model == \Veer\Models\Product::class) $entity->checked();
 		
 		else $entity->excludeHidden();
 		
-		return $entity->orderBy(array_get($queryParams, 'sort', 'created_at'), array_get($queryParams, 'direction', 'desc'))
-			->take(array_get($queryParams, 'take', 25))
-			->skip(array_get($queryParams, 'skip', 0))->get();
+		return $entity->orderBy(\Illuminate\Support\Arr::get($queryParams, 'sort', 'created_at'), \Illuminate\Support\Arr::get($queryParams, 'direction', 'desc'))
+			->take(\Illuminate\Support\Arr::get($queryParams, 'take', 25))
+			->skip(\Illuminate\Support\Arr::get($queryParams, 'skip', 0))->get();
 	}
 	
 	protected function collectWithAttributes($entity, $attributes)
